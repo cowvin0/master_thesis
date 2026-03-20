@@ -1,0 +1,647 @@
+---
+embed-resources: true
+format: pdf
+documentclass: scrreprt
+lang: pt
+urlcolor: SeaGreen
+linkcolor: SeaGreen
+title: "Solução - Lista 1"
+subtitle: Programa Interinstitucional de Pós-Graduação em Estatística UFSCar - USP
+author:
+  - name: Gabriel de Jesus Pereira
+date: today
+date-format: long
+warning: false
+echo: true
+cache: true
+monofont: "Ubuntu Mono"
+monofontoptions: Scale = 1
+fig-cap-location: top
+before-body:
+  - |
+    \usepackage{amsmath}
+    \usepackage{amssymb}
+---
+
+## Decomposição do Erro Quadrático em Regressão Polinomial
+
+Considere o modelo gerado por
+
+$$
+Y = f\left(x\right) + \epsilon, \epsilon \sim \mathcal{N}\left(0, \sigma^2\right)
+$$
+
+com
+
+$$
+f\left(x\right) = 5x^2\left(1-x\right)\text{.}
+$$
+
+O objetivo deste exercício é estudar, na prática, a decomposição do erro quadrático médio de predição em três partes:
+
+$$
+\mathbb{E}\left[\left(Y - \hat{f}\left(x\right)\right)^2\right] = \underbrace{\text{erro irredutível}}_{\sigma^2} + \underbrace{\text{viés}^2}_{\left(\mathbb{E}\left[\hat{f}(x)\right] - f(x)\right)^2} + \underbrace{\text{variância}}_{\mathbb{V}\left(\hat{f}\left(x\right)\right)}\text{.}
+$$
+
+## Exercício 1
+
+::: {.callout-tip title="" icon="false"}
+
+## Enunciado - Exercício 1
+
+1. Gere $M=500$ amostras de treinamento independentes.
+2. Cada amostra deve ter $n = 100$ observações.
+3. Em cada amostra:
+    - sorteie $x \sim \text{Uniforme}\left(-2, 2\right)\text{;}$
+    - gere $y = f\left(x\right) + \epsilon, \text{ com } \epsilon \sim \mathcal{N}\left(0, 1\right)$\text{;}
+    - ajuste modelos de regressão polinomial com graus $1$, $2$ , $5$ e $10$.
+4. Considere uma grade fixa com 200 pontos no intervalo $\left[-2, 2\right]$.
+5. Para cada grau do polinômio e para cada ponto da grade, estime:
+    - a média das predições;
+    - o viés ao quadrado;
+    - a variância das predições.
+6. Estime empiricamente também o erro irredutível.
+7. Calcule, para cada grau:
+    - a média do viés ao quadrado na grade;
+    - a média da variância na grade;
+    - a estimativa do erro irredutível;
+    - a soma dos três componentes;
+8. Troque os valores de $M$ e $n$ os graus dos polinômios e compare os comportamentos.
+
+### Dicas
+
+Sejam $\hat{f}^{\left(1\right)}, \dots, \hat{f}^{\left(M\right)}$ as predições obtidas a partir das $M$ amostras de treinamento.
+
+- A média das predições em um ponto $x$ é dada por: $\bar{\hat{f}}\left(x\right) = \frac{1}{M} \sum_{m=1}^M \hat{f}^{\left(m\right)}\left(x\right)\text{.}$
+- O viés ao quadrado em um ponto $x$ é dado por: $\text{Viés}^2\left(x\right) = \left(\bar{\hat{f}}\left(x\right) - f\left(x\right)\right)^2\text{.}$
+- A variância em um ponto $x$ é dada por: $\text{Var}\left(x\right) = \frac{1}{M} \sum_{m=1}^M \left(\hat{f}^{\left(m\right)}\left(x\right) - \bar{\hat{f}}\left(x\right)\right)^2\text{.}$
+- Uma estimativa prática do erro irredutível é dada por: $\hat{\sigma}^2 = \frac{1}{N}\sum_{i=1}^N \left(y_i - f\left(x_i\right)\right)^2\text{,}$
+$\text{onde } N \text{ é o número total de observações geradas ao longo das amostras.}$
+:::
+
+## Solução - Exercício 1
+
+```{python}
+#| output: false
+
+import itertools
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from IPython.display import display
+
+from sklearn.metrics import root_mean_squared_error
+from sklearn.model_selection import train_test_split, KFold
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+from numpy.random import uniform, normal
+
+def simulate_exercise_1(M=500, n=100, grid_n=200, degrees=[1, 2, 5, 10]):
+
+    f_x = lambda x: 5 * x**2 * (1 - x)
+    results = []
+    X_simulated = []
+    y_simulated = []
+
+    N = 0
+    sum_irreducible = 0
+
+    np.random.seed(0)
+    grid = np.linspace(-2, 2, grid_n)
+
+    for sample in range(M):
+        X_train = uniform(-2, 2, n)
+        y_train = f_x(X_train) + normal(0, 1, n)
+
+        N += len(X_train)
+        sum_irreducible += np.sum((y_train - f_x(X_train)) ** 2)
+
+        for degree in degrees:
+            poly = PolynomialFeatures(degree=degree)
+            X_train_poly = poly.fit_transform(X_train.reshape(-1, 1))
+            f_hat = LinearRegression(fit_intercept=False).fit(
+                X=X_train_poly, y=y_train
+            )
+            X_train_poly_grid = poly.transform(grid.reshape(-1, 1))
+
+            preds = f_hat.predict(X_train_poly_grid)
+
+            for i, pred in enumerate(preds):
+                results.append(
+                    {
+                        "sample": sample,
+                        "degree": degree,
+                        "f_hat": f_hat,
+                        "x_grid_id": i,
+                        "prediction_grid": pred,
+                    }
+                )
+
+    fitted_models = pd.DataFrame(results)\
+        .assign(
+            f_bar_hat=lambda x: x.groupby(
+                ["degree", "x_grid_id"]
+            )["prediction_grid"].transform("mean"),
+            bias2 = lambda x: (x.f_bar_hat - f_x(grid[x.x_grid_id]))**2,
+            var_hat=lambda x: x.groupby(
+                ["degree", "x_grid_id"]
+            ).prediction_grid.transform(lambda y: y.var(ddof=0)),
+            sigma2_hat=sum_irreducible / N,
+            total_error=lambda x: x.bias2 + x.var_hat + x.sigma2_hat
+        ).groupby("degree").agg(
+            bias2=("bias2", "mean"),
+            var_hat=("var_hat", "mean"),
+            sigma2_hat=("sigma2_hat", "mean"),
+            total_error=("total_error", "mean")
+        ).reset_index()
+
+    return fitted_models
+
+results_first_question = simulate_exercise_1()
+
+Ms = [100, 500, 1000]
+ns = [50, 100, 200]
+
+final_summary = pd.concat(
+    [
+        simulate_exercise_1(M=M, n=n).assign(M=M, n=n)
+        for M, n in itertools.product(Ms, ns)
+    ],
+    ignore_index=True
+)
+
+df_plot = (
+    final_summary.query("M == 500 & n == 100")
+    .assign(bias=lambda x: np.sqrt(x.bias2))
+    .sort_values("degree")
+)
+
+g = sns.relplot(
+    data=final_summary,
+    x="degree",
+    y="total_error",
+    hue="M",
+    col="n",
+    kind="line",
+    marker="o",
+    facet_kws={"sharex": True, "sharey": False},
+)
+g.set_axis_labels("Grau do polinômio", "Erro total")
+g.fig.suptitle("Erro total vs grau (variando M e n)", y=1.02)
+plt.show()
+
+fig, ax = plt.subplots(figsize=(8, 4))
+sns.lineplot(
+    data=df_plot,
+    x="degree",
+    y="bias",
+    marker="o",
+    label="Viés",
+    ax=ax
+)
+sns.lineplot(
+    data=df_plot,
+    x="degree",
+    y="var_hat",
+    marker="o",
+    label="Variância",
+    ax=ax
+)
+ax.set_xlabel("Grau do polinômio")
+ax.set_ylabel("Magnitude")
+ax.set_title("Trade-off Viés vs Variância (M=500, n=100)")
+ax.legend()
+plt.show()
+```
+
+::: {.callout-tip icon="false" title="Visualização e Comentários"}
+\ \ \ Como esperado, um modelo de grau 1 apresenta um viés elevado, mas baixa variância. Já para o modelo de grau 10, a variância começa a influenciar mais o erro total e o viés é bastante baixo. O modelo de grau 5, para estes dados, obteve o menor erro total de $1,07$, o que indica um bom equilíbrio entre viés e variância.
+
+\vspace{12pt}
+
+\ \ \ Além disso, variando a quantidade de amostras $M$ e observações $n$, é possível observar que para $n \geq 100$ o comportamento do viés e variância são mais estáveis. Portanto, foi escolhido analisar as métricas do modelo apenas para $M=500$ e $n=100$.
+
+```{python}
+#| echo: false
+
+display(
+    df_plot
+    .drop(columns=["bias2", "M", "n"])
+    .rename(columns={
+        "degree": "Grau do polinômio",
+        "bias": "Viés",
+        "var_hat": "Variância",
+        "sigma2_hat": "Erro irredutível",
+        "total_error": "Erro total"
+    })
+    .style
+    .hide()
+    .format({
+        "Viés": "{:.2f}",
+        "Variância": "{:.2f}",
+        "Erro irredutível": "{:.2f}",
+        "Erro total": "{:.2f}"
+    })
+    .set_caption("Decomposição do erro (M = 500, n = 100)")
+    .set_table_styles([
+        {"selector": "th", "props": [("text-align", "center")]},
+        {"selector": "td", "props": [("text-align", "center")]},
+        {"selector": "caption", "props": [("caption-side", "top"),
+                                         ("font-size", "14px"),
+                                         ("text-align", "center")]}
+    ])
+)
+
+g = sns.relplot(
+    data=final_summary,
+    x="degree",
+    y="total_error",
+    hue="M",
+    col="n",
+    kind="line",
+    marker="o",
+    facet_kws={"sharex": True, "sharey": False},
+)
+g.set_axis_labels("Grau do polinômio", "Erro total")
+g.fig.suptitle("Erro total vs grau (variando M e n)", y=1.02)
+plt.show()
+
+df_plot = (
+    final_summary.query("M == 500 & n == 100")
+    .assign(bias=lambda x: np.sqrt(x.bias2))
+    .sort_values("degree")
+)
+
+fig, ax = plt.subplots(figsize=(8, 4))
+sns.lineplot(data=df_plot, x="degree", y="bias", marker="o", label="Viés", ax=ax)
+sns.lineplot(data=df_plot, x="degree", y="var_hat", marker="o", label="Variância", ax=ax)
+
+ax.set_xlabel("Grau do polinômio")
+ax.set_ylabel("Magnitude")
+ax.set_title("Trade-off Viés vs Variância (M=500, n=100)")
+ax.legend()
+plt.show()
+```
+:::
+
+
+## Exercício 2
+
+::: {.callout-tip title="" icon="false"}
+
+## Enunciado - Exercício 2
+
+Neste exercício, em vez de repetir muitas amostras para estimar viés, variância e erro irredutível, você vai trabalhar com \textbf{uma única nova amostra} de tamanho $n$ e usá-la para fazer \textbf{seleção de modelo}.
+
+1. Gere uma nova amostra de tamanho $n$ a partir do modelo anterior.
+
+2. Separe essa amostra em três partes:
+    - \textbf{treino}
+    - \textbf{calibração}
+    - \textbf{teste}
+
+3. Ajuste modelos de regressão polinomial com os mesmos graus do Exercício 1:
+    - grau 1;
+    - grau 2;
+    - grau 5;
+    - grau 10;
+
+4. Use apenas o conjunto de \textbf{treino} para ajustar os modelos.
+
+5. Avalie os modelos no conjunto de \textbf{calibração} e escolha o grau que apresentar o menor erro quadrático médio nesse conjunto.
+
+6. Depois de escolher o melhor grau com base na calibração, avalie esse modelo no conjunto de \textbf{teste}.
+
+7. Compare:
+    - o grau escolhido pela calibração;
+    - o erro obtido no teste;
+    - os resultados observados no Exercício 1.
+
+:::
+
+## Solução - Exercício 2
+
+```{python}
+#| output: false
+
+def simulate_exercise_2(n=1_000, degrees=[1, 2, 5, 10]):
+    f_x = lambda x: 5 * x**2 * (1 - x)
+
+    x = uniform(-2, 2, n)
+    y = f_x(x) + normal(0, 1, n)
+
+    x_temp, x_test, y_temp, y_test = train_test_split(
+        x, y, test_size=.2,
+        random_state=42
+    )
+    x_train, x_cal, y_train, y_cal = train_test_split(
+        x_temp, y_temp,
+        test_size=.25,
+        random_state=42
+    )
+
+    x_train = x_train.reshape(-1, 1)
+    x_cal = x_cal.reshape(-1, 1)
+    x_test = x_test.reshape(-1, 1)
+
+    model_metric = []
+    for degree in degrees:
+        poly = PolynomialFeatures(degree=degree)
+        X_train_poly = poly.fit_transform(x_train)
+        fit_model_train = LinearRegression(fit_intercept=False).fit(
+            X=X_train_poly,
+            y=y_train
+        )
+
+        X_cal_poly = poly.transform(x_cal)
+        X_test_poly = poly.transform(x_test)
+
+        preds_train = fit_model_train.predict(X=X_train_poly)
+        preds_cal = fit_model_train.predict(X=X_cal_poly)
+        preds_test = fit_model_train.predict(X_test_poly)
+
+        model_metric.append(
+            {
+                "degree": degree,
+                "rmse_train_error": root_mean_squared_error(
+                    y_pred=preds_train, y_true=y_train
+                ),
+                "rmse_cal_error": root_mean_squared_error(
+                    y_pred=preds_cal, y_true=y_cal
+                ),
+                "rmse_test_error": root_mean_squared_error(
+                    y_pred=preds_test,
+                    y_true=y_test
+                )
+            }
+        )
+
+    return pd.DataFrame(model_metric)
+
+results_second_question = simulate_exercise_2()
+```
+
+::: {.callout-tip icon="false" title="Visualização e Comentários"}
+
+\ \ \ Considerando a métrica de erro quadrático médio, o modelo de grau 5 apresentou o melhor desempenho no conjunto de calibração, o que é consistente com os resultados do Exercício 1, onde o modelo de grau 5 também apresentou o menor erro total. O erro observado no conjunto de teste para o modelo escolhido é relativamente próximo ao erro de calibração. O tamanho da amostra considerada foi de $n=1000$.
+
+```{python}
+#| echo: false
+
+
+display(
+    results_second_question
+    .rename(columns={
+        "degree": "Grau do polinômio",
+        "rmse_train_error": "RMSE Treino",
+        "rmse_cal_error": "RMSE Calibração",
+        "rmse_test_error": "RMSE Teste"
+    })
+    .style
+    .hide()
+    .format({
+        "Grau do polinômio": "{:.0f}",
+        "RMSE Treino": "{:.2f}",
+        "RMSE Calibração": "{:.2f}",
+        "RMSE Teste": "{:.2f}"
+    })
+    .set_caption("Erro quadrático médio por grau do polinômio")
+    .set_table_styles([
+        {"selector": "th", "props": [("text-align", "center")]},
+        {"selector": "td", "props": [("text-align", "center")]},
+        {"selector": "caption", "props": [("caption-side", "top"),
+                                         ("font-size", "14px"),
+                                         ("text-align", "center")]}
+    ])
+)
+
+sns.lineplot(
+    data=results_second_question,
+    x="degree",
+    y="rmse_cal_error",
+    marker="o",
+    label="Calibração"
+)
+sns.lineplot(
+    data=results_second_question,
+    x="degree",
+    y="rmse_test_error",
+    marker="o",
+    label="Teste"
+)
+
+sns.lineplot(
+    data=results_second_question,
+    x="degree",
+    y="rmse_train_error",
+    marker="o",
+    label="Treino"
+)
+plt.xlabel("Grau do polinômio")
+plt.ylabel("RMSE")
+plt.title("Erro quadrático médio por grau do polinômio")
+plt.legend()
+plt.show()
+```
+
+:::
+
+## Exercício 3
+
+::: {.callout-tip title="" icon="false"}
+
+## Enunciado - Exercício 3
+
+Neste exercício, você vai substituir a divisão em treino, calibração e teste por um procedimento de \textbf{validação cruzada} para escolher o grau do polinômio.
+
+1. Gere uma nova amostra de tamanho $n$ a partir do modelo anterior.
+
+2. Separe essa amostra em duas partes:
+    - \textbf{treino};
+    - \textbf{teste}.
+
+3. Considere os mesmos graus polinomiais dos exercícios anteriores:
+    - grau 1;
+    - grau 2;
+    - grau 5;
+    - grau 10.
+
+4. Use apenas o conjunto de \textbf{treino} para realizar a escolha do modelo por \textbf{validação cruzada}.
+
+5. Para cada grau:
+    - aplique validação cruzada no conjunto de treino;
+    - calcule o erro quadrático médio médio entre os folds.
+
+6. Escolha o grau que apresentar o menor erro médio de validação cruzada.
+
+7. Reajuste o modelo escolhido usando \textbf{todo o conjunto de treino}.
+
+8. Avalie o modelo final no conjunto de \textbf{teste}.
+
+9. Compare:
+    - o grau escolhido por validação cruzada;
+    - o erro estimado pela validação cruzada;
+    - o erro observado no conjunto de teste;
+    - os resultados obtidos nos Exercícios 1 e 2.
+
+:::
+
+## Solução - Exercício 3
+
+```{python}
+#| output: false
+
+def simulate_exercise_3(n=1_000, degrees=[1, 2, 5, 10], n_splits=5):
+    f_x = lambda x: 5 * x**2 * (1 - x)
+
+    cv = KFold(random_state=42, n_splits=n_splits, shuffle=True)
+    fold_metrics = []
+
+    x = uniform(-2, 2, n)
+    y = f_x(x) + normal(0, 1, n)
+
+    x_train, x_test, y_train, y_test = train_test_split(
+        x, y, test_size=.3, random_state=42
+    )
+
+    x_train = x_train.reshape(-1, 1)
+    x_test = x_test.reshape(-1, 1)
+
+    for fold, (idx_train, idx_val) in enumerate(cv.split(x_train), start=1):
+        x_fold_train = x_train[idx_train]
+        y_fold_train = y_train[idx_train]
+
+        x_fold_val = x_train[idx_val]
+        y_fold_val = y_train[idx_val]
+
+        for degree in degrees:
+            poly = PolynomialFeatures(degree=degree)
+            x_fold_train_poly = poly.fit_transform(x_fold_train)
+
+            fit_model_train = LinearRegression(fit_intercept=False).fit(
+                X=x_fold_train_poly, y=y_fold_train
+            )
+            preds_train = fit_model_train.predict(x_fold_train_poly)
+            preds_val = fit_model_train.predict(
+                X=poly.transform(x_fold_val)
+            )
+
+            poly_all_data = PolynomialFeatures(degree=degree)
+            X_train_all_data_poly = poly_all_data.fit_transform(x_train)
+            fit_model_all_data = LinearRegression(fit_intercept=False).fit(
+                X=X_train_all_data_poly,
+                y=y_train
+            )
+
+            fold_metrics.append(
+                {
+                    "fold": fold,
+                    "degree": degree,
+                    "rmse_train_fold_error": root_mean_squared_error(
+                        y_pred=preds_train,
+                        y_true=y_fold_train
+                    ),
+                    "rmse_val_fold_error": root_mean_squared_error(
+                        y_pred=preds_val,
+                        y_true=y_fold_val
+                    ),
+                    "rmse_train_all_data_error": root_mean_squared_error(
+                        y_pred=fit_model_all_data.predict(X_train_all_data_poly),
+                        y_true=y_train
+                    ),
+                    "rmse_test_all_data_error": root_mean_squared_error(
+                        y_pred=fit_model_all_data.predict(
+                            poly_all_data.transform(x_test)
+                        ),
+                        y_true=y_test
+                    ),
+                }
+            )
+
+    return pd.DataFrame(fold_metrics)\
+        .assign(
+            rmse_train_fold_error=lambda x: x.groupby("degree")
+            .rmse_train_fold_error.transform("mean"),
+            rmse_val_fold_error=lambda x: x.groupby("degree")
+            .rmse_val_fold_error.transform("mean"),
+            rmse_train_all_data_error=lambda x: x.groupby("degree")
+            .rmse_train_all_data_error.transform("mean"),
+            rmse_test_all_data_error=lambda x: x.groupby("degree")
+            .rmse_test_all_data_error.transform("mean"),
+        ).drop_duplicates(subset=["degree"])
+
+results_third_question = simulate_exercise_3()
+```
+
+::: {.callout-tip icon="false" title="Visualização e Comentários"}
+
+\ \ \ Assim como nos dois exercícios anteriores, o modelo de grau 5 apresentou o melhor desempenho, tanto na validação cruzada quanto no conjunto de teste após o reajuste do modelo em todo conjunto de dados de treinamento. Foi considerado um tamanho de amostra de $n=1000$ e a validação cruzada foi realizada com $K=5$.
+
+```{python}
+#| echo: false
+
+display(
+    results_third_question
+    .drop(columns=["fold"])
+    .rename(columns={
+        "degree": "Grau do polinômio",
+        "rmse_train_fold_error": "RMSE Treino<br>CV",
+        "rmse_val_fold_error": "RMSE Validação<br>CV",
+        "rmse_train_all_data_error": "RMSE Treino (todos os dados)",
+        "rmse_test_all_data_error": "RMSE Teste (todos os dados)"
+    })
+    .style
+    .hide()
+    .format({
+        "Grau do polinômio": "{:.0f}",
+        "RMSE Treino<br>CV": "{:.2f}",
+        "RMSE Validação<br>CV": "{:.2f}",
+        "RMSE Treino (todos os dados)": "{:.2f}",
+        "RMSE Teste (todos os dados)": "{:.2f}"
+    })
+    .set_caption("Erro quadrático médio por grau do polinômio")
+    .set_table_styles([
+        {"selector": "th", "props": [("text-align", "center"), ("white-space", "normal"), ("max-width", "120px")]},
+        {"selector": "td", "props": [("text-align", "center")]},
+        {"selector": "caption", "props": [("caption-side", "top"),
+                                         ("font-size", "14px"),
+                                         ("text-align", "center")]}
+    ])
+)
+
+sns.lineplot(
+    data=results_third_question,
+    x="degree",
+    y="rmse_train_fold_error",
+    marker="o",
+    label="Treino CV"
+)
+sns.lineplot(
+    data=results_third_question,
+    x="degree",
+    y="rmse_val_fold_error",
+    marker="o",
+    label="Validação CV"
+)
+sns.lineplot(
+    data=results_third_question,
+    x="degree",
+    y="rmse_test_all_data_error",
+    marker="o",
+    label="Teste (todos os dados)"
+)
+sns.lineplot(
+    data=results_third_question,
+    x="degree",
+    y="rmse_train_all_data_error",
+    marker="o",
+    label="Treino (todos os dados)"
+)
+plt.xlabel("Grau do polinômio")
+plt.ylabel("RMSE")
+plt.title("Erro quadrático médio por grau do polinômio")
+plt.legend()
+plt.show()
+```
+:::
