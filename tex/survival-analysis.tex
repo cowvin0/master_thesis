@@ -29,8 +29,20 @@ failed.
 Formally, let $T^*$ denote a random variable representing the time to failure and $U$ is
 a random variable representing the time to a censoring event. Therefore, the observed
 survival time is denoted as $T=\text{min}\left(T^*, U\right)$. Following the previous
-definition, $\delta = I\left[T^* < U\right]$ denotes a censoring indicator. That is,
-if $T$ is a censored time $\delta$ will be a 1 and 0 otherwise.
+definition,
+
+$$
+\delta = \begin{cases}
+1 & \text{if } T^* < U \\
+0 & \text{if } T^* \geq U
+\end{cases}
+$$
+
+\noindent denotes a censoring indicator. That is,
+$\delta$ is 1 if $T$ is a failured time and 0 if $T$ is a censored time.
+
+
+
 
 % \citeonline[p.~2]{moore2016applied} defines survival data as two characteristics.
 % The first one is that the response variable is a non-negative discrete or
