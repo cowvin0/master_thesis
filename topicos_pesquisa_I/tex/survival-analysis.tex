@@ -1,0 +1,62 @@
+\noindent In many real-world scenarios, understanding whether an event will
+occur is important. Nevertheless, understanding when it will occur
+is even more informative. Consider, for example, a patient with a
+chronic disease. Clinicians are often interested not only in the
+effectiveness of a treatment, but also in how long the patient is
+expected to survive under different therapeutic strategies. Similarly,
+in the financial sector, institutions may aim to monitor the time until
+a customer defaults on a loan, seeking to better manage risk exposure.
+In this regard, companies are also frequently concerned with customer
+churn, that is, the time until a client stops using a service or cancels
+a subscription. Anticipating when a customer is likely to leave allows
+organizations to implement targeted retention strategies and improve
+long-term profitability. All of these examples are ubiquitous, and
+survival analysis is particularly concerned with modeling the time
+until an event of interest especialy in the presence of incomplete
+observations.
+
+\section{Characteristics of Survival Data}
+
+According to \citeonline[p.~2]{moore2016applied}, survival data are defined by two
+characteristics. The first one is that the response variable is a non-negative discrete
+or continuous random variable, and represents the time from a well-defined origin to a
+well-defined event. For example, the time elapsed between the starting point of a cancer
+diagnosis and the occurrence of a specified event of interest (e.g., the pacient death).
+The second on is censoring. Censoring occurs when the exact time of the event of interest
+is not fully observed. When censoring does not occurs, it is said that the individual
+failed.
+
+Formally, let $T^*$ denote a random variable representing the time to failure and $U$ is
+a random variable representing the time to a censoring event. Therefore, the observed
+survival time is denoted as $T=\text{min}\left(T^*, U\right)$. Following the previous
+definition,
+
+$$
+\delta = \begin{cases}
+1 & \text{if } T^* < U \\
+0 & \text{if } T^* \geq U
+\end{cases}
+$$
+
+\noindent denotes a censoring indicator. That is,
+$\delta$ is 1 if $T$ is a failured time and 0 if $T$ is a censored time.
+
+
+
+
+% \citeonline[p.~2]{moore2016applied} defines survival data as two characteristics.
+% The first one is that the response variable is a non-negative discrete or
+% continuous random variable, and representes the time from a well-defined
+% origin to a well-defined event (i.e., the survival time). The second one
+% is censoring, is the most important. Censoring happens when the starting or
+% ending events are not precisely observed. When the censoring does not happens,
+% it means that the event was observed in the survival time and in this case is
+% to be said a failure.
+
+
+
+% In other
+% words, it means that the main characteristic of survival data is
+% that the response variable is a non-negative discrete or continuous
+% random variable, and represents the time from a well-defined origin to a
+% well-defined
