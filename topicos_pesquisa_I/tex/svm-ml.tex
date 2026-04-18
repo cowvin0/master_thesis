@@ -1,0 +1,73 @@
+\noindent Proposto por \cite{vapnik1997support}, o algoritmo
+de Máquinas de Vetores de Suporte (SVM) permite construir
+fronteiras de decisão não lineares por meio da indução de um
+hiperplano linear em um espaço de características de alta dimensão,
+obtido por meio de uma transformação do espaço original. Este capítulo
+aborda o SVM nos contextos de classificação, regressão e ranking. A
+apresentação do caso de classificação tem como objetivo servir de base
+para os demais, uma vez que estes herdam seus principais conceitos. Por
+fim, o capítulo se restringe à descrição dos casos não separáveis.
+
+
+\section{Máquinas de Vetores de Suporte para Classificação}
+
+O objetivo do SVM para classificação é encontrar um hiperplano
+que maximize a margem de separação entre as classes. Formalmente,
+conforme definido por \citeonline[p.~79]{mohri2018foundations},
+considere um espaço de covariáveis $\mathcal{X} \subseteq \mathbb{R}^d$
+e um espaço de rótulos $\mathcal{Y} = {-1, +1}$. Seja $\mathit{f} : \mathcal{X} \rightarrow \mathcal{Y}$
+a função alvo desconhecida.
+
+Dado um conjunto de hipóteses $\mathcal{H}$ de funções que
+mapeiam $\mathcal{X}$ em $\mathcal{Y}$, o problema de classificação
+binária consiste em encontrar uma hipótese $\mathit{h} \in \mathcal{H}$
+que minimize o erro de generalização:
+$$
+\mathit{R}_{\mathcal{D}}\left(\mathit{h}\right) = \underset{\mathit{x} \sim \mathcal{D}}{\mathbb{P}}\left[\mathit{h}(\mathit{x}) \neq \mathit{f}(\mathit{x})\right]\text{,}
+$$
+em que $\mathcal{D}$ é uma distribuição desconhecida sobre $\mathcal{X}$.
+
+Para isso, o modelo recebe um conjunto de treinamento
+$\mathit{S} = \left((\mathit{x}_1, \mathit{y}_1), \ldots, (\mathit{x}_m, \mathit{y}_m)\right) \in (\mathcal{X} \times \mathcal{Y})^m$
+composto por $\mathit{m}$ observações i.i.d. de $\mathcal{X} \times \mathcal{Y}$,
+geradas segundo a distribuição $\mathcal{D}$, tais que $\mathit{y}_i = \mathit{f}(\mathit{x}_i)$.
+Um conjunto de hipóteses natural é um hiperplano, definido da seguinte forma:
+
+\begin{figure}[htb]
+ \caption{Dois hiperplanos de separação. O hiperplano à direita é aquele que maximiza a margem de separação.}
+ \label{fig:jabref}
+ \centering
+ \includegraphics[scale=0.45]{hyperplane.png}
+Fonte: \citeonline[p.~80]{mohri2018foundations}
+\end{figure}
+$$
+\mathcal{H} = \{\mathbf{x} \mapsto \sgn(\mathbf{w} \cdot \mathbf{x} + b) : \mathbf{w} \in \mathbb{R}^d, b \in \mathbb{R}\}
+$$
+em que $\mathbf{w} \cdot \mathbf{x} + b = 0$ é a equação de um hiperplano
+em $\mathbb{R}^d$, com $\mathbf{w} \in \mathbb{R}^d$ um vetor normal não nulo
+ao hiperplano e $b \in \mathbb{R}$ um escalar. Dessa forma, a hipótese
+$\mathbf{x} \mapsto \sgn(\mathbf{w} \cdot \mathbf{x} + b)$ define a regra
+de classificação
+$$
+\mathit{h}\left(\mathbf{x}\right) = \sgn\left(\mathbf{w} \cdot \mathbf{x} + b\right)
+$$
+como ilustrado na Figura \ref{fig:jabref}.
+
+Observe que, na Figura \ref{fig:jabref}, podem existir infinitos hiperplanos
+que separam as classes. No entanto, conforme discutido anteriormente, a solução do SVM
+baseia-se na escolha do hiperplano que maximiza a margem geométrica entre as classes.
+
+A margem geométrica $\rho_{\mathit{h}}\left(\mathbf{x}\right)$ de um classificador
+$\mathit{h}: \mathbf{x} \mapsto \sgn(\mathbf{w} \cdot \mathbf{x} + b)$, em um ponto $\mathbf{x}$,
+é definida como a sua distância Euclidiana ao hiperplano $\mathbf{w} \cdot \mathbf{x} + b = 0$:
+$$
+\rho_{\mathit{h}}\left(\mathit{x}\right) = \frac{|\mathbf{w} \cdot \mathbf{x} + b|}{\|\mathbf{w}\|_{2}}\text{.}
+$$
+Como a margem deve ser garantida para todas as observações, para uma amostra
+$\mathit{S} = \left(\mathbf{x}_1, \ldots, \mathbf{x}_m\right)$, define-se a margem
+geométrica do classificador $mathit{h}$ como o menor valor entre as margens dos pontos
+da amostra valor entre as margens dos pontos da amostra, isto é,
+$$
+\rho_{\mathit{h}} = \min_{i \in \left[\mathit{m}\right]} \rho_{\mathit{h}} \left(\mathbf{x}_i\right)\text{,}
+$$
+que corresponde aos pontos da amostra mais próximos ao hiperplano.
