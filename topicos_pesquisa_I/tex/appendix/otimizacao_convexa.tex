@@ -1,0 +1,109 @@
+\section{Definição de Problema de Otimização com Restrições}
+\label{sec:general_definition_optimization}
+
+Seja $X \subseteq \mathbb{R}^N$ e $f, g_i : X \to \mathbb{R}$, para todo
+$i \in [m]$. Então, um problema de otimização com restrições tem a forma:
+\begin{equation*}
+\begin{aligned}
+\min_{\mathbf{x} \in X} \quad & f(\mathbf{x})
+\\
+\text{sujeito a:} & \quad g_i(\mathbf{x}) \leq 0, \quad \forall i \in \{1, \ldots, m\}.
+\end{aligned}
+\end{equation*}
+
+Essa formulação geral não faz quaisquer suposições de convexidade e pode ser ampliada
+com restrições de igualdade. Ela é denominada problema primal, em contraste com um
+problema relacionado introduzido posteriormente. Denotaremos por $p^*$ o valor ótimo
+da função objetivo.
+
+Para qualquer $\mathbf{x} \in X$, denotaremos por $g(\mathbf{x})$ o vetor $(g_1(\mathbf{x}), \ldots, g_m(\mathbf{x}))^{\top}$.
+Assim, as restrições podem ser escritas como $g(\mathbf{x}) \leq \mathbf{0}$. A qualquer problema de
+otimização com restrições, podemos associar uma função de Lagrange que desempenha um papel
+importante na análise do problema e em sua relação com outro problema de otimização
+relacionado.
+
+\section{Definição da Função de Lagrange}
+\label{sec:lagrange_function}
+
+A função de Lagrange, ou o Lagrangiano, associada ao problema geral de otimização com
+restrições definido em (B.21) é a função definida em $X \times \mathbb{R}_{+}$ por:
+\[
+L(\mathbf{x}, \bm{\alpha}) = f(\mathbf{x}) + \sum_{i=1}^{m} \alpha_i g_i(\mathbf{x}), \quad \forall \mathbf{x} \in X, \; \forall \bm{\alpha} \geq 0,
+\]
+onde as variáveis $\alpha_i$ são conhecidas como variáveis de Lagrange ou variáveis duais,
+com $\bm{\alpha} = (\alpha_1, \ldots, \alpha_m)^{\top}$.
+
+Qualquer restrição de igualdade da forma $g(\mathbf{x}) = 0$, para uma função $g$,
+pode ser expressa de forma equivalente por duas desigualdades: $-g(\mathbf{x}) \leq 0$
+e $g(\mathbf{x}) \leq 0$. Seja $\alpha^- \geq 0$ a variável de Lagrange associada à
+primeira restrição e $\alpha^+ \geq 0$ a associada à segunda. A soma dos termos
+correspondentes a essas restrições na definição da função de Lagrange pode, portanto,
+ser escrita como $\alpha g(\mathbf{x})$, com $\alpha = (\alpha^+ - \alpha^-)$.
+
+Assim, em geral, para uma restrição de igualdade $g(\mathbf{x}) = 0$, o Lagrangiano
+é acrescido de um termo $\alpha g(\mathbf{x})$, mas com $\alpha \in \mathbb{R}$ não
+restrito a ser não negativo. Note que, no caso de um problema de otimização convexa,
+as restrições de igualdade $g(\mathbf{x})$ devem ser afins, uma vez que tanto
+$g(\mathbf{x})$ quanto $-g(\mathbf{x})$ devem ser convexas.
+
+\section{Função dual}
+\label{sec:dual_function}
+
+A função dual (de Lagrange) associada ao problema de otimização com restrições é definida
+por
+\[
+\forall \bm{\alpha} \geq 0, \quad F(\bm{\alpha}) = \inf_{\mathbf{x} \in X} L(\mathbf{x}, \bm{\alpha}) = \inf_{\mathbf{x} \in X} \left[ f(\mathbf{x}) + \sum_{i=1}^{m} \alpha_i g_i(\mathbf{x}) \right].
+\]
+
+Note que $F$ é sempre côncava, uma vez que o Lagrangiano é linear em relação a
+$\bm{\alpha}$ e que o ínfimo preserva a concavidade. Observamos ainda que,
+\begin{equation}
+\forall \bm{\alpha} \geq 0, \quad F(\bm{\alpha}) \leq p^*,
+\label{eq:weak_duality}
+\end{equation}
+pois, para qualquer $\mathbf{x}$ viável, tem-se $f(\mathbf{x}) + \sum_{i=1}^{m} \alpha_i g_i(\mathbf{x}) \leq f(\mathbf{x})$.
+A função dual conduz naturalmente ao seguinte problema de otimização.
+
+\section{Problema dual}
+\label{sec:dual_problem}
+
+O problema dual (de otimização) associado ao problema de otimização com restrições é
+\begin{equation*}
+\begin{aligned}
+\max_{\bm{\alpha}} \quad & F(\bm{\alpha}) \\
+\text{sujeito a:} \quad & \bm{\alpha} \geq 0.
+\end{aligned}
+\end{equation*}
+
+O problema dual é sempre um problema de otimização convexa (como a maximização de uma função côncava). Seja $d^*$ um valor ótimo. Pela Equação \ref{eq:weak_duality}, a seguinte desigualdade sempre vale:
+\[
+d^* \leq p^* \quad \text{(dualidade fraca)}.
+\]
+
+A diferença $(p^* - d^*)$ é conhecida como gap de dualidade. O caso de igualdade
+\[
+d^* = p^* \quad \text{(dualidade forte)}
+\]
+não vale em geral. No entanto, a dualidade forte vale quando problemas convexos satisfazem uma condição de qualificação das restrições. Denotaremos por $\operatorname{int}(X)$ o interior do conjunto $X$.
+
+\section{Teorema de Karush-Kuhn-Tucker (KKT)}
+\label{sec:kkt_conditions}
+
+Suponha que $f, g_i : X \to \mathbb{R}$, $\forall i \in [\mathit{m}]$, sejam convexas e
+diferenciáveis e que as restrições sejam qualificadas. Então, $\mathbf{\bar x}$ é
+uma solução do problema de otimização com restrições se, e somente se, existe
+$\bm{\bar \alpha} \geq 0$ tal que,
+\begin{equation*}
+\begin{aligned}
+\nabla_{\mathbf{x}} L(\bar{\mathbf{x}}, \bar{\bm{\alpha}}) &= \nabla_{\mathbf{x}} f(\bar{\mathbf{x}}) + \bar{\bm{\alpha}} \cdot \nabla_{\mathbf{x}} g(\bar{\mathbf{x}}) = 0 \\
+\nabla_{\bm{\alpha}} L(\bar{\mathbf{x}}, \bar{\bm{\alpha}}) &= g(\bar{\mathbf{x}}) \leq 0 \\
+\bar{\bm{\alpha}} \cdot g(\bar{\mathbf{x}}) &= \sum_{i=1}^{\mathit{m}} \bar{\alpha}_i g_i(\bar{\mathbf{x}}) = 0
+\end{aligned}
+\end{equation*}
+
+As condições anteriores são conhecidas como condições KKT. Note que as duas últimas
+condições KKT são equivalentes a
+\[
+g(\mathbf{\bar x}) \leq 0 \;\wedge\; (\forall i \in \{1, \ldots, \mathit{m}\}, \; \bm{\bar \alpha}_i g_i(\mathbf{\bar x}) = 0).
+\]
+Essas igualdades são conhecidas como condições de complementaridade.

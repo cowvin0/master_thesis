@@ -18,6 +18,7 @@
 % Pacotes Opcionais
 % ---------------------------------------------------------------------------
 \usepackage{rotating}           % Usado para rotacionar o texto
+\usepackage{bm}
 \usepackage{amsmath}
 \usepackage{eulervm}
 \usepackage[all,knot,arc,import,poly]{xy}   % Pacote para desenhos gráficos
@@ -115,9 +116,9 @@
 \label{chapter:support-vector-machine}
 \input{tex/svm-ml}
 
-\chapter{Análise de Sobrevivência}
-\label{chapter:survival-analysis}
-\input{tex/survival-analysis}
+% \chapter{Análise de Sobrevivência}
+% \label{chapter:survival-analysis}
+% \input{tex/survival-analysis}
 
 % \chapter{Instalando o abnTeX2}
 % \label{chapter:instalando-abntex}
@@ -182,17 +183,17 @@
 % ---
 % Inicia os apêndices
 % ---
-% \begin{apendicesenv}
+\begin{apendicesenv}
 
-%     \chapter{Documento básico usando a classe \textit{icmc}}
-%     \label{chapter:documento-basico}
-%     \input{tex/appendix/documento-basico}
+    \chapter{Resultados de Otimização Convexa}
+    \label{chapter:otimizacao_convexa}
+    \input{tex/appendix/otimizacao_convexa.tex}
 
-%     \chapter{Configuração do programa JabRef}
-%     \label{chapter:configuracao-jabref}
-%     \input{tex/appendix/configuracao-jabref}
+    % \chapter{Configuração do programa JabRef}
+    % \label{chapter:configuracao-jabref}
+    % \input{tex/appendix/configuracao-jabref}
 
-% \end{apendicesenv}
+\end{apendicesenv}
 % ---
 
 
@@ -205,9 +206,9 @@
 % ---
 % \begin{anexosenv}
 
-%     \chapter{Páginas interessantes na Internet}
-%     \label{chapter:paginas-interessantes}
-%     \input{tex/annex/paginas-interessantes}
+%     \chapter{Resultado de Otimização Convexa}
+%     \label{chapter:otimizacao_convexa}
+%     \input{tex/annex/otimizacao_convexa}
 
 % \end{anexosenv}
 % ---

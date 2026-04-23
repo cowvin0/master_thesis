@@ -5,11 +5,10 @@ hiperplano linear em um espaço de características de alta dimensão,
 obtido por meio de uma transformação do espaço original. Este capítulo
 aborda o SVM nos contextos de classificação, regressão e ranking. A
 apresentação do caso de classificação tem como objetivo servir de base
-para os demais, uma vez que estes herdam seus principais conceitos. Por
-fim, o capítulo se restringe à descrição dos casos não separáveis.
+para os demais, uma vez que estes herdam seus principais conceitos.
 
 
-\section{Máquinas de Vetores de Suporte para Classificação}
+\section{Máquinas de Vetores de Suporte para Classificação (SVM)}
 
 O objetivo do SVM para classificação é encontrar um hiperplano
 que maximize a margem de separação entre as classes. Formalmente,
@@ -34,11 +33,10 @@ geradas segundo a distribuição $\mathcal{D}$, tais que $\mathit{y}_i = \mathit
 Um conjunto de hipóteses natural é um hiperplano, definido da seguinte forma:
 
 \begin{figure}[htb]
- \caption{Dois hiperplanos de separação. O hiperplano à direita é aquele que maximiza a margem de separação.}
- \label{fig:jabref}
- \centering
- \includegraphics[scale=0.45]{hyperplane.png}
-Fonte: \citeonline[p.~80]{mohri2018foundations}
+    \centering
+    \includegraphics[scale=0.45]{hyperplane.png}
+\caption{Dois hiperplanos de separação. O hiperplano à direita é aquele que maximiza a margem de separação, que é o interesse do SVM.}
+\label{fig:jabref}
 \end{figure}
 $$
 \mathcal{H} = \{\mathbf{x} \mapsto \sgn(\mathbf{w} \cdot \mathbf{x} + b) : \mathbf{w} \in \mathbb{R}^d, b \in \mathbb{R}\}
@@ -63,6 +61,7 @@ $\mathit{h}: \mathbf{x} \mapsto \sgn(\mathbf{w} \cdot \mathbf{x} + b)$, em um po
 $$
 \rho_{\mathit{h}}\left(\mathit{x}\right) = \frac{|\mathbf{w} \cdot \mathbf{x} + b|}{\|\mathbf{w}\|_{2}}\text{.}
 $$
+
 Como a margem deve ser garantida para todas as observações, para uma amostra
 $\mathit{S} = \left(\mathbf{x}_1, \ldots, \mathbf{x}_m\right)$, define-se a margem
 geométrica do classificador $\mathit{h}$ como o menor valor entre as margens dos pontos
@@ -71,3 +70,336 @@ $$
 \rho_{\mathit{h}} = \min_{i \in \left[\mathit{m}\right]} \rho_{\mathit{h}} \left(\mathbf{x}_i\right)\text{,}
 $$
 que corresponde aos pontos da amostra mais próximos ao hiperplano.
+
+Dessa forma, a margem geométrica a ser maximizada é aquela definida por
+
+$$
+\rho = \max_{\mathbf{w}, b : \mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right) \geq 0} \min_{i \in \left[\mathit{m}\right]} \frac{|\mathbf{w} \cdot \mathbf{x}_i + b|}{\|\mathbf{w}\|} = \max_{\mathbf{w}, b} \min_{i \in \left[\mathit{m}\right]} \frac{\mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right)}{\|\mathbf{w}\|}\text{.}
+$$
+
+Note que, para o caso em que os dados estejam sendo corretamente classificados e a margem esteja
+sendo maximizada para os pares $\left(\mathbf{w}, b\right)$, temos que
+$|\mathbf{w} \cdot \mathbf{x}_i + b| \geq 0$ e, dessa forma $\mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right) \geq 0$.
+Essa relação explica a segunda igualdade da expressão acima. Além disso, observe que
+para a última expressão é invariante para qualquer multiplicador de escalar positivo
+de $\left(\mathbf{w}, b\right)$. Assim, pode-se restringir a busca por $\left(\mathbf{w}, b\right)$ para aqueles que satisfazem
+$\min_{i \in \left[\mathit{m}\right]} \mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right) = 1$. Dessa forma:
+
+$$
+\rho = \max_{\mathbf{w}, b : \min_{i \in \left[\mathit{m}\right]} \mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right) = 1} \frac{1}{\|\mathbf{w}\|} = \max_{\mathbf{w}, b : \forall i \in \left[\mathit{m}\right], \mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right) \geq 1} \frac{1}{\|\mathbf{w}\|}\text{.}
+$$
+
+Como maximizar $\frac{1}{\|\mathbf{w}\|}$ é o mesmo que minimizar $\frac{1}{2} \|\mathbf{w}\|^2$, o par $\left(\mathbf{w}, b\right)$
+retornado pelo SVM, para o caso em que os dados são linearmente separáveis, é a
+solução do seguinte problema de otimização convexa:
+
+\begin{equation}
+\begin{aligned}
+\min_{\mathbf{w}, b} \quad & \frac{1}{2} \|\mathbf{w}\|^2 \\
+\text{sujeito a:} \quad & \mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right) \geq 1, \forall i \in \left[\mathit{m}\right]\text{.}
+\end{aligned}
+\label{eq:svm-problem}
+\end{equation}
+
+A função objetivo $F: \mathbf{w} \mapsto \frac{1}{2} \|\mathbf{w}\|^2$ é infinitamente diferenciável,
+seu gradiente é $\nabla F(\mathbf{w}) = \mathbf{w}$ e a sua matriz Hessiana é $\nabla^2 F(\mathbf{w}) = \mathbf{I}$
+é a matriz identidade, que é definida positiva. Portanto, $F$ é estritamente convexo, bem como
+a restrição $1 - \mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right)$ é convexa, pois
+é uma função afim. Assim, o problema de otimização definido na Equação \ref{eq:svm-problem} se trata
+de um problema de otimização convexa e, dessa forma, adimite solução única. Essa é uma das principais vantagens do SVM,
+pois a solução ótima é garantida e pode ser encontrada de forma eficiente por meio
+de algoritmos de otimização convexa.
+
+O problema de otimização convexa definido na Equação \ref{eq:svm-problem} poderá ser reduzido em
+termos de variáveis Lagrangeanas. No entanto, isso será descrito apenas para o caso em
+que os dados não são separáveis, o que é o mais comum em casos reais. Este caso será descrito na
+seção a seguir.
+
+\subsection{Caso não separável}
+
+Para o caso em que os dados não são linearmente separáveis, tem-se que $\exists i \in \left[\mathit{m}\right]$
+tal que $\mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right) \ngeq 1$, como pode
+ser visto na Figura \ref{fig:non-separable}. Nesse caso, assume-se variáveis de folga
+$\xi_i \geq 0$ de forma que as condições de separação sejam satisfeitas e flexibilizadas.
+Ou seja, é assumido que erros possam ocorrer. Portanto, para o caso em
+que os dados não são separáveis, a restrição se torna:
+
+$$
+\mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right) \geq 1 - \xi_i\text{.}
+$$
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[scale=0.45]{hyperplan_non_separable.png}
+\caption{Hiperplano de separação representando caso não separável. As variáveis de folga $\xi_i$ permitem que as condições de separação sejam satisfeitas e flexibilizadas.}
+\label{fig:non-separable}
+\end{figure}
+
+A variável de folga $\xi_i$ mede o quanto o vetor $\mathbf{x}_i$ viola a restrição
+desejada, $\mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right) \geq 1$, como
+pode ser visto na Figura \ref{fig:non-separable}. Para um hiperplano
+$\mathbf{w} \cdot \mathbf{x} + b = 0$, um vetor $\mathbf{x}_i$
+com $\xi_i > 0$ pode ser visto como sendo um outlier. Observe que
+na Figura \ref{fig:non-separable}, $\mathbf{x}_j$ para $\xi_j$ está corretamente classificado, mas a
+sua margem é menor do que 1, ou seja, $0 < \mathit{y}_j \left(\mathbf{w} \cdot \mathbf{x}_j + b\right) < 1$.
+Por outro lado, para $\xi_i$, tem-se que $\mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right) < 0$ e, portanto, $\xi_i > 1$,
+representando um erro de classificação.
+
+Nesse contexto, tem-se um trade-off: diminuir a quantidade total de folga dos outliers,
+que podem ser medidos por $\sum_{i=1}^{m} \xi_i$. Por outro lado, o hiperplano a ser procurado
+é aquele com a maior margem possível, mas uma maior margem pode levar a uma maior quantidade
+de outliers e assim a maior folga. Dessa forma, para o caso não linear, tem-se o seguinte
+problema de otimização:
+\begin{equation}
+\begin{aligned}
+\min_{\mathbf{w}, b, \bm{\xi}} \quad & \frac{1}{2} \|\mathbf{w}\|^2 + C \sum_{i=1}^{m} \xi_i \\
+\text{sujeito a:} \quad & \mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right) \geq 1 - \xi_i, \forall i \in \left[\mathit{m}\right], \\
+& \xi_i \geq 0, \forall i \in \left[\mathit{m}\right]\text{.}
+\end{aligned}
+\label{eq:svm-non-separable}
+\end{equation}
+em que $C > 0$ é um hiperparâmetro de regularização que controla o trade-off
+entre a maximização da margem e a quantidade total de folga dos outliers. Como no caso
+separável, o problema de otimização definido na Equação \ref{eq:svm-non-separable} é um problema
+de otimização convexa, pois a função objetivo é convexa e as restrições são funções afim e,
+portanto, convexas. Tem-se que o problema de otimização da Equação \ref{eq:svm-non-separable}
+pode ser reduzido em termos de variáveis Lagrangeanas $\alpha_i \geq 0$,
+$i \in \left[\mathit{m}\right]$, associado às $\mathit{m}$ restrições (veja a Seção
+\ref{sec:lagrange_function} do Apêndice \ref{chapter:otimizacao_convexa}). Dessa forma,
+a função de Lagrange pode ser definida para todo $\mathbf{w} \in \mathbb{R}^N$,
+$b \in \mathbb{R}$ e $\bm{\alpha} \in \mathbb{R}_{+}^m$ por:
+\begin{equation}
+\begin{aligned}
+L\left(\mathbf{w}, b, \bm{\alpha}\right) = \frac{1}{2} \|\mathbf{w}\|^2 - \sum_{i=1}^{\mathit{m}}\alpha_i\left[\mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right) - 1\right]\text{.}
+\end{aligned}
+\label{eq:svm-lagrange}
+\end{equation}
+
+As condições de otimalidade de KKT podem ser obtidas ao igualar o gradiente de $L$ a zero em
+relação as variáveis primais $\mathbf{w}$ e $b$ e ao escrever o complementar das condições:
+\begin{align}
+\nabla_{\mathbf{w}} L
+&= \mathbf{w} - \sum_{i=1}^{m} \alpha_i y_i \mathbf{x}_i
+= 0
+&&\Longrightarrow\quad
+\mathbf{w} = \sum_{i=1}^{m} \alpha_i y_i \mathbf{x}_i
+\label{eq:kkt_w} \\[6pt]
+\nabla_{b} L
+&= - \sum_{i=1}^{m} \alpha_i y_i
+= 0
+&&\Longrightarrow\quad
+\sum_{i=1}^{m} \alpha_i y_i = 0
+\label{eq:kkt_b} \\[6pt]
+&\forall i,\; \alpha_i \bigl[y_i (\mathbf{w} \cdot \mathbf{x}_i + b) - 1\bigr]
+= 0
+&&\Longrightarrow\quad
+\alpha_i = 0 \;\vee\; y_i (\mathbf{w} \cdot \mathbf{x}_i + b) = 1
+\label{eq:kkt_comp}
+\end{align}
+
+Pela equação \ref{eq:kkt_w}, tem-se que o vetor de pesos $\mathbf{w}$ para a solução do
+SVM é uma combinação linear dos conjuntos de treinamento $\mathbf{x}_1, \ldots, \mathbf{x}_{\mathbf{m}}$.
+O vetor $\mathbf{x}_i$ só vai aparecer na expansão se $\alpha_i \neq 0$, então
+$\mathit{y}_i \left(\mathbf{w} \cdot \mathbf{x}_i + b\right) = 1$. Portanto, os vetores de
+suporte se referem àqueles vetores $\mathbf{x}_i$ estão sobre os hiperplanos marginais
+$\mathbf{w} \cdot \mathbf{x}_i + b = \pm 1$. Isso motiva o nome do algoritmo. Observando
+a Equação \ref{eq:kkt_w}, se os vetores não estiverem sobre os hiperplanos marginais, a
+solução do SVM não se altera. No entanto, embora a solução do $\mathbf{w}$ seja única,
+a solução dos vetores de suporte não são únicas. Isso acontece pois na dimensão $N$, são suficientes
+$N+1$ para definir um hiperplano. Assim, quando mais de $N+1$ pontos estão sobre o hiperplano,
+diferentes escolhas são possíveis para $N+1$ vetores de suporte.
+
+Para derivar a forma dual (Veja a Seção \ref{sec:dual_function} do Apêndice \ref{chapter:otimizacao_convexa}),
+tem-se que
+
+\begin{equation}
+\begin{aligned}
+L &= \underbrace{\frac{1}{2} \|\sum_{i=1}^{\mathit{m}} \alpha_i \mathit{y}_i \mathbf{x}_i\|^2 - \sum_{i,j=1}^{\mathit{m}} \alpha_i \alpha_j \mathit{y}_i \mathit{y}_j \left(\mathbf{x}_i \cdot \mathbf{x}_j\right)}_{-\frac{1}{2} \sum_{i,j=1}^{\mathit{m}} \alpha_i \alpha_j \mathit{y}_i \mathit{y}_j \left(\mathbf{x}_i \cdot \mathbf{x}_j\right)} + \sum_{i=1}^{\mathit{m}} \alpha_i - \underbrace{b \sum_{i=1}^{\mathit{m}} \alpha_i \mathit{y}_i}_{0} \\
+L &= \sum_{i=1}^{\mathit{m}} \alpha_i - \frac{1}{2} \sum_{i,j=1}^{\mathit{m}} \alpha_i \alpha_j \mathit{y}_i \mathit{y}_j \left(\mathbf{x}_i \cdot \mathbf{x}_j\right) \text{.}
+\end{aligned}
+\end{equation}
+
+Assim, o problema de otimização dual do SVM é definido por (Veja a Seção
+\ref{sec:dual_problem} do Apêndice \ref{chapter:otimizacao_convexa}):
+
+\begin{equation}
+\begin{aligned}
+\max_{\bm{\alpha}} \quad & \sum_{i=1}^{\mathit{m}} \alpha_i - \frac{1}{2} \sum_{i,j=1}^{\mathit{m}} \alpha_i \alpha_j \mathit{y}_i \mathit{y}_j \left(\mathbf{x}_i \cdot \mathbf{x}_j\right) \\
+\text{sujeito a:} \quad & \sum_{i=1}^{\mathit{m}} \alpha_i \mathit{y}_i = 0, \\
+& \alpha_i \geq 0, \forall i \in \left[\mathit{m}\right]\text{.}
+\end{aligned}
+\end{equation}
+
+A função objetivo $G: \bm{\alpha} \mapsto \sum_{i=1}^{\mathit{m}} \alpha_i - \frac{1}{2} \sum_{i,j=1}^{\mathit{m}} \alpha_i \alpha_j \mathit{y}_i \mathit{y}_j \left(\mathbf{x}_i \cdot \mathbf{x}_j\right)$
+é infinitamente diferenciável, seu gradiente é dado por $\nabla G(\bm{\alpha}) = \mathbf{1} - \mathbf{Q} \bm{\alpha}$,
+em que $\mathbf{1}$ é um vetor de uns e $\mathbf{Q}$ é a matriz de Gram definida por
+$Q_{ij} = \mathit{y}_i \mathit{y}_j \left(\mathbf{x}_i \cdot \mathbf{x}_j\right)$,
+e a sua matriz Hessiana é dada por $\nabla^2 G(\bm{\alpha}) = -\mathbf{Q}$, que é
+uma matriz semidefinida negativa. Portanto, $G$ é uma função côncava e o problema de
+otimização dual do SVM é um problema de otimização convexa. Além disso, como as
+restrições são funções afim, as condições estão qualificadas e, portanto, a dualidade
+forte é garantida. Assim, a solução do problema dual e primal (definido na Equação
+\ref{eq:svm-non-separable}) são equivalentes. Dessa forma, a hipótese $\mathit{h}$ retornada pelo SVM é dada por:
+
+\begin{equation}
+\mathit{h} \left(\mathbf{x}\right) = \sgn \left(\mathbf{w} \cdot \mathbf{x} + b\right) = \sgn \left(\sum_{i=1}^{\mathit{m}} \alpha_i \mathit{y}_i \left(\mathbf{x}_i \cdot \mathbf{x}\right)\right)
+\end{equation}
+
+Além disso, como os vetores de suporte estão localizados sobre os hiperplanos marginais,
+para qualquer vetor de suporte $\mathbf{x}_i$ tem-se que
+$\mathbf{w} \cdot \mathbf{x}_i + b = y_i$. Dessa forma, o termo de bias $b$ pode ser
+obtido a partir de:
+\begin{equation}
+b = \mathit{y}_i - \sum_{j=1}^{m} \alpha_j \mathit{y}_j (\mathbf{x}_j \cdot \mathbf{x}_i).
+\label{eq:b_svm}
+\end{equation}
+
+As expressões obtidas para $\mathbf{w}$ e $b$, juntamente com o problema dual, evidenciam
+uma propriedade fundamental das Máquinas de Vetores de Suporte: a solução do classificador
+depende apenas de produtos internos entre observações, e não diretamente dos vetores em si.
+Essa característica é central para a extensão do método a casos não lineares por meio do uso
+de funções de kernel.
+
+A Equação \eqref{eq:b_svm} também permite obter uma expressão alternativa para a margem
+geométrica em função dos multiplicadores de Lagrange. Como a igualdade é válida para todo
+índice $i$ tal que $\alpha_i > 0$, multiplicando ambos os lados por $\alpha_i \mathit{y}_i$ e somando
+sobre $i$, obtém-se:
+\begin{equation}
+\sum_{i=1}^{m} \alpha_i \mathit{y}_i^2 - \sum_{i=1}^{m} \alpha_i \mathit{y}_i b
+= \sum_{i=1}^{m} \sum_{j=1}^{m} \alpha_i \alpha_j \mathit{y}_i \mathit{y}_j (\mathbf{x}_i \cdot \mathbf{x}_j).
+\label{eq:margin_aux}
+\end{equation}
+
+Utilizando o fato de que $\mathit{y}_i^2 = 1$ e a condição $\sum_{i=1}^{m} \alpha_i \mathit{y}_i = 0$,
+segue que:
+
+\begin{equation}
+\sum_{i=1}^{m} \alpha_i = \|\mathbf{w}\|^2.
+\label{eq:w_norm}
+\end{equation}
+
+Como a margem geométrica é dada por $\rho = \frac{1}{\|\mathbf{w}\|}$, pode-se reescrevê-la
+em termos dos multiplicadores de Lagrange como:
+\begin{equation}
+\rho^2 = \frac{1}{\|\mathbf{w}\|^2} = \frac{1}{\sum_{i=1}^{m} \alpha_i} = \frac{1}{\|\bm{\alpha}\|_1}.
+\label{eq:margin_alpha}
+\end{equation}
+
+Essa relação mostra que a margem geométrica pode ser interpretada diretamente em função da
+norma $\ell_1$ do vetor $\bm{\alpha}$, reforçando a interpretação de que a solução do SVM é
+determinada essencialmente pelos vetores de suporte.
+
+Por fim, esta é a formulação para o SVM para classificação. Com base nesses conceitos, na
+próxima seção será apresentada a formulação do SVM para regressão, que é uma extensão
+natural do caso de classificação.
+
+\section{Máquinas de Vetores de Suporte para Regressão (SVR)}
+
+Para o caso em que o SVM está sendo utilizado para regressão, o objetivo ajustar um
+tubo com largura $\epsilon$ aos dados, de forma que a maioria dos pontos de treinamento
+estejam dentro do tubo, como pode ser visto na Figura \ref{fig:svm-regression}. Como no
+caso de classificação binária, dois conjuntos de pontos são definidos, aqueles que estão
+dentro do tubo, que são $\epsilon$ próximos da função predita e portanto não são penalizados,
+e aqueles que estão fora do tubo, que são penalizados de acordo com a função predita.
+\begin{figure}[htb]
+    \centering
+    \includegraphics[scale=0.45]{svm_regression.png}
+\caption{SVM para regressão. O objetivo é ajustar um tubo com largura $\epsilon$ aos dados, de forma que a maioria dos pontos de treinamento estejam dentro do tubo.}
+\label{fig:svm-regression}
+\end{figure}
+
+Formalmente, seja $H = {x \mapsto \mathbf{w} \cdot \Phi(x) + b: \mathbf{w} \in \mathbb{R}^N, b \in \mathbb{R}}$,
+em que $\Phi$ é uma função de mapeamento associada a um kernel definido positivo (PDS) $K$.
+Considerando esse conjunto de hipóteses lineares no espaço de características, o problema
+de otimização do SVR pode ser formulado como:
+\begin{equation}
+\min_{\mathbf{w}, b} \frac{1}{2} \|\mathbf{w}\|^2 + C\sum_{i=1}^{\mathit{m}} |\mathit{y}_i - \left(\mathbf{w} \cdot \Phi\left(x_i\right) + b\right)|_\epsilon\text{,}
+\end{equation}
+em que $|\cdot|_{\varepsilon}$ denota a perda $\varepsilon$-insensível, definida por:
+\begin{equation}
+\forall \mathit{y}, \mathit{y}' \in y, \quad |\mathit{y} - \mathit{y}'|_\epsilon = \max\{0, |\mathit{y} - \mathit{y}'| - \epsilon\}\text{.}
+\end{equation}
+
+O uso dessa função de perda conduz a soluções esparsas, caracterizadas por um número
+relativamente pequeno de vetores de suporte. Introduzindo variáveis de folga
+$\xi_i \geq 0$ e $\xi_i' \geq 0$, para todo $i \in [m]$, o problema de otimização pode
+ser reescrito de forma equivalente como
+
+\begin{equation}
+\begin{aligned}
+\min_{\mathbf{w}, b, \bm{\xi}, \bm{\xi}'} \quad & \frac{1}{2} \|\mathbf{w}\|^2 + C \sum_{i=1}^{\mathit{m}} \left(\xi_i + \xi_i'\right) \\
+\text{sujeito a:} \quad & \mathbf{w} \cdot \Phi\left(x_i\right) + b - \mathit{y}_i \leq \epsilon + \xi_i, \\
+& \mathit{y}_i - \mathbf{w} \cdot \Phi\left(x_i\right) - b \leq \epsilon + \xi_i', \\
+& \xi_i \geq 0, \xi_i' \geq 0, \forall i \in \left[\mathit{m}\right] \\
+\end{aligned}
+\end{equation}
+
+Da mesma forma que foi feita para o caso de classificação, é possível derivar a forma dual do
+problema de otimização. Dessa forma, introduzindo os multiplicadores de Lagrange e aplicando
+as condições de otimalidade de KKT, tem-se o problema de otimização dual definido por:
+
+\begin{equation}
+\begin{aligned}
+\max_{\alpha, \alpha'} \quad
+& \varepsilon \sum_{i=1}^{m} (\alpha_i + \alpha_i')
+- \sum_{i=1}^{m} y_i (\alpha_i' - \alpha_i) \\
+& - \frac{1}{2} \sum_{i,j=1}^{m} (\alpha_i' - \alpha_i)(\alpha_j' - \alpha_j) K_{ij} \\
+\text{sujeito a:} \quad
+& 0 \leq \alpha_i \leq C, \quad 0 \leq \alpha_i' \leq C, \\
+& \sum_{i=1}^{m} (\alpha_i' - \alpha_i) = 0.
+\end{aligned}
+\end{equation}
+em que $K_{ij}$ é um kernel definido positivo, associado à função de mapeamento $\Phi$ definido por:
+
+\begin{equation}
+K_{ij} = K\left(x_i, x_j\right) = \Phi\left(x_i\right) \cdot \Phi\left(x_j\right)\text{.}
+\end{equation}
+
+Portanto, a hipótese $h$ retornada pelo SVR é dada por:
+
+\begin{equation}
+\forall x \in X, \quad h(x) = \sum_{i=1}^{m} (\alpha_i' - \alpha_i) K(\mathbf{x}_i, \mathbf{x}) + b
+\end{equation}
+em que $b$ pode ser obtido a partir de um ponto $x_j$ com $0 < \alpha_j < C$ por:
+\begin{equation}
+b = - \sum_{i=1}^{m} (\alpha_i' - \alpha_i) K(x_i, x_j) + y_j + \epsilon\text{,}
+\end{equation}
+ou de um ponto $x_j$ com $0 < \alpha_j' < C$ por:
+\begin{equation}
+b = - \sum_{i=1}^{m} (\alpha_i' - \alpha_i) K(x_i, x_j) + y_j - \epsilon\text{.}
+\end{equation}
+
+Pelas condições complementares, para todo $i \in \left[\mathit{m}\right]$, valem as seguintes
+desigualdades:
+\begin{align}
+&\alpha_i \left(\mathbf{w} \cdot \Phi\left(x_i\right) + b - y_i - \epsilon - \xi_i\right) = 0 \\
+&\alpha_i' \left(y_i - \mathbf{w} \cdot \Phi\left(x_i\right) - b - \epsilon - \xi_i'\right) = 0
+\end{align}
+
+Dessa forma, perceba que se $\alpha_i \neq 0$ or $\alpha_i' \neq 0$, então $x_i$ é um vetor de suporte
+e vale $\mathbf{w} \cdot \Phi\left(x_i\right) + b - y_i - \epsilon = \xi_i$ ou $y_i - \mathbf{w} \cdot \Phi\left(x_i\right) - b - \epsilon = \xi_i'$.
+Além disso, observa-se que, para cada observação $\mathbf{x}_i$, no máximo um dos multiplicadores
+de Lagrange $\alpha_i$ ou $\alpha_i'$ pode ser estritamente positivo, uma vez que a predição
+do modelo não pode simultaneamente superestimar e subestimar o valor real além da margem
+$\epsilon$.
+
+Por outro lado, para os pontos que se encontram no interior do tubo
+$\epsilon$, isto é, aqueles para os quais $|y_i - (\mathbf{w} \cdot \Phi(x_i) + b)| \leq \epsilon$,
+tem-se que $\alpha_i = \alpha_i' = 0$. Consequentemente, tais observações não contribuem
+para a construção da hipótese final obtida pelo SVR. Dessa forma, apenas os pontos
+localizados fora do tubo $\epsilon$, isto é, aqueles associados a violações da margem,
+influenciam diretamente a solução do modelo, caracterizando-os como vetores de suporte.
+Em particular, quando uma parcela significativa das observações está contida no
+interior do tubo, a solução obtida tende a ser esparsa.
+
+Por fim, o parâmetro $\epsilon$ desempenha um papel fundamental nesse contexto,
+estabelecendo um trade-off entre esparsidade e precisão. Valores maiores de $\epsilon$
+permitem que mais pontos sejam considerados adequadamente ajustados dentro do tubo,
+reduzindo o número de vetores de suporte e, consequentemente, tornando a solução mais
+esparsa, ao custo potencial de uma menor capacidade de ajuste aos dados.
+
+O algoritmo do SVR tem diversos tipos de vantagens. Ele permite a utilização de kernels, o que
+permite estender o método a casos não lineares. Algumas de suas desvantagens é ter que encontrar
+dois hiperparâmetros, $C$ e $\epsilon$, que podem ser encontrados por validação cruzada, mas
+requer um conjunto de validação relativamente grande. Outra disvantagem é que o SVR pode ser
+custoso computacionalmente caso esteja sendo utilizado um conjunto de treinamento muito grande.
