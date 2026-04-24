@@ -1,62 +1,112 @@
-\noindent In many real-world scenarios, understanding whether an event will
-occur is important. Nevertheless, understanding when it will occur
-is even more informative. Consider, for example, a patient with a
-chronic disease. Clinicians are often interested not only in the
-effectiveness of a treatment, but also in how long the patient is
-expected to survive under different therapeutic strategies. Similarly,
-in the financial sector, institutions may aim to monitor the time until
-a customer defaults on a loan, seeking to better manage risk exposure.
-In this regard, companies are also frequently concerned with customer
-churn, that is, the time until a client stops using a service or cancels
-a subscription. Anticipating when a customer is likely to leave allows
-organizations to implement targeted retention strategies and improve
-long-term profitability. All of these examples are ubiquitous, and
-survival analysis is particularly concerned with modeling the time
-until an event of interest especialy in the presence of incomplete
-observations.
+\noindent Em muitos cenários do mundo real, compreender se um evento irá ocorrer é uma
+tarefa importante. No entanto, compreender quando esse evento ocorrerá pode ser ainda
+mais informativo. Considere, por exemplo, um paciente com uma doença crônica.
+Profissionais da saúde frequentemente estão interessados não apenas na eficácia de um
+tratamento, mas também no tempo esperado de sobrevivência do paciente sob diferentes
+estratégias terapêuticas. De maneira análoga, no setor financeiro, instituições podem
+buscar modelar o tempo até que um cliente entre em inadimplência, com o objetivo de
+gerenciar de forma mais eficiente a exposição ao risco. De forma semelhante, empresas
+frequentemente se preocupam com o fenômeno de churn, isto é, o tempo até que um cliente
+deixe de utilizar um serviço ou cancele uma assinatura. Antecipar esse momento permite a
+implementação de estratégias direcionadas de retenção, contribuindo para a melhoria da
+lucratividade no longo prazo. Esses exemplos ilustram a ubiquidade de problemas em que o
+tempo até a ocorrência de um evento é a principal variável de interesse. Nesse contexto,
+a análise de sobrevivência tem como objetivo modelar o tempo até a ocorrência de um evento,
+especialmente na presença de observações incompletas.
 
-\section{Characteristics of Survival Data}
+\section{Censura}
 
-According to \citeonline[p.~2]{moore2016applied}, survival data are defined by two
-characteristics. The first one is that the response variable is a non-negative discrete
-or continuous random variable, and represents the time from a well-defined origin to a
-well-defined event. For example, the time elapsed between the starting point of a cancer
-diagnosis and the occurrence of a specified event of interest (e.g., the pacient death).
-The second on is censoring. Censoring occurs when the exact time of the event of interest
-is not fully observed. When censoring does not occurs, it is said that the individual
-failed.
+A principal característica que distingue a análise de sobrevivência de outras áreas da
+estatística é a presença de censura. Em termos gerais, a censura ocorre quando o tempo
+exato de ocorrência do evento de interesse não é observado para todos os indivíduos da
+amostra. Assim, enquanto para alguns indivíduos o evento é observado, para outros apenas
+se dispõe de informação parcial sobre o tempo de ocorrência, caracterizando observações
+censuradas \cite{clark2003survival}.
 
-Formally, let $T^*$ denote a random variable representing the time to failure and $U$ is
-a random variable representing the time to a censoring event. Therefore, the observed
-survival time is denoted as $T=\text{min}\left(T^*, U\right)$. Following the previous
-definition,
+No contexto da análise de sobrevivência, a censura pode ser classificada em três tipos
+principais: à direita, à esquerda e intervalar. A censura à direita ocorre quando o evento
+de interesse não é observado até o final do período de acompanhamento, seja porque o
+indivíduo deixa o estudo precocemente, seja porque o estudo se encerra antes da ocorrência
+do evento. A censura à esquerda ocorre quando o evento já ocorreu antes do início do período
+de observação, mas seu tempo exato é desconhecido. Por fim, a censura intervalar ocorre quando
+se sabe que o evento ocorreu entre dois instantes de observação, mas não se conhece o momento
+exato.
+
+Neste trabalho, será dada ênfase aos casos de censura à esquerda e à direita. Formalmente,
+uma observação censurada pode ser representada por $\left(\mathbf{x}_i, l_i, u_i\right)$,
+para $i = 1, \ldots, m$, em que $\mathbf{x}_i$ denota o vetor de covariáveis, $l_i$ o limite
+inferior e $u_i$ o limite superior do intervalo no qual o evento ocorreu. Em particular, a
+censura à direita e à esquerda podem ser representadas, respectivamente, por
+$\left(\mathbf{x}_i, l_i, +\infty\right)$ e $\left(\mathbf{x}_i, -\infty, u_i\right)$.
+
+No caso de observações não censuradas, tem-se $l_i = u_i = y_i$, de modo que a observação
+pode ser representada por $\left(\mathbf{x}_i, y_i\right)$, em que $y_i$ corresponde ao
+tempo de sobrevivência observado.
+
+\section{Funções importantes para análise de sobrevivência e suas relações}
+
+Os métodos de análise de sobrevivência dependem da distribuição de sobrevivência e, as principais
+formas para sua especificação, é através da função de risco e de sobrevivência. A função de sobrevivência
+define a probabilidade de não experenciar o evento após um tempo $\mathit{t}$ e é definida como:
+\begin{equation}
+\mathit{S}\left(\mathit{t}\right) = \mathit{P}\left(\mathit{T} > \mathit{t}\right), \quad 0 < \mathit{t} < \infty\text{.}
+\label{eq:survival_function}
+\end{equation}
+
+Para a Equação \ref{eq:survival_function}, quando $\mathit{t} = 0 \implies \mathit{S}\left(0\right)= 1$
+e, quando $\mathit{t} \to \infty \implies \mathit{S} \left(\mathit{t}\right) \to 0$. Além disso,
+a $\mathit{S}\left(\mathit{t}\right)$, como foi definido, é contínuo à direita.
+
+A função de sobrevivência também pode ser definido em termos da função de risco, que é a taxa
+instantânea de falha. É a probabilidade de, dado que um indivíduo sobreviveu depois de um tempo
+$\mathit{t}$, qual a é a probabilidade de que ele falhe em um próximo pequeno intervalo de tempo,
+dividido pelo comprimento do intervalo. Formalmente, tem-se a sua expressão dada por:
 
 $$
-\delta = \begin{cases}
-1 & \text{if } T^* < U \\
-0 & \text{if } T^* \geq U
-\end{cases}
+\mathit{h}\left(\mathit{t}\right) = \lim_{\delta \to 0} \frac{P\left(\mathit{t} < \mathit{T} < t + \delta | \mathit{T} > \mathit{t}\right)}{\delta}
 $$
 
-\noindent denotes a censoring indicator. That is,
-$\delta$ is 1 if $T$ is a failured time and 0 if $T$ is a censored time.
+A partir das últimas duas últimas expressões, é possível obter outras representações para a
+distribuição de sobrevivência. Começando pelo complementar da função de sobrevivência, que é
+a função de distribuição acumulada, ela é dada por
 
+\begin{equation}
+\mathit{F}\left(\mathit{t}\right) = \mathit{P}\left(\mathit{T}\leq\mathit{t}\right) = 1 - \mathit{S}\left(\mathit{t}\right), \quad 0 < \mathit{t} < \infty
+\end{equation}
 
+Esta função corresponde ao complementar da função de sobrevivência e, assim como esta, é contínua à direita. No contexto da análise de sobrevivência, $\mathit{F}(t)$ também pode ser interpretada como a função de risco acumulado em termos probabilísticos, não devendo ser confundida com a função de risco acumulado definida a seguir.
 
+A função densidade de probabilidade (f.d.p.), quando existente, é obtida como a derivada
+da função de distribuição acumulada, ou, equivalentemente, como o oposto da derivada da
+função de sobrevivência:
+\begin{equation}
+\mathit{f}(t) = \frac{d}{dt}\mathit{F}(t) = -\frac{d}{dt}\mathit{S}(t).
+\end{equation}
 
-% \citeonline[p.~2]{moore2016applied} defines survival data as two characteristics.
-% The first one is that the response variable is a non-negative discrete or
-% continuous random variable, and representes the time from a well-defined
-% origin to a well-defined event (i.e., the survival time). The second one
-% is censoring, is the most important. Censoring happens when the starting or
-% ending events are not precisely observed. When the censoring does not happens,
-% it means that the event was observed in the survival time and in this case is
-% to be said a failure.
+A função de risco pode então ser expressa em termos da função densidade e da função de
+sobrevivência como:
+\begin{equation}
+\mathit{h}(t) = \frac{\mathit{f}(t)}{\mathit{S}(t)}.
+\end{equation}
 
+Essa relação mostra que a função de risco em um instante $\mathit{t}$ pode ser interpretada
+como a razão entre a densidade de ocorrência do evento nesse instante e a probabilidade de o
+indivíduo ter sobrevivido até $\mathit{t}$. Em outras palavras, trata-se de uma taxa
+instantânea de ocorrência condicionada à sobrevivência até o tempo considerado.
 
+A função de risco acumulado é definida como a integral da função de risco ao longo do
+tempo:
+\begin{equation}
+\mathit{H}(t) = \int_{0}^{t} \mathit{h}(u)\,du.
+\end{equation}
 
-% In other
-% words, it means that the main characteristic of survival data is
-% that the response variable is a non-negative discrete or continuous
-% random variable, and represents the time from a well-defined origin to a
-% well-defined
+Essa função desempenha um papel central na análise de sobrevivência, pois permite estabelecer
+uma relação direta com a função de sobrevivência. De fato, pode-se mostrar que:
+\begin{equation}
+\mathit{S}(t) = \exp\left(- \int_{0}^{t} \mathit{h}(u)\,du \right) = \exp\left(-\mathit{H}(t)\right).
+\end{equation}
+
+Essa expressão evidencia que a função de sobrevivência pode ser completamente determinada a
+partir da função de risco. Tal relação é fundamental tanto do ponto de vista teórico quanto
+prático, uma vez que muitos modelos em análise de sobrevivência, como o modelo de riscos
+proporcionais, são especificados diretamente em termos da função de risco.
