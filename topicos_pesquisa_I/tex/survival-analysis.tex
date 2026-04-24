@@ -110,3 +110,62 @@ Essa expressão evidencia que a função de sobrevivência pode ser completament
 partir da função de risco. Tal relação é fundamental tanto do ponto de vista teórico quanto
 prático, uma vez que muitos modelos em análise de sobrevivência, como o modelo de riscos
 proporcionais, são especificados diretamente em termos da função de risco.
+
+\section{Modelo de Riscos Proporcionais de Cox}
+
+O modelo de riscos proporcionais de Cox, proposto por \cite{cox1972regression}, constitui uma das abordagens
+mais amplamente utilizadas na análise de sobrevivência. Sua principal característica é a modelagem
+da função de risco de forma semiparamétrica, na qual não se impõe uma forma funcional específica
+para o risco basal ao longo do tempo.
+
+Formalmente, seja $\mathbf{x}_i \in \mathbb{R}^p$ um vetor de covariáveis. A expressão geral
+do modelo de Cox é dada por:
+\begin{equation}
+h(t \mid \mathbf{x}_i) = h_0(t)\exp\left(\mathbf{x}_i^\top \bm{\beta}\right),
+\end{equation}
+em que $h_0(t)$ é a função de risco basal, comum a todos os indivíduos, e
+$\bm{\beta} \in \mathbb{R}^p$ é o vetor de parâmetros associados às covariáveis.
+
+A hipótese central do modelo é a de riscos proporcionais, segundo a qual a razão entre as
+funções de risco de dois indivíduos quaisquer é constante ao longo do tempo. De fato, para
+dois indivíduos com vetores de covariáveis $\mathbf{x}_i$ e $\mathbf{x}_j$, tem-se:
+\begin{equation}
+\frac{h_i(t)}{h_j(t)} = \exp\left((\mathbf{x}_i - \mathbf{x}_j)^\top \bm{\beta}\right),
+\end{equation}
+o que evidencia que tal razão independe do tempo $t$. Essa propriedade permite interpretar
+$\exp(\beta_k)$ como o efeito multiplicativo de uma unidade adicional na $k$-ésima
+covariável sobre o risco instantâneo.
+
+Uma das principais vantagens do modelo de Cox reside no fato de que a estimação dos parâmetros
+$\bm{\beta}$ pode ser realizada sem a necessidade de especificar explicitamente a função de risco
+basal $h_0(t)$. Isso é possível por meio da maximização da verossimilhança parcial, que
+utiliza apenas a ordenação dos tempos de falha observados. Seja $t_{(1)} < \cdots < t_{(D)}$
+a sequência ordenada dos tempos de falha distintos e $\mathcal{R}(t_{(d)})$ o conjunto de
+risco imediatamente antes de $t_{(d)}$. A verossimilhança parcial é dada por:
+\begin{equation}
+L(\bm{\beta}) = \prod_{d=1}^{D} \frac{\exp\left(\mathbf{x}_{(d)}^\top \bm{\beta}\right)}{\sum_{j \in \mathcal{R}(t_{(d)})} \exp\left(\mathbf{x}_j^\top \bm{\beta}\right)}.
+\end{equation}
+
+A maximização dessa função fornece estimativas consistentes para $\bm{\beta}$ sob condições
+regulares, mesmo na presença de censura à direita. Uma vez estimados os parâmetros, a função
+de sobrevivência pode ser obtida por meio da relação entre a função de risco e a função de
+risco acumulado, sendo a função de sobrevivência individual dada por:
+\begin{equation}
+S_i(t \mid \mathbf{x}_i) = S_0(t)^{\exp\left(\mathbf{x}_i^\top \bm{\beta}\right)},
+\end{equation}
+em que $S_0(t)$ é a função de sobrevivência basal associada a $h_0(t)$.
+
+% MODIFICAR O PARÁGRAFO ABAIXO DEPOIS! FALAR SOBRE O SVM QUE SERÁ DISCUTIDO MAIS A FRENTE E SOBRE O PROBLEMA DO MODELO DE COX PARA ALTAS DIMENSÕES
+
+Apesar de sua ampla aplicabilidade, o modelo de Cox depende fortemente da validade da hipótese
+de riscos proporcionais. Violações dessa suposição podem levar a estimativas viesadas e interpretações
+inadequadas dos efeitos das covariáveis. Nesse contexto, extensões do modelo têm sido propostas,
+incluindo versões com coeficientes dependentes do tempo e abordagens não paramétricas e
+baseadas em aprendizado de máquina, que buscam maior flexibilidade na modelagem da função de
+risco.
+
+\section{SVR com Censura}
+
+
+
+\section{WSVCR}
