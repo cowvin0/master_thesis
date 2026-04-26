@@ -164,8 +164,161 @@ incluindo versões com coeficientes dependentes do tempo e abordagens não param
 baseadas em aprendizado de máquina, que buscam maior flexibilidade na modelagem da função de
 risco.
 
-\section{SVR com Censura}
+\section{SVR com Censura (SVCR)}
 
+O modelo de Support Vector Regression (SVR), apresentado na Seção \ref{sec:svr}, pode ser
+naturalmente estendido para o caso em que os dados estão sujeitos à censura. Essa extensão,
+proposta por \citeonline{shivaswamy2007support}, permite incorporar diretamente a informação
+parcial disponível nos dados censurados, sem a necessidade de imputações ou transformações
+ad hoc.
 
+Formalmente, considere um conjunto de dados censurados $\left\{(\mathbf{x}_i, l_i, u_i)\right\}_{i=1}^{n}$,
+em que $\mathbf{x}_i \in \mathbb{R}^p$ representa o vetor de covariáveis, e $l_i$ e $u_i$
+denotam, respectivamente, os limites inferior e superior do intervalo no qual o valor alvo
+está contido. O objetivo é estimar uma função $f: \mathbb{R}^p \to \mathbb{R}$ tal que suas
+predições estejam, sempre que possível, dentro desses intervalos.
 
-\section{WSVCR}
+Mais precisamente, não há penalização quando $f(\mathbf{x}_i) \in (l_i, u_i)$. A penalização
+ocorre apenas quando a predição viola os limites do intervalo, isto é, quando
+$f(\mathbf{x}_i) < l_i$ ou $f(\mathbf{x}_i) > u_i$. Nesse caso, a função de perda pode ser definida como:
+\begin{equation}
+c\left(f(\mathbf{x}_i), l_i, u_i\right) = \max\left(l_i - f(\mathbf{x}_i), \; f(\mathbf{x}_i) - u_i\right).
+\end{equation}
+
+Note que essa função de perda coincide com o erro absoluto fora do intervalo permitido,
+sendo nula quando a predição pertence ao intervalo observado. Além disso, quando $l_i = -\infty$
+ou $u_i = +\infty$, a perda torna-se unilateral, refletindo os casos de censura à esquerda
+e à direita, respectivamente.
+
+Para formalizar o problema, particiona-se o conjunto de índices $\{1, \ldots, n\}$ em três
+subconjuntos disjuntos:
+\begin{align}
+I_u &= \{i \mid l_i > -\infty,\; u_i < +\infty\}, \\
+I_r &= \{i \mid u_i = +\infty\}, \\
+I_l &= \{i \mid l_i = -\infty\}.
+\end{align}
+
+O conjunto $I_u$ contém as observações completamente intervaladas, enquanto $I_r$ e $I_l$
+correspondem às observações censuradas à direita e à esquerda, respectivamente. Define-se
+ainda:
+\begin{equation}
+L = I_u \cup I_r, \quad U = I_u \cup I_l,
+\end{equation}
+em que $L$ contém os índices das observações com limite inferior finito, e $U$ aqueles com
+limite superior finito.
+
+Com base nessas definições, o problema de otimização associado ao SVCR pode ser formulado
+como:
+\begin{equation}
+\begin{aligned}
+\min_{\mathbf{w}, b, \bm{\xi}, \bm{\xi}^*} \quad
+& \frac{1}{2}\|\mathbf{w}\|^2 + C \left( \sum_{i \in U} \xi_i + \sum_{i \in L} \xi_i^* \right) \\
+\text{sujeito a:} \quad
+& \mathbf{w}^\top \mathbf{x}_i + b - u_i \leq \xi_i^*, \quad \forall i \in U, \\
+& l_i - \mathbf{w}^\top \mathbf{x}_i - b \leq \xi_i, \quad \forall i \in L, \\
+& \xi_i \geq 0, \quad \forall i \in U, \\
+& \xi_i^* \geq 0, \quad \forall i \in L.
+\end{aligned}
+\label{eq:svcr_primal}
+\end{equation}
+
+Essa formulação evidencia que o modelo utiliza toda a informação disponível no conjunto de dados,
+tratando de forma unificada observações censuradas e não censuradas. As variáveis de folga
+$\xi_i$ e $\xi_i^*$ quantificam o grau de violação dos limites inferior e superior,
+respectivamente.
+
+Introduzindo multiplicadores de Lagrange $\alpha_i \geq 0$ e $\alpha_i^* \geq 0$
+associados às restrições, pode-se obter a formulação dual do problema, dada por:
+\begin{equation}
+\begin{aligned}
+\max_{\bm{\alpha}, \bm{\alpha}^*} \quad
+& \frac{1}{2} \sum_{i,j=1}^{n} (\alpha_i - \alpha_i^*)(\alpha_j - \alpha_j^*) K(\mathbf{x}_i, \mathbf{x}_j) \\
+& - \sum_{i \in L} l_i \alpha_i + \sum_{i \in U} u_i \alpha_i^* \\
+\text{sujeito a:} \quad
+& \sum_{i \in L} \alpha_i - \sum_{i \in U} \alpha_i^* = 0, \\
+& 0 < \alpha_i, \alpha_i^* \leq C.
+\end{aligned}
+\label{eq:svcr_dual}
+\end{equation}
+
+Assim como no SVR clássico, a solução depende apenas de produtos internos entre vetores,
+permitindo o uso de funções de kernel para modelar relações não lineares.  Portanto, de
+forma semelhante a anterior, a hipótese retornada pelo SVCR é dada por:
+\begin{equation}
+h(\mathbf{x}) = \sum_{i=1}^{n} (\alpha_i - \alpha_i^*) K(\mathbf{x}_i, \mathbf{x}) + b.
+\end{equation}
+
+Observa-se que, na solução ótima, apenas uma fração dos coeficientes
+$\alpha_i - \alpha_i^*$ é diferente de zero, caracterizando os vetores de suporte.
+Do ponto de vista computacional, o problema resultante é um programa quadrático convexo,
+podendo ser resolvido por algoritmos eficientes como o SMO, com complexidade comparável à do
+SVM clássico.
+
+\section{Wavelet Support Vector Censored Regression}
+
+Wavelets constituem uma ferramenta matemática amplamente utilizada para a decomposição de
+funções, sinais e operadores em componentes localizadas no tempo (ou espaço) e na frequência.
+Diferentemente de abordagens clássicas baseadas em transformadas globais, como a transformada
+de Fourier, a análise por wavelets permite capturar simultaneamente características locais
+e multiescala de um sinal, o que a torna particularmente adequada para modelagem de
+fenômenos não lineares e não estacionários.
+
+A ideia central da análise por wavelets consiste em representar uma função
+$g: \mathbb{R} \to \mathbb{R}$ por meio de combinações de funções geradas a partir de
+uma função base, denominada wavelet mãe. Essas funções são obtidas por meio de
+operações de dilatação (escala) e translação. Formalmente, uma família de wavelets pode
+ser definida como:
+\begin{equation}
+h_{A,B}(x) = |A|^{-1/2} \, h\left(\frac{x - B}{A}\right),
+\end{equation}
+em que $h(x)$ é a wavelet mãe, $A \in \mathbb{R} \setminus \{0\}$ é o parâmetro de escala
+(ou dilatação), e $B \in \mathbb{R}$ é o parâmetro de translação.
+
+A partir dessa construção, uma função $g(x)$ pode ser aproximada por uma combinação finita
+de wavelets:
+\begin{equation}
+\hat{g}(x) = \sum_{i=1}^{t} w_i \, h_{A_i, B_i}(x),
+\end{equation}
+em que $w_i \in \mathbb{R}$ são coeficientes de ponderação, e $\hat{g}(x)$ representa uma
+aproximação de $g(x)$. Essa representação evidencia a capacidade das wavelets de aproximar
+funções arbitrárias, especialmente em contextos onde há variações locais relevantes.
+
+No contexto de máquinas de vetores de suporte, a utilização de wavelets ocorre por meio da
+definição de funções kernel que incorporam essas propriedades multiescala. Recorde que,
+para que uma função $K(\mathbf{x}, \mathbf{x}')$ seja um kernel válido, ela deve satisfazer
+as condições do teorema de Mercer, o que garante a existência de um mapeamento implícito
+para um espaço de características onde o produto interno é bem definido.
+
+A partir dessas considerações, pode-se construir um kernel de wavelet baseado em uma função
+wavelet mãe adequada. Uma escolha comum na literatura é a wavelet do tipo cosseno-Gaussiana,
+definida por:
+\begin{equation}
+h(x) = \cos(1.75x)\exp(-0.5x^2),
+\end{equation}
+que corresponde à parte real da wavelet de Morlet. Essa função apresenta boas propriedades
+de localização tanto no domínio do tempo quanto da frequência, sendo adequada para a
+construção de kernels.
+
+Com base nessa função, um kernel de wavelet multidimensional pode ser definido como:
+\begin{equation}
+K(\mathbf{x}, \mathbf{x}') = \prod_{k=1}^{p} h\left(\frac{x_k - x_k'}{A}\right),
+\end{equation}
+em que $x_k$ e $x_k'$ denotam a $k$-ésima componente dos vetores $\mathbf{x}$ e $\mathbf{x}'$,
+respectivamente, e $A > 0$ é um parâmetro de escala que controla o grau de dilatação da
+wavelet.
+
+Esse kernel é invariante por translação e permite capturar estruturas locais nos dados,
+oferecendo maior flexibilidade em relação a kernels tradicionais, como o linear ou o
+gaussiano. Em particular, sua capacidade de adaptação a diferentes escalas torna-o
+especialmente útil em problemas onde a relação entre as variáveis apresenta comportamento
+não linear complexo.
+
+O modelo Wavelet Support Vector Censored Regression, proposto por \citeonline{maia2023wavelet},
+utiliza o kernel de wavelet como kernel. Portanto, na formulação dor problema
+dual dada por \ref{eq:svcr_dual}, o problema se torna:
+
+\begin{equation}
+\begin{aligned}
+\max_{\bm{\alpha}, \bm{\alpha}^*} \quad \frac{1}{2} \sum_{i,j=1}^{n} (\alpha_i - \alpha_i^*)(\alpha_j - \alpha_j^*) \prod^{p}_{k=1}h\left(\frac{x_k - x_k'}{A}\right) - \sum_{i \in L} l_i \alpha_i + \sum_{i \in U} u_i \alpha_i^*
+\end{aligned}
+\end{equation}

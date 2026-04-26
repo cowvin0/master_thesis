@@ -294,6 +294,7 @@ próxima seção será apresentada a formulação do SVM para regressão, que é
 natural do caso de classificação.
 
 \section{Máquinas de Vetores de Suporte para Regressão (SVR)}
+\label{sec:svr}
 
 Para o caso em que o SVM está sendo utilizado para regressão, o objetivo ajustar um
 tubo com largura $\epsilon$ aos dados, de forma que a maioria dos pontos de treinamento
@@ -376,7 +377,7 @@ desigualdades:
 &\alpha_i' \left(y_i - \mathbf{w} \cdot \Phi\left(x_i\right) - b - \epsilon - \xi_i'\right) = 0
 \end{align}
 
-Dessa forma, perceba que se $\alpha_i \neq 0$ or $\alpha_i' \neq 0$, então $x_i$ é um vetor de suporte
+Dessa forma, perceba que se $\alpha_i \neq 0$ ou $\alpha_i' \neq 0$, então $x_i$ é um vetor de suporte
 e vale $\mathbf{w} \cdot \Phi\left(x_i\right) + b - y_i - \epsilon = \xi_i$ ou $y_i - \mathbf{w} \cdot \Phi\left(x_i\right) - b - \epsilon = \xi_i'$.
 Além disso, observa-se que, para cada observação $\mathbf{x}_i$, no máximo um dos multiplicadores
 de Lagrange $\alpha_i$ ou $\alpha_i'$ pode ser estritamente positivo, uma vez que a predição
