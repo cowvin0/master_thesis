@@ -407,73 +407,73 @@ por validação cruzada, mas requer um conjunto de validação relativamente gra
 disvantagem é que o SVR pode ser custoso computacionalmente caso esteja sendo utilizado
 um conjunto de treinamento muito grande.
 
-\subsection{Máquinas de Vetores de Suporte para Ranking}
+% \subsection{Máquinas de Vetores de Suporte para Ranking}
 
-Nesta seção, considera-se o problema de aprendizado de ranking sob a perspectiva de
-comparações pareadas, no qual o objetivo é aprender uma função capaz de ordenar elementos
-a partir de preferências relativas. Diferentemente do problema de classificação, em que
-se predizem rótulos absolutos, no contexto de ranking busca-se modelar relações do tipo
-``$x_i$ é preferível a $x_i'$'', o que pode ser formalizado por meio de pares ordenados
-de observações.
+% Nesta seção, considera-se o problema de aprendizado de ranking sob a perspectiva de
+% comparações pareadas, no qual o objetivo é aprender uma função capaz de ordenar elementos
+% a partir de preferências relativas. Diferentemente do problema de classificação, em que
+% se predizem rótulos absolutos, no contexto de ranking busca-se modelar relações do tipo
+% ``$x_i$ é preferível a $x_i'$'', o que pode ser formalizado por meio de pares ordenados
+% de observações.
 
-Seja $\mathcal{X}$ o espaço de entrada e considere um conjunto de treinamento composto
-por pares $(x_i, x_i')$, $i \in [m]$, juntamente com rótulos $y_i \in \{-1, +1\}$
-indicando a preferência relativa entre os elementos do par. O objetivo é encontrar
-uma função de pontuação $f: \mathcal{X} \to \mathbb{R}$ tal que
-\[
-y_i \bigl(f(x_i') - f(x_i)\bigr) > 0,
-\]
-isto é, que respeite a ordenação observada nos dados.
+% Seja $\mathcal{X}$ o espaço de entrada e considere um conjunto de treinamento composto
+% por pares $(x_i, x_i')$, $i \in [m]$, juntamente com rótulos $y_i \in \{-1, +1\}$
+% indicando a preferência relativa entre os elementos do par. O objetivo é encontrar
+% uma função de pontuação $f: \mathcal{X} \to \mathbb{R}$ tal que
+% \[
+% y_i \bigl(f(x_i') - f(x_i)\bigr) > 0,
+% \]
+% isto é, que respeite a ordenação observada nos dados.
 
-Assumindo uma parametrização linear no espaço de características,
-$f(x) = \mathbf{w} \cdot \Phi(x)$, com $\Phi: \mathcal{X} \to \mathcal{H}$
-sendo um mapeamento associado a um kernel definido positivo, a condição acima pode
-ser reescrita como:
-\[
-y_i \, \mathbf{w} \cdot \bigl(\Phi(x_i') - \Phi(x_i)\bigr) > 0.
-\]
+% Assumindo uma parametrização linear no espaço de características,
+% $f(x) = \mathbf{w} \cdot \Phi(x)$, com $\Phi: \mathcal{X} \to \mathcal{H}$
+% sendo um mapeamento associado a um kernel definido positivo, a condição acima pode
+% ser reescrita como:
+% \[
+% y_i \, \mathbf{w} \cdot \bigl(\Phi(x_i') - \Phi(x_i)\bigr) > 0.
+% \]
 
-Com base em garantias teóricas de generalização, pode-se construir um algoritmo que busca
-simultaneamente minimizar a complexidade do modelo e penalizar violações dessa condição.
-Introduzindo variáveis de folga $\xi_i \geq 0$, o problema de otimização pode ser formulado
-como:
-\begin{equation}
-\begin{aligned}
-\min_{\mathbf{w}, \bm{\xi}} \quad
-& \frac{1}{2}\|\mathbf{w}\|^2 + C \sum_{i=1}^{m} \xi_i \\
-\text{sujeito a:} \quad
-& y_i \, \mathbf{w} \cdot \bigl(\Phi(x_i') - \Phi(x_i)\bigr) \geq 1 - \xi_i, \\
-& \xi_i \geq 0, \quad \forall i \in [m].
-\end{aligned}
-\label{eq:svm_ranking_primal}
-\end{equation}
+% Com base em garantias teóricas de generalização, pode-se construir um algoritmo que busca
+% simultaneamente minimizar a complexidade do modelo e penalizar violações dessa condição.
+% Introduzindo variáveis de folga $\xi_i \geq 0$, o problema de otimização pode ser formulado
+% como:
+% \begin{equation}
+% \begin{aligned}
+% \min_{\mathbf{w}, \bm{\xi}} \quad
+% & \frac{1}{2}\|\mathbf{w}\|^2 + C \sum_{i=1}^{m} \xi_i \\
+% \text{sujeito a:} \quad
+% & y_i \, \mathbf{w} \cdot \bigl(\Phi(x_i') - \Phi(x_i)\bigr) \geq 1 - \xi_i, \\
+% & \xi_i \geq 0, \quad \forall i \in [m].
+% \end{aligned}
+% \label{eq:svm_ranking_primal}
+% \end{equation}
 
-Observa-se que esse problema coincide formalmente com o problema primal do SVM para
-classificação, ao se considerar um novo mapeamento de características
-$\Psi: \mathcal{X} \times \mathcal{X} \to \mathcal{H}$ definido por:
-\[
-\Psi(x, x') = \Phi(x') - \Phi(x).
-\]
+% Observa-se que esse problema coincide formalmente com o problema primal do SVM para
+% classificação, ao se considerar um novo mapeamento de características
+% $\Psi: \mathcal{X} \times \mathcal{X} \to \mathcal{H}$ definido por:
+% \[
+% \Psi(x, x') = \Phi(x') - \Phi(x).
+% \]
 
-Dessa forma, o problema de ranking pode ser interpretado como um problema de
-classificação binária no espaço de pares, no qual as instâncias são diferenças entre
-representações no espaço de características. Consequentemente, todas as propriedades
-previamente estabelecidas para o SVM, incluindo convexidade, existência de solução única
-e possibilidade de uso de kernels, permanecem válidas neste contexto.
+% Dessa forma, o problema de ranking pode ser interpretado como um problema de
+% classificação binária no espaço de pares, no qual as instâncias são diferenças entre
+% representações no espaço de características. Consequentemente, todas as propriedades
+% previamente estabelecidas para o SVM, incluindo convexidade, existência de solução única
+% e possibilidade de uso de kernels, permanecem válidas neste contexto.
 
-Em particular, a formulação dual do problema pode ser expressa em termos de uma matriz
-de kernel induzida pelos pares de entrada. Seja $K$ o kernel associado a $\Phi$.
-Define-se então um novo kernel $K'$ sobre pares por:
-\begin{equation}
-K'_{ij} = K(x_i, x_j) + K(x_i', x_j') - K(x_i', x_j) - K(x_i, x_j'),
-\label{eq:kernel_ranking}
-\end{equation}
-para todo $i, j \in [m]$. Essa construção permite que o algoritmo opere inteiramente
-em termos de produtos internos, preservando o chamado \textit{truque do kernel}.
+% Em particular, a formulação dual do problema pode ser expressa em termos de uma matriz
+% de kernel induzida pelos pares de entrada. Seja $K$ o kernel associado a $\Phi$.
+% Define-se então um novo kernel $K'$ sobre pares por:
+% \begin{equation}
+% K'_{ij} = K(x_i, x_j) + K(x_i', x_j') - K(x_i', x_j) - K(x_i, x_j'),
+% \label{eq:kernel_ranking}
+% \end{equation}
+% para todo $i, j \in [m]$. Essa construção permite que o algoritmo opere inteiramente
+% em termos de produtos internos, preservando o chamado truque do kernel.
 
-Do ponto de vista prático, essa abordagem fornece uma solução eficaz para problemas de
-ranking pareado (pairwise ranking), sendo amplamente utilizada em aplicações
-como recuperação de informação e sistemas de recomendação. Além disso, a formulação
-pode ser naturalmente estendida para cenários mais gerais, incluindo casos em que os
-rótulos pertencem ao conjunto $\{-1, 0, +1\}$, permitindo modelar situações de indiferença
-entre pares.
+% Do ponto de vista prático, essa abordagem fornece uma solução eficaz para problemas de
+% ranking pareado (pairwise ranking), sendo amplamente utilizada em aplicações
+% como recuperação de informação e sistemas de recomendação. Além disso, a formulação
+% pode ser naturalmente estendida para cenários mais gerais, incluindo casos em que os
+% rótulos pertencem ao conjunto $\{-1, 0, +1\}$, permitindo modelar situações de indiferença
+% entre pares.
