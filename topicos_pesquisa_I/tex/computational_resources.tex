@@ -1,0 +1,56 @@
+
+\noindent Nesta seção, são apresentados os principais recursos computacionais utilizados no
+desenvolvimento deste trabalho, incluindo ferramentas para escrita do documento,
+linguagens de programação empregadas na implementação dos modelos e bibliotecas utilizadas
+na resolução dos problemas de otimização convexa. A escolha dessas ferramentas foi guiada
+pela necessidade de garantir rigor científico, reprodutibilidade dos experimentos e
+eficiência computacional na implementação dos algoritmos propostos.
+
+\section{Ambiente de desenvolvimento e escrita}
+
+A redação deste trabalho foi realizada utilizando o sistema de preparação de documentos
+\LaTeX, amplamente adotado na comunidade científica devido à sua capacidade de lidar de
+forma robusta com expressões matemáticas, referências bibliográficas e formatação de
+documentos técnicos. O uso do \LaTeX\ foi particularmente importante neste trabalho,
+dado o elevado número de equações e demonstrações envolvidas na formulação dos modelos
+baseados em máquinas de vetores de suporte.
+
+Para a edição do código-fonte e do documento, foi utilizado o editor Visual Studio Code
+(VSCode), que oferece um ambiente leve e altamente configurável. O VSCode permite integração
+com diversas extensões, possibilitando suporte eficiente tanto para a escrita em \LaTeX\
+quanto para o desenvolvimento em linguagens de programação como Python. Entre as
+funcionalidades utilizadas, destacam-se a navegação facilitada entre arquivos,
+realce de sintaxe, execução de scripts e integração com sistemas de controle de versão.
+
+\section{Linguagem de programação e implementação dos modelos}
+
+A implementação dos modelos propostos neste trabalho foi realizada na linguagem de
+programação Python, devido à sua ampla adoção na área de ciência de dados e aprendizado
+de máquina, bem como à disponibilidade de bibliotecas eficientes para computação numérica.
+
+O Python foi utilizado tanto para a geração de dados simulados quanto para a implementação
+dos algoritmos de Support Vector Regression (SVR) e sua extensão para dados censurados
+(SVCR e WSVCR). A manipulação de dados foi realizada com o auxílio da biblioteca NumPy,
+que oferece estruturas eficientes para operações matriciais e vetoriais, fundamentais
+para a implementação de métodos baseados em kernel.
+
+Além disso, o Python permite uma integração natural com bibliotecas de otimização e
+facilita a prototipagem de modelos matemáticos complexos, o que foi essencial para o
+desenvolvimento e validação das abordagens propostas neste trabalho.
+
+\subsection{Otimização convexa}
+
+A resolução dos problemas de otimização associados aos modelos SVCR e WSVCR foi realizada
+por meio da biblioteca CVXOPT, uma biblioteca especializada em programação convexa
+desenvolvida para a linguagem Python.
+
+A escolha do CVXOPT deve-se ao fato de que os problemas dual dos modelos baseados em
+máquinas de vetores de suporte podem ser formulados como problemas de programação
+quadrática convexa. Nesse contexto, o CVXOPT fornece rotinas eficientes e numericamente
+estáveis para a obtenção da solução ótima global, garantindo a correta resolução do
+problema sem a necessidade de implementação manual de algoritmos iterativos, como o
+Sequential Minimal Optimization (SMO).
+
+O uso de uma biblioteca consolidada como o CVXOPT também contribui para a reprodutibilidade
+dos resultados, uma vez que os algoritmos de otimização empregados são amplamente testados
+e documentados na literatura.

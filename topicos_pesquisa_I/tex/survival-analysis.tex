@@ -1,196 +1,251 @@
-\noindent Em muitos cenários do mundo real, compreender se um evento irá ocorrer é uma
-tarefa importante. No entanto, compreender quando esse evento ocorrerá pode ser ainda
-mais informativo. Considere, por exemplo, um paciente com uma doença crônica.
-Profissionais da saúde frequentemente estão interessados não apenas na eficácia de um
-tratamento, mas também no tempo esperado de sobrevivência do paciente sob diferentes
-estratégias terapêuticas. De maneira análoga, no setor financeiro, instituições podem
-buscar modelar o tempo até que um cliente entre em inadimplência, com o objetivo de
-gerenciar de forma mais eficiente a exposição ao risco. De forma semelhante, empresas
-frequentemente se preocupam com o fenômeno de churn, isto é, o tempo até que um cliente
-deixe de utilizar um serviço ou cancele uma assinatura. Antecipar esse momento permite a
-implementação de estratégias direcionadas de retenção, contribuindo para a melhoria da
-lucratividade no longo prazo. Esses exemplos ilustram a ubiquidade de problemas em que o
-tempo até a ocorrência de um evento é a principal variável de interesse. Nesse contexto,
-a análise de sobrevivência tem como objetivo modelar o tempo até a ocorrência de um evento,
-especialmente na presença de observações incompletas.
+\noindent Em diversos contextos aplicados, não é suficiente determinar se um evento de
+interesse ocorrerá; torna-se igualmente, e frequentemente mais relevante, modelar o
+tempo até a sua ocorrência. Considere, por exemplo, um paciente acometido por uma
+doença crônica. Nesse caso, profissionais da saúde estão interessados não apenas em
+avaliar a eficácia de diferentes intervenções terapêuticas, mas também em estimar o
+tempo de sobrevivência associado a cada estratégia. De maneira análoga, no setor
+financeiro, instituições buscam modelar o tempo até a ocorrência de inadimplência de
+um cliente, com o objetivo de aprimorar mecanismos de controle e gestão de risco.
+De forma semelhante, em aplicações de marketing e negócios, o fenômeno de \textit{churn}
+refere-se ao tempo até que um cliente deixe de utilizar um serviço, sendo sua antecipação
+fundamental para a implementação de políticas eficazes de retenção.
+
+Esses exemplos evidenciam a ampla gama de aplicações em que o tempo até a ocorrência
+de um evento constitui a principal variável de interesse. Nesse contexto, a análise de
+sobrevivência emerge como um arcabouço estatístico voltado à modelagem de tempos até
+evento, caracterizando-se, em particular, pela presença de observações incompletas,
+decorrentes de mecanismos de censura. A incorporação adequada dessas informações
+parciais é um dos aspectos centrais que distinguem a análise de sobrevivência de
+abordagens tradicionais de modelagem estatística.
+
+% \noindent Em muitos cenários do mundo real, compreender se um evento irá ocorrer é uma
+% tarefa importante. No entanto, compreender quando esse evento ocorrerá pode ser ainda
+% mais informativo. Considere, por exemplo, um paciente com uma doença crônica.
+% Profissionais da saúde frequentemente estão interessados não apenas na eficácia de um
+% tratamento, mas também no tempo esperado de sobrevivência do paciente sob diferentes
+% estratégias terapêuticas. De maneira análoga, no setor financeiro, instituições podem
+% buscar modelar o tempo até que um cliente entre em inadimplência, com o objetivo de
+% gerenciar de forma mais eficiente a exposição ao risco. De forma semelhante, empresas
+% frequentemente se preocupam com o fenômeno de churn, isto é, o tempo até que um cliente
+% deixe de utilizar um serviço ou cancele uma assinatura. Antecipar esse momento permite a
+% implementação de estratégias direcionadas de retenção, contribuindo para a melhoria da
+% lucratividade no longo prazo. Esses exemplos ilustram a ubiquidade de problemas em que o
+% tempo até a ocorrência de um evento é a principal variável de interesse. Nesse contexto,
+% a análise de sobrevivência tem como objetivo modelar o tempo até a ocorrência de um evento,
+% especialmente na presença de observações incompletas.
 
 \section{Censura}
 
 A principal característica que distingue a análise de sobrevivência de outras áreas da
-estatística é a presença de censura. Em termos gerais, a censura ocorre quando o tempo
-exato de ocorrência do evento de interesse não é observado para todos os indivíduos da
-amostra. Assim, enquanto para alguns indivíduos o evento é observado, para outros apenas
-se dispõe de informação parcial sobre o tempo de ocorrência, caracterizando observações
-censuradas \cite{clark2003survival}.
+estatística é a presença de censura. De forma geral, diz-se que uma observação é censurada
+quando o tempo exato de ocorrência do evento de interesse não é completamente observado.
+Assim, enquanto para alguns indivíduos o tempo até o evento é conhecido, para outros apenas
+se dispõe de informação parcial, o que caracteriza a presença de dados censurados
+\cite{clark2003survival}.
 
-No contexto da análise de sobrevivência, a censura pode ser classificada em três tipos
+No contexto da análise de sobrevivência, a censura pode ser classificada em três categorias
 principais: à direita, à esquerda e intervalar. A censura à direita ocorre quando o evento
-de interesse não é observado até o final do período de acompanhamento, seja porque o
-indivíduo deixa o estudo precocemente, seja porque o estudo se encerra antes da ocorrência
-do evento. A censura à esquerda ocorre quando o evento já ocorreu antes do início do período
-de observação, mas seu tempo exato é desconhecido. Por fim, a censura intervalar ocorre quando
-se sabe que o evento ocorreu entre dois instantes de observação, mas não se conhece o momento
-exato.
+de interesse não é observado durante o período de acompanhamento, seja em razão da saída
+do indivíduo do estudo antes de sua conclusão, seja pelo término do estudo sem a ocorrência
+do evento. A censura à esquerda, por sua vez, ocorre quando o evento já aconteceu antes do
+início do período de observação, embora o instante exato de sua ocorrência seja desconhecido.
+Por fim, a censura intervalar caracteriza-se pelo fato de que o evento é conhecido apenas
+como tendo ocorrido em algum instante dentro de um intervalo de tempo, delimitado por duas
+observações sucessivas.
 
-Neste trabalho, será dada ênfase aos casos de censura à esquerda e à direita. Formalmente,
-uma observação censurada pode ser representada por $\left(\mathbf{x}_i, l_i, u_i\right)$,
-para $i = 1, \ldots, m$, em que $\mathbf{x}_i$ denota o vetor de covariáveis, $l_i$ o limite
-inferior e $u_i$ o limite superior do intervalo no qual o evento ocorreu. Em particular, a
-censura à direita e à esquerda podem ser representadas, respectivamente, por
-$\left(\mathbf{x}_i, l_i, +\infty\right)$ e $\left(\mathbf{x}_i, -\infty, u_i\right)$.
+Neste trabalho, o foco será direcionado aos casos de censura à esquerda e à direita, que
+são os mais frequentemente encontrados em aplicações práticas. Formalmente, uma observação
+censurada pode ser representada por um triplo $\left(\mathbf{x}_i, l_i, u_i\right)$,
+para $i = 1, \ldots, m$, em que $\mathbf{x}_i \in \mathbb{R}^d$ denota o vetor de covariáveis,
+$l_i \in \mathbb{R} \cup \{-\infty\}$ representa o limite inferior e $u_i \in \mathbb{R} \cup \{+\infty\}$
+o limite superior do intervalo no qual o tempo de ocorrência do evento está contido.
 
-No caso de observações não censuradas, tem-se $l_i = u_i = y_i$, de modo que a observação
-pode ser representada por $\left(\mathbf{x}_i, y_i\right)$, em que $y_i$ corresponde ao
-tempo de sobrevivência observado.
+Nesse formalismo, a censura à direita é representada por observações da forma $\left(\mathbf{x}_i, l_i, +\infty\right)$,
+indicando que o evento ocorreu após o tempo $l_i$, mas seu instante exato é desconhecido.
+Analogamente, a censura à esquerda é representada por $\left(\mathbf{x}_i, -\infty, u_i\right)$,
+indicando que o evento ocorreu antes de $u_i$. Quando ambos os limites são finitos, isto é,
+$l_i < u_i < +\infty$, tem-se o caso de censura intervalar.
+
+No caso particular de observações não censuradas, o tempo de ocorrência do evento é conhecido
+exatamente, de modo que $l_i = u_i = y_i$. Nesse caso, a observação pode ser representada
+simplesmente por $\left(\mathbf{x}_i, y_i\right)$, em que $y_i$ corresponde ao tempo de
+sobrevivência observado.
+
+Essa representação unificada permite tratar, de forma coerente, diferentes mecanismos de
+censura dentro de um mesmo arcabouço matemático, sendo particularmente útil na formulação
+de métodos de aprendizado que incorporam explicitamente a informação parcial disponível
+nos dados.
 
 \section{Funções importantes para análise de sobrevivência e suas relações}
 
-Os métodos de análise de sobrevivência dependem da distribuição de sobrevivência e, as principais
-formas para sua especificação, é através da função de risco e de sobrevivência. A função de sobrevivência
-define a probabilidade de não experenciar o evento após um tempo $\mathit{t}$ e é definida como:
+Os métodos de análise de sobrevivência são fundamentados na caracterização da distribuição
+do tempo até a ocorrência de um evento aleatório. As principais formas de descrever essa
+distribuição são por meio da função de sobrevivência e da função de risco, que oferecem
+interpretações complementares e desempenham papel central tanto na formulação teórica
+quanto na modelagem estatística.
+
+A função de sobrevivência descreve a probabilidade de o evento de interesse não ter ocorrido
+até um instante \( t \), sendo definida por:
 \begin{equation}
 \mathit{S}\left(\mathit{t}\right) = \mathit{P}\left(\mathit{T} > \mathit{t}\right), \quad 0 < \mathit{t} < \infty\text{.}
 \label{eq:survival_function}
 \end{equation}
 
-Para a Equação \ref{eq:survival_function}, quando $\mathit{t} = 0 \implies \mathit{S}\left(0\right)= 1$
-e, quando $\mathit{t} \to \infty \implies \mathit{S} \left(\mathit{t}\right) \to 0$. Além disso,
-a $\mathit{S}\left(\mathit{t}\right)$, como foi definido, é contínuo à direita.
+Sob condições usuais, tem-se que \( \mathit{S}(0) = 1 \) e \( \lim_{t \to \infty} \mathit{S}(t) = 0 \). Além disso, a função de sobrevivência é não crescente e contínua à direita, propriedades que decorrem diretamente de sua definição probabilística.
 
-A função de sobrevivência também pode ser definido em termos da função de risco, que é a taxa
-instantânea de falha. É a probabilidade de, dado que um indivíduo sobreviveu depois de um tempo
-$\mathit{t}$, qual a é a probabilidade de que ele falhe em um próximo pequeno intervalo de tempo,
-dividido pelo comprimento do intervalo. Formalmente, tem-se a sua expressão dada por:
-
-$$
-\mathit{h}\left(\mathit{t}\right) = \lim_{\delta \to 0} \frac{P\left(\mathit{t} < \mathit{T} < t + \delta | \mathit{T} > \mathit{t}\right)}{\delta}
-$$
-
-A partir das últimas duas últimas expressões, é possível obter outras representações para a
-distribuição de sobrevivência. Começando pelo complementar da função de sobrevivência, que é
-a função de distribuição acumulada, ela é dada por
-
+Outra quantidade fundamental é a função de risco, que descreve a taxa instantânea de
+ocorrência do evento no tempo \( t \), condicionada à sobrevivência até esse instante.
+Formalmente, a função de risco é definida por:
 \begin{equation}
-\mathit{F}\left(\mathit{t}\right) = \mathit{P}\left(\mathit{T}\leq\mathit{t}\right) = 1 - \mathit{S}\left(\mathit{t}\right), \quad 0 < \mathit{t} < \infty
+\mathit{h}\left(\mathit{t}\right) = \lim_{\delta \to 0} \frac{\mathit{P}\left(\mathit{t} < \mathit{T} \leq \mathit{t} + \delta \mid \mathit{T} > \mathit{t}\right)}{\delta}\text{.}
 \end{equation}
 
-Esta função corresponde ao complementar da função de sobrevivência e, assim como esta, é contínua à direita. No contexto da análise de sobrevivência, $\mathit{F}(t)$ também pode ser interpretada como a função de risco acumulado em termos probabilísticos, não devendo ser confundida com a função de risco acumulado definida a seguir.
+Essa definição evidencia que \( \mathit{h}(t) \) não é uma probabilidade, mas sim uma taxa,
+podendo assumir valores maiores que 1. Intuitivamente, ela quantifica a propensão instantânea
+de ocorrência do evento em torno de \( t \), dado que o indivíduo sobreviveu até esse
+momento.
 
-A função densidade de probabilidade (f.d.p.), quando existente, é obtida como a derivada
-da função de distribuição acumulada, ou, equivalentemente, como o oposto da derivada da
-função de sobrevivência:
+A partir dessas definições, podem ser estabelecidas diversas relações que caracterizam completamente
+a distribuição de \( T \). Em particular, a função de distribuição acumulada é dada por:
 \begin{equation}
-\mathit{f}(t) = \frac{d}{dt}\mathit{F}(t) = -\frac{d}{dt}\mathit{S}(t).
+\mathit{F}\left(\mathit{t}\right) = \mathit{P}\left(\mathit{T} \leq \mathit{t}\right) = 1 - \mathit{S}\left(\mathit{t}\right), \quad 0 < \mathit{t} < \infty\text{.}
 \end{equation}
 
-A função de risco pode então ser expressa em termos da função densidade e da função de
-sobrevivência como:
+Assim como \( \mathit{S}(t) \), a função \( \mathit{F}(t) \) é contínua à direita e não
+decrescente. No contexto da análise de sobrevivência, \( \mathit{F}(t) \) pode ser
+interpretada como a probabilidade acumulada de ocorrência do evento até o tempo \( t \),
+não devendo ser confundida com a função de risco acumulado definida adiante.
+
+Quando a distribuição de \( T \) admite densidade, a função densidade de probabilidade é
+obtida como:
 \begin{equation}
-\mathit{h}(t) = \frac{\mathit{f}(t)}{\mathit{S}(t)}.
+\mathit{f}(t) = \frac{d}{dt}\mathit{F}(t) = -\frac{d}{dt}\mathit{S}(t)\text{.}
 \end{equation}
 
-Essa relação mostra que a função de risco em um instante $\mathit{t}$ pode ser interpretada
-como a razão entre a densidade de ocorrência do evento nesse instante e a probabilidade de o
-indivíduo ter sobrevivido até $\mathit{t}$. Em outras palavras, trata-se de uma taxa
-instantânea de ocorrência condicionada à sobrevivência até o tempo considerado.
-
-A função de risco acumulado é definida como a integral da função de risco ao longo do
-tempo:
+A função de risco pode então ser expressa em termos da densidade e da função de sobrevivência
+como:
 \begin{equation}
-\mathit{H}(t) = \int_{0}^{t} \mathit{h}(u)\,du.
+\mathit{h}(t) = \frac{\mathit{f}(t)}{\mathit{S}(t)}\text{,}
+\end{equation}
+o que explicita sua interpretação como uma taxa condicional: trata-se da densidade de
+ocorrência do evento em \( t \), ponderada pela probabilidade de sobrevivência até esse
+instante.
+
+A integral da função de risco ao longo do tempo define a função de risco acumulado:
+\begin{equation}
+\mathit{H}(t) = \int_{0}^{t} \mathit{h}(u)\,du\text{.}
 \end{equation}
 
-Essa função desempenha um papel central na análise de sobrevivência, pois permite estabelecer
-uma relação direta com a função de sobrevivência. De fato, pode-se mostrar que:
+Essa função é não decrescente e desempenha papel central na teoria da sobrevivência, uma
+vez que estabelece uma relação direta e particularmente conveniente com a função de
+sobrevivência. De fato, pode-se demonstrar que:
 \begin{equation}
-\mathit{S}(t) = \exp\left(- \int_{0}^{t} \mathit{h}(u)\,du \right) = \exp\left(-\mathit{H}(t)\right).
+\mathit{S}(t) = \exp\left(- \int_{0}^{t} \mathit{h}(u)\,du \right) = \exp\left(-\mathit{H}(t)\right)\text{.}
 \end{equation}
 
-Essa expressão evidencia que a função de sobrevivência pode ser completamente determinada a
-partir da função de risco. Tal relação é fundamental tanto do ponto de vista teórico quanto
-prático, uma vez que muitos modelos em análise de sobrevivência, como o modelo de riscos
-proporcionais, são especificados diretamente em termos da função de risco.
+Essa expressão evidencia que a função de sobrevivência é completamente determinada pela
+função de risco, e vice-versa. Do ponto de vista prático, essa relação é de grande
+relevância, pois muitos modelos em análise de sobrevivência são especificados diretamente
+em termos da função de risco, como é o caso do modelo de riscos proporcionais de Cox. Além
+disso, a representação exponencial garante que \( \mathit{S}(t) \) permaneça no intervalo
+unitário e preserve suas propriedades fundamentais.
+
+Em conjunto, essas funções e suas inter-relações fornecem um arcabouço matemático consistente
+para a modelagem de dados de sobrevivência, permitindo diferentes formas de especificação
+de modelos conforme as características do problema e dos dados disponíveis.
 
 \section{Modelo de Riscos Proporcionais de Cox}
 
-O modelo de riscos proporcionais de Cox, proposto por \cite{cox1972regression}, constitui uma das abordagens
-mais amplamente utilizadas na análise de sobrevivência. Sua principal característica é a modelagem
-da função de risco de forma semiparamétrica, na qual não se impõe uma forma funcional específica
-para o risco basal ao longo do tempo.
+O modelo de riscos proporcionais de Cox, proposto por \cite{cox1972regression}, constitui
+uma das abordagens mais influentes e amplamente empregadas na análise de sobrevivência.
+Sua principal característica reside na natureza semiparamétrica da modelagem, na qual a
+função de risco é decomposta em um componente basal arbitrário e um componente paramétrico
+associado às covariáveis, sem a necessidade de especificação explícita da forma funcional
+do risco basal ao longo do tempo.
 
-Formalmente, seja $\mathbf{x}_i \in \mathbb{R}^p$ um vetor de covariáveis. A expressão geral
-do modelo de Cox é dada por:
+Formalmente, seja $\mathbf{x}_i \in \mathbb{R}^p$ o vetor de covariáveis associado ao
+$i$-ésimo indivíduo. O modelo de Cox é definido por:
 \begin{equation}
 h(t \mid \mathbf{x}_i) = h_0(t)\exp\left(\mathbf{x}_i^\top \bm{\beta}\right),
 \end{equation}
 em que $h_0(t)$ é a função de risco basal, comum a todos os indivíduos, e
-$\bm{\beta} \in \mathbb{R}^p$ é o vetor de parâmetros associados às covariáveis.
+$\bm{\beta} \in \mathbb{R}^p$ é o vetor de parâmetros que quantifica o efeito das
+covariáveis sobre o risco.
 
 A hipótese central do modelo é a de riscos proporcionais, segundo a qual a razão entre as
-funções de risco de dois indivíduos quaisquer é constante ao longo do tempo. De fato, para
-dois indivíduos com vetores de covariáveis $\mathbf{x}_i$ e $\mathbf{x}_j$, tem-se:
+funções de risco de quaisquer dois indivíduos permanece constante ao longo do tempo. Mais
+precisamente, para dois indivíduos com vetores de covariáveis $\mathbf{x}_i$ e $\mathbf{x}_j$,
+tem-se:
 \begin{equation}
-\frac{h_i(t)}{h_j(t)} = \exp\left((\mathbf{x}_i - \mathbf{x}_j)^\top \bm{\beta}\right),
+\frac{h(t \mid \mathbf{x}_i)}{h(t \mid \mathbf{x}_j)} = \exp\left((\mathbf{x}_i - \mathbf{x}_j)^\top \bm{\beta}\right),
 \end{equation}
-o que evidencia que tal razão independe do tempo $t$. Essa propriedade permite interpretar
-$\exp(\beta_k)$ como o efeito multiplicativo de uma unidade adicional na $k$-ésima
-covariável sobre o risco instantâneo.
+o que evidencia que essa razão independe do tempo $t$. Essa propriedade confere ao modelo
+uma interpretação particularmente conveniente, pois o termo $\exp(\beta_k)$ pode ser
+interpretado como o efeito multiplicativo associado a um aumento unitário na $k$-ésima
+covariável sobre o risco instantâneo, mantendo as demais fixas.
 
-Uma das principais vantagens do modelo de Cox reside no fato de que a estimação dos parâmetros
-$\bm{\beta}$ pode ser realizada sem a necessidade de especificar explicitamente a função de risco
-basal $h_0(t)$. Isso é possível por meio da maximização da verossimilhança parcial, que
-utiliza apenas a ordenação dos tempos de falha observados. Seja $t_{(1)} < \cdots < t_{(D)}$
-a sequência ordenada dos tempos de falha distintos e $\mathcal{R}(t_{(d)})$ o conjunto de
-risco imediatamente antes de $t_{(d)}$. A verossimilhança parcial é dada por:
+Uma das principais vantagens do modelo de Cox é que a estimação do vetor de parâmetros
+$\bm{\beta}$ pode ser realizada sem a necessidade de especificar a função de risco basal
+$h_0(t)$. Esse resultado é obtido por meio da verossimilhança parcial, que explora apenas
+a informação contida na ordenação dos tempos de falha observados. Seja
+$t_{(1)} < \cdots < t_{(D)}$ a sequência dos tempos de falha distintos e
+$\mathcal{R}(t_{(d)})$ o conjunto de risco imediatamente antes de $t_{(d)}$.
+A verossimilhança parcial é definida por:
 \begin{equation}
 L(\bm{\beta}) = \prod_{d=1}^{D} \frac{\exp\left(\mathbf{x}_{(d)}^\top \bm{\beta}\right)}{\sum_{j \in \mathcal{R}(t_{(d)})} \exp\left(\mathbf{x}_j^\top \bm{\beta}\right)}.
 \end{equation}
 
-A maximização dessa função fornece estimativas consistentes para $\bm{\beta}$ sob condições
-regulares, mesmo na presença de censura à direita. Uma vez estimados os parâmetros, a função
-de sobrevivência pode ser obtida por meio da relação entre a função de risco e a função de
-risco acumulado, sendo a função de sobrevivência individual dada por:
+Sob condições de regularidade, a maximização dessa função conduz a estimativas consistentes
+e assintoticamente normais para $\bm{\beta}$, mesmo na presença de censura à direita.
+Uma vez obtidas as estimativas dos parâmetros, é possível recuperar a função de risco basal,
+tipicamente por meio do estimador de Breslow, e, consequentemente, a função de sobrevivência.
+
+A função de sobrevivência condicional associada ao indivíduo $i$ pode ser expressa como:
 \begin{equation}
-S_i(t \mid \mathbf{x}_i) = S_0(t)^{\exp\left(\mathbf{x}_i^\top \bm{\beta}\right)},
+S(t \mid \mathbf{x}_i) = S_0(t)^{\exp\left(\mathbf{x}_i^\top \bm{\beta}\right)},
 \end{equation}
-em que $S_0(t)$ é a função de sobrevivência basal associada a $h_0(t)$.
+em que $S_0(t)$ denota a função de sobrevivência basal correspondente a $h_0(t)$. Essa
+expressão evidencia que o efeito das covariáveis atua de forma multiplicativa sobre o risco
+e, de maneira equivalente, exponencial sobre a função de sobrevivência.
 
-% MODIFICAR O PARÁGRAFO ABAIXO DEPOIS! FALAR SOBRE O SVM QUE SERÁ DISCUTIDO MAIS A FRENTE E SOBRE O PROBLEMA DO MODELO DE COX PARA ALTAS DIMENSÕES
-
-Apesar de sua ampla aplicabilidade, o modelo de Cox depende fortemente da validade da hipótese
-de riscos proporcionais. Violações dessa suposição podem levar a estimativas viesadas e interpretações
-inadequadas dos efeitos das covariáveis. Nesse contexto, extensões do modelo têm sido propostas,
-incluindo versões com coeficientes dependentes do tempo e abordagens não paramétricas e
-baseadas em aprendizado de máquina, que buscam maior flexibilidade na modelagem da função de
-risco.
+Apesar de sua ampla aplicabilidade e interpretabilidade, o modelo de Cox depende
+criticamente da validade da hipótese de riscos proporcionais. Violações dessa suposição
+podem resultar em estimativas viesadas e comprometer a interpretação dos coeficientes.
+Nesse contexto, diversas extensões têm sido propostas na literatura, incluindo modelos
+com coeficientes dependentes do tempo, abordagens estratificadas e métodos baseados em
+aprendizado de máquina, que buscam maior flexibilidade na modelagem de relações complexas
+entre covariáveis e o risco de ocorrência do evento, especialmente em cenários de alta
+dimensionalidade.
 
 \section{SVR com Censura (SVCR)}
 
 O modelo de Support Vector Regression (SVR), apresentado na Seção \ref{sec:svr}, pode ser
-naturalmente estendido para o caso em que os dados estão sujeitos à censura. Essa extensão,
-proposta por \citeonline{shivaswamy2007support}, permite incorporar diretamente a informação
-parcial disponível nos dados censurados, sem a necessidade de imputações ou transformações
-ad hoc.
+estendido de forma natural para o caso em que as observações estão sujeitas à censura. Essa
+generalização, proposta por \citeonline{shivaswamy2007support}, permite incorporar explicitamente
+a informação parcial contida nos dados censurados, evitando a necessidade de procedimentos
+auxiliares, como imputações ou transformações ad hoc, que podem introduzir viés ou perda de
+informação.
 
-Formalmente, considere um conjunto de dados censurados $\left\{(\mathbf{x}_i, l_i, u_i)\right\}_{i=1}^{n}$,
-em que $\mathbf{x}_i \in \mathbb{R}^p$ representa o vetor de covariáveis, e $l_i$ e $u_i$
-denotam, respectivamente, os limites inferior e superior do intervalo no qual o valor alvo
-está contido. O objetivo é estimar uma função $f: \mathbb{R}^p \to \mathbb{R}$ tal que suas
-predições estejam, sempre que possível, dentro desses intervalos.
+Considere um conjunto de dados censurados $\left\{(\mathbf{x}_i, l_i, u_i)\right\}_{i=1}^{n}$,
+em que $\mathbf{x}_i \in \mathbb{R}^p$ representa o vetor de covariáveis, enquanto $l_i$ e
+$u_i$ denotam, respectivamente, os limites inferior e superior do intervalo no qual o valor
+alvo verdadeiro está contido. O objetivo consiste em estimar uma função
+$f: \mathbb{R}^p \to \mathbb{R}$ tal que, idealmente, $f(\mathbf{x}_i) \in [l_i, u_i]$ para a
+maior parte das observações.
 
-Mais precisamente, não há penalização quando $f(\mathbf{x}_i) \in (l_i, u_i)$. A penalização
-ocorre apenas quando a predição viola os limites do intervalo, isto é, quando
-$f(\mathbf{x}_i) < l_i$ ou $f(\mathbf{x}_i) > u_i$. Nesse caso, a função de perda pode ser definida como:
+Nesse contexto, não há penalização quando a predição pertence ao intervalo observado. A
+penalização ocorre apenas quando há violação dos limites, isto é, quando $f(\mathbf{x}_i) < l_i$ ou
+$f(\mathbf{x}_i) > u_i$. A função de perda correspondente pode ser definida por:
 \begin{equation}
-c\left(f(\mathbf{x}_i), l_i, u_i\right) = \max\left(l_i - f(\mathbf{x}_i), \; f(\mathbf{x}_i) - u_i\right).
+c\left(f(\mathbf{x}_i), l_i, u_i\right) = \max\left\{l_i - f(\mathbf{x}_i), \; f(\mathbf{x}_i) - u_i, \; 0\right\}.
 \end{equation}
 
-Note que essa função de perda coincide com o erro absoluto fora do intervalo permitido,
-sendo nula quando a predição pertence ao intervalo observado. Além disso, quando $l_i = -\infty$
-ou $u_i = +\infty$, a perda torna-se unilateral, refletindo os casos de censura à esquerda
-e à direita, respectivamente.
+Essa função de perda é convexa e coincide com o erro absoluto fora do intervalo permitido,
+sendo nula quando a predição se encontra dentro do intervalo. Nos casos particulares em que
+$l_i = -\infty$ ou $u_i = +\infty$, a perda torna-se unilateral, refletindo, respectivamente,
+situações de censura à esquerda e à direita.
 
-Para formalizar o problema, particiona-se o conjunto de índices $\{1, \ldots, n\}$ em três
+Para a formulação do problema, particiona-se o conjunto de índices $\{1, \ldots, n\}$ em três
 subconjuntos disjuntos:
 \begin{align}
 I_u &= \{i \mid l_i > -\infty,\; u_i < +\infty\}, \\
@@ -198,17 +253,16 @@ I_r &= \{i \mid u_i = +\infty\}, \\
 I_l &= \{i \mid l_i = -\infty\}.
 \end{align}
 
-O conjunto $I_u$ contém as observações completamente intervaladas, enquanto $I_r$ e $I_l$
-correspondem às observações censuradas à direita e à esquerda, respectivamente. Define-se
-ainda:
+O conjunto $I_u$ corresponde às observações com limites inferior e superior finitos,
+enquanto $I_r$ e $I_l$ representam, respectivamente, observações censuradas à direita e à
+esquerda. Define-se ainda:
 \begin{equation}
 L = I_u \cup I_r, \quad U = I_u \cup I_l,
 \end{equation}
 em que $L$ contém os índices das observações com limite inferior finito, e $U$ aqueles com
 limite superior finito.
 
-Com base nessas definições, o problema de otimização associado ao SVCR pode ser formulado
-como:
+Com base nessas definições, o problema de otimização associado ao SVCR pode ser formulado como:
 \begin{equation}
 \begin{aligned}
 \min_{\mathbf{w}, b, \bm{\xi}, \bm{\xi}^*} \quad
@@ -222,103 +276,106 @@ como:
 \label{eq:svcr_primal}
 \end{equation}
 
-Essa formulação evidencia que o modelo utiliza toda a informação disponível no conjunto de dados,
-tratando de forma unificada observações censuradas e não censuradas. As variáveis de folga
-$\xi_i$ e $\xi_i^*$ quantificam o grau de violação dos limites inferior e superior,
-respectivamente.
+Essa formulação evidencia que o modelo utiliza de forma integrada todas as informações disponíveis,
+tratando simultaneamente observações não censuradas, censuradas à direita, à esquerda e
+intervalares. As variáveis de folga $\xi_i$ e $\xi_i^*$ quantificam, respectivamente, as
+violações dos limites inferior e superior impostos pelos intervalos observados.
 
-Introduzindo multiplicadores de Lagrange $\alpha_i \geq 0$ e $\alpha_i^* \geq 0$
-associados às restrições, pode-se obter a formulação dual do problema, dada por:
+Introduzindo multiplicadores de Lagrange $\alpha_i \geq 0$ e $\alpha_i^* \geq 0$ associados
+às restrições, obtém-se a formulação dual do problema:
 \begin{equation}
 \begin{aligned}
 \max_{\bm{\alpha}, \bm{\alpha}^*} \quad
-& \frac{1}{2} \sum_{i,j=1}^{n} (\alpha_i - \alpha_i^*)(\alpha_j - \alpha_j^*) K(\mathbf{x}_i, \mathbf{x}_j) \\
+& -\frac{1}{2} \sum_{i,j=1}^{n} (\alpha_i - \alpha_i^*)(\alpha_j - \alpha_j^*) K(\mathbf{x}_i, \mathbf{x}_j) \\
 & - \sum_{i \in L} l_i \alpha_i + \sum_{i \in U} u_i \alpha_i^* \\
 \text{sujeito a:} \quad
 & \sum_{i \in L} \alpha_i - \sum_{i \in U} \alpha_i^* = 0, \\
-& 0 < \alpha_i, \alpha_i^* \leq C.
+& 0 \leq \alpha_i \leq C, \quad 0 \leq \alpha_i^* \leq C.
 \end{aligned}
 \label{eq:svcr_dual}
 \end{equation}
 
-Assim como no SVR clássico, a solução depende apenas de produtos internos entre vetores,
-permitindo o uso de funções de kernel para modelar relações não lineares.  Portanto, de
-forma semelhante a anterior, a hipótese retornada pelo SVCR é dada por:
+A função objetivo dual é côncava, uma vez que a matriz de Gram associada ao kernel é
+semidefinida positiva, o que garante que o problema constitui um programa quadrático convexo
+bem posto. Além disso, variáveis $\alpha_i$ e $\alpha_i^*$ fora de seus respectivos conjuntos
+podem ser consideradas nulas, permitindo uma formulação uniforme para todo $i = 1, \ldots, n$.
+
+Assim como no SVR clássico, a solução depende exclusivamente de produtos internos entre
+vetores de entrada, o que permite a substituição desses produtos por uma função de kernel
+$K(\mathbf{x}_i, \mathbf{x}_j)$, viabilizando a modelagem de relações não lineares no espaço
+original. Consequentemente, a função estimada pode ser expressa como:
 \begin{equation}
 h(\mathbf{x}) = \sum_{i=1}^{n} (\alpha_i - \alpha_i^*) K(\mathbf{x}_i, \mathbf{x}) + b.
 \end{equation}
 
-Observa-se que, na solução ótima, apenas uma fração dos coeficientes
-$\alpha_i - \alpha_i^*$ é diferente de zero, caracterizando os vetores de suporte.
-Do ponto de vista computacional, o problema resultante é um programa quadrático convexo,
-podendo ser resolvido por algoritmos eficientes como o SMO, com complexidade comparável à do
-SVM clássico.
+Na solução ótima, apenas uma fração dos coeficientes $\alpha_i - \alpha_i^*$ assume valores
+não nulos, caracterizando os vetores de suporte. Essa propriedade de esparsidade é
+fundamental tanto para a eficiência computacional quanto para a interpretabilidade do modelo.
+
+Do ponto de vista computacional, o problema dual consiste em um programa quadrático com
+restrições lineares, podendo ser resolvido por métodos clássicos de otimização convexa, como
+métodos de pontos interiores, ou por abordagens mais escaláveis, como o método de otimização
+mínima sequencial (SMO). Em termos de complexidade, o SVCR apresenta comportamento comparável
+ao do SVR padrão, tornando-o adequado para problemas de dimensão moderada a elevada.
 
 \section{Wavelet Support Vector Censored Regression}
 
 Wavelets constituem uma ferramenta matemática amplamente utilizada para a decomposição de
 funções, sinais e operadores em componentes localizadas no tempo (ou espaço) e na frequência.
-Diferentemente de abordagens clássicas baseadas em transformadas globais, como a transformada
-de Fourier, a análise por wavelets permite capturar simultaneamente características locais
-e multiescala de um sinal, o que a torna particularmente adequada para modelagem de
-fenômenos não lineares e não estacionários.
+Diferentemente de abordagens baseadas em transformadas globais, a análise por wavelets permite
+capturar simultaneamente características locais e multiescala, sendo particularmente adequada
+para a modelagem de fenômenos não lineares e não estacionários.
 
-A ideia central da análise por wavelets consiste em representar uma função
-$g: \mathbb{R} \to \mathbb{R}$ por meio de combinações de funções geradas a partir de
-uma função base, denominada wavelet mãe. Essas funções são obtidas por meio de
-operações de dilatação (escala) e translação. Formalmente, uma família de wavelets pode
-ser definida como:
+A ideia central consiste em representar uma função $g: \mathbb{R} \to \mathbb{R}$ como uma
+combinação de funções geradas a partir de uma função base, denominada wavelet mãe, por meio
+de operações de dilatação e translação. Formalmente, define-se a família de wavelets como:
 \begin{equation}
 h_{A,B}(x) = |A|^{-1/2} \, h\left(\frac{x - B}{A}\right),
 \end{equation}
-em que $h(x)$ é a wavelet mãe, $A \in \mathbb{R} \setminus \{0\}$ é o parâmetro de escala
-(ou dilatação), e $B \in \mathbb{R}$ é o parâmetro de translação.
+em que $h(x)$ é a wavelet mãe, $A \in \mathbb{R} \setminus \{0\}$ é o parâmetro de escala e
+$B \in \mathbb{R}$ é o parâmetro de translação.
 
-A partir dessa construção, uma função $g(x)$ pode ser aproximada por uma combinação finita
-de wavelets:
+A partir dessa construção, uma função $g(x)$ pode ser aproximada por:
 \begin{equation}
 \hat{g}(x) = \sum_{i=1}^{t} w_i \, h_{A_i, B_i}(x),
 \end{equation}
-em que $w_i \in \mathbb{R}$ são coeficientes de ponderação, e $\hat{g}(x)$ representa uma
-aproximação de $g(x)$. Essa representação evidencia a capacidade das wavelets de aproximar
-funções arbitrárias, especialmente em contextos onde há variações locais relevantes.
+em que $w_i \in \mathbb{R}$ são coeficientes reais. Essa representação evidencia a capacidade
+das wavelets de aproximar funções complexas, especialmente em contextos com variações locais.
 
-No contexto de máquinas de vetores de suporte, a utilização de wavelets ocorre por meio da
-definição de funções kernel que incorporam essas propriedades multiescala. Recorde que,
-para que uma função $K(\mathbf{x}, \mathbf{x}')$ seja um kernel válido, ela deve satisfazer
-as condições do teorema de Mercer, o que garante a existência de um mapeamento implícito
-para um espaço de características onde o produto interno é bem definido.
+No contexto de máquinas de vetores de suporte, essas propriedades podem ser incorporadas por
+meio da definição de funções kernel. Para que uma função $K(\mathbf{x}, \mathbf{x}')$ seja
+um kernel válido, ela deve satisfazer as condições do teorema de Mercer, assegurando a existência
+de um espaço de características associado.
 
-A partir dessas considerações, pode-se construir um kernel de wavelet baseado em uma função
-wavelet mãe adequada. Uma escolha comum na literatura é a wavelet do tipo cosseno-Gaussiana,
-definida por:
+Uma escolha amplamente utilizada é a wavelet cosseno-Gaussiana, definida por:
 \begin{equation}
 h(x) = \cos(1.75x)\exp(-0.5x^2),
 \end{equation}
 que corresponde à parte real da wavelet de Morlet. Essa função apresenta boas propriedades
-de localização tanto no domínio do tempo quanto da frequência, sendo adequada para a
-construção de kernels.
+de localização conjunta no domínio do tempo e da frequência.
 
-Com base nessa função, um kernel de wavelet multidimensional pode ser definido como:
+Com base nessa função, define-se o kernel de wavelet multidimensional como:
 \begin{equation}
 K(\mathbf{x}, \mathbf{x}') = \prod_{k=1}^{p} h\left(\frac{x_k - x_k'}{A}\right),
 \end{equation}
-em que $x_k$ e $x_k'$ denotam a $k$-ésima componente dos vetores $\mathbf{x}$ e $\mathbf{x}'$,
-respectivamente, e $A > 0$ é um parâmetro de escala que controla o grau de dilatação da
-wavelet.
+em que $A > 0$ é um parâmetro de escala.
 
-Esse kernel é invariante por translação e permite capturar estruturas locais nos dados,
-oferecendo maior flexibilidade em relação a kernels tradicionais, como o linear ou o
-gaussiano. Em particular, sua capacidade de adaptação a diferentes escalas torna-o
-especialmente útil em problemas onde a relação entre as variáveis apresenta comportamento
-não linear complexo.
+Esse kernel é invariante por translação e capaz de capturar estruturas locais e não lineares
+nos dados, oferecendo maior flexibilidade em comparação com kernels clássicos.
 
-O modelo Wavelet Support Vector Censored Regression, proposto por \citeonline{maia2023wavelet},
-utiliza o kernel de wavelet como kernel. Portanto, na formulação dor problema
-dual dada por \ref{eq:svcr_dual}, o problema se torna:
-
+O modelo Wavelet Support Vector Censored Regression incorpora esse kernel na formulação dual
+do SVCR. Dessa forma, substituindo o kernel na Equação \eqref{eq:svcr_dual}, obtém-se:
 \begin{equation}
 \begin{aligned}
-\max_{\bm{\alpha}, \bm{\alpha}^*} \quad \frac{1}{2} \sum_{i,j=1}^{n} (\alpha_i - \alpha_i^*)(\alpha_j - \alpha_j^*) \prod^{p}_{k=1}h\left(\frac{x_k - x_k'}{A}\right) - \sum_{i \in L} l_i \alpha_i + \sum_{i \in U} u_i \alpha_i^*
+\max_{\bm{\alpha}, \bm{\alpha}^*} \quad
+& -\frac{1}{2} \sum_{i,j=1}^{n} (\alpha_i - \alpha_i^*)(\alpha_j - \alpha_j^*)
+\prod_{k=1}^{p} h\left(\frac{x_{ik} - x_{jk}}{A}\right) \\
+& - \sum_{i \in L} l_i \alpha_i + \sum_{i \in U} u_i \alpha_i^*,
 \end{aligned}
 \end{equation}
+sob as mesmas restrições definidas anteriormente.
+
+Essa formulação permite combinar a robustez do SVCR com a capacidade de representação
+multiescala dos kernels de wavelet, tornando o modelo particularmente adequado para cenários
+em que a relação entre covariáveis e tempo de sobrevivência apresenta elevada complexidade
+não linear.
