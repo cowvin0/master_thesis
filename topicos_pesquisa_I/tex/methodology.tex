@@ -1,0 +1,103 @@
+\chapter{Metodologia}
+
+Este capítulo descreve, de forma sistemática, os procedimentos adotados para a construção,
+treinamento e avaliação dos modelos considerados neste trabalho. Em particular, são detalhados
+os processos de particionamento dos dados, seleção de hiperparâmetros e geração de dados
+experimentais, seguindo práticas consolidadas na literatura de aprendizado de máquina aplicado
+à análise de sobrevivência.
+
+\section{Particionamento dos dados}
+
+A avaliação do desempenho preditivo dos modelos foi conduzida por meio de um esquema de
+validação baseado na divisão dos dados em conjuntos de treinamento e teste. Especificamente,
+adotou-se uma estratégia de holdout, na qual $70\%$ das observações foram utilizadas para
+treinamento e os $30\%$ restantes reservados para teste.
+
+Seja $\mathcal{D} = \{(\mathbf{x}_i, y_i)\}_{i=1}^{n}$ o conjunto de dados disponível.
+Esse conjunto foi particionado em dois subconjuntos disjuntos, $\mathcal{D}_{\text{train}}$
+e $\mathcal{D}_{\text{test}}$, tais que:
+\[
+\mathcal{D}_{\text{train}} \cup \mathcal{D}_{\text{test}} = \mathcal{D}, \quad
+\mathcal{D}_{\text{train}} \cap \mathcal{D}_{\text{test}} = \emptyset,
+\]
+com $|\mathcal{D}_{\text{train}}| \approx 0{,}7n$ e $|\mathcal{D}_{\text{test}}| \approx 0{,}3n$.
+
+A separação foi realizada de forma aleatória, preservando, sempre que aplicável, a estrutura
+dos dados censurados, de modo a garantir que ambos os subconjuntos apresentassem proporções
+semelhantes de observações censuradas e não censuradas. Essa precaução é particularmente
+importante em problemas de análise de sobrevivência, uma vez que a distribuição dos tipos de
+censura pode influenciar significativamente o desempenho dos modelos.
+
+Adicionalmente, com o objetivo de reduzir a variabilidade associada a uma única partição,
+o procedimento de holdout foi repetido múltiplas vezes, conforme sugerido na literatura
+empírica :contentReference[oaicite:0]{index=0}. As métricas de desempenho foram então agregadas ao longo dessas
+repetições, considerando medidas como média, mediana e desvio padrão, proporcionando uma
+avaliação mais robusta e estável.
+
+\section{Seleção de hiperparâmetros}
+
+A escolha adequada dos hiperparâmetros é um elemento crucial para o desempenho de modelos
+baseados em máquinas de vetores de suporte. Nesse contexto, foi empregado um procedimento
+de busca em grade (grid search), amplamente utilizado devido à sua simplicidade e
+efetividade.
+
+Para cada modelo considerado, definiu-se um conjunto finito de valores candidatos para os
+hiperparâmetros relevantes. No caso do SVR e de suas extensões, foram considerados, entre
+outros:
+
+\begin{itemize}
+    \item o parâmetro de regularização $C$, que controla o equilíbrio entre ajuste aos dados
+    e complexidade do modelo;
+    \item o parâmetro $\epsilon$, no caso do SVR, que define a largura do tubo de insensibilidade;
+    \item os parâmetros específicos de cada função kernel, como o grau no kernel polinomial
+    ou o parâmetro de escala em kernels gaussianos e wavelet.
+\end{itemize}
+
+Formalmente, seja $\Theta$ o espaço de hiperparâmetros. O grid search consiste em avaliar
+exaustivamente o desempenho do modelo para cada combinação $\theta \in \Theta$, selecionando
+aquela que otimiza uma métrica de interesse.
+
+A avaliação das combinações foi realizada exclusivamente no conjunto de treinamento,
+utilizando validação interna, de modo a evitar vazamento de informação do conjunto de teste.
+O modelo final foi então treinado com os hiperparâmetros selecionados e avaliado no conjunto
+de teste.
+
+Em consonância com o estudo de referência :contentReference[oaicite:1]{index=1}, foram considerados diferentes
+tipos de funções kernel, incluindo não apenas os kernels tradicionais (linear, polinomial e
+gaussiano), mas também alternativas como os kernels exponencial, Laplaciano e Cauchy, que
+têm demonstrado bom desempenho em cenários de dados censurados.
+
+\section{Geração de dados experimentais}
+
+Além da aplicação em dados reais, foi conduzido um estudo de simulação com o objetivo de
+avaliar o comportamento dos modelos em cenários controlados. Esse procedimento permite
+analisar, de forma sistemática, o impacto de diferentes características dos dados sobre o
+desempenho dos métodos.
+
+A geração dos dados seguiu abordagens clássicas da literatura de análise de sobrevivência,
+nas quais os tempos de falha são simulados a partir de distribuições paramétricas, como a
+distribuição Weibull ou exponencial, possivelmente incorporando efeitos de covariáveis por
+meio de modelos do tipo riscos proporcionais :contentReference[oaicite:2]{index=2}.
+
+Seja $\mathbf{x}_i$ um vetor de covariáveis gerado a partir de uma distribuição multivariada
+pré-especificada. O tempo de sobrevivência $T_i$ foi então obtido por meio de uma relação do tipo:
+\[
+T_i = g(\mathbf{x}_i, \bm{\beta}, \varepsilon_i),
+\]
+em que $g(\cdot)$ é uma função que incorpora o efeito das covariáveis, $\bm{\beta}$ é um vetor
+de parâmetros e $\varepsilon_i$ representa um termo aleatório.
+
+Para introduzir censura, foram gerados tempos de censura $C_i$, independentes de $T_i$, e
+definidos:
+\[
+Y_i = \min(T_i, C_i), \quad \delta_i = \mathbb{I}(T_i \leq C_i),
+\]
+em que $Y_i$ é o tempo observado e $\delta_i$ indica se a observação é não censurada.
+
+A proporção de censura foi controlada por meio da distribuição de $C_i$, permitindo a
+avaliação dos modelos sob diferentes níveis de informação incompleta.
+
+O procedimento de simulação foi repetido diversas vezes, e as métricas de desempenho,
+como o índice de concordância (C-index), foram agregadas ao longo das repetições,
+seguindo a prática adotada no estudo de referência :contentReference[oaicite:3]{index=3}. Essa abordagem
+possibilita uma análise mais abrangente da variabilidade e da robustez dos modelos.
