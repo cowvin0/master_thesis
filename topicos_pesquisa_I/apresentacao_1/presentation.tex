@@ -1,0 +1,193 @@
+\documentclass[aspectratio=169,t,xcolor=table]{beamer}
+\usepackage[portuges]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{subcaption}
+\usepackage[percent]{overpic}
+\usepackage{multicol}
+\usepackage{soul}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
+\usepackage{color}
+\definecolor{red}{RGB}{255,0,0}
+\usepackage[makeroom]{cancel}
+\renewcommand{\CancelColor}{\color{red}}
+\usetheme{Ufg}
+
+%-------------------------------------theorems--------------
+\newtheorem{conj}{Conjetura}
+\newtheorem{defi}{Definição}
+\newtheorem{teo}{Teorema}
+\newtheorem{lema}{Lema}
+\newtheorem{prop}{Proposição}
+\newtheorem{cor}{Corolário}
+\newtheorem{ex}{Exemplo}
+\newtheorem{exer}{Exercício}
+
+\setbeamertemplate{theorems}[numbered]
+\setbeamertemplate{caption}[numbered]
+
+%-------------------------------------------------------------%
+%----------------------- Primary Definitions -----------------%
+
+% This command set the default Color, is also possible to choose a custom color (beamerthemeUfg.sty)
+\setPrimaryColor{CustomBlue}
+
+% First one is logo in title slide (we recommend use a horizontal image), and second one is the logo used in the remaining slides (we recommend use a square image)
+\setLogos{lib/logos/usp.png}{lib/logos/pipges.png}{lib/logos/pipges_75.png}
+
+
+% -------------------------------------- Title Slide Information
+\title[Inf PIPGES]{TÍTULO DO TRABALHO}
+
+\author[Discente, Docente]{Gabriel de Jesus Pereira\inst{1} \and Vera Lucia Damasceno Tomazella}
+
+\institute[UFSCar] % (optional)
+{
+  \inst{1}%
+  %Mestrado - PIPGEs\\
+  Doutorado - PIPGEs\\
+  UFSCar \& USP \\
+  %Houve financiamento?
+  %\vspace{.2in} {\Large \textbf{Pesquisa financiada pela CAPES}}
+}
+\date{\today}
+
+%-----------------------The next statement creates the title page.
+\begin{document}
+\frame[noframenumbering]{\titlepage}
+
+
+%------------------------------------------------Slide 1
+\setLayout{vertical} % This command define the layout. 'vertical' can be replace with 'horizontal', 'blank, 'mainpoint', 'titlepage'
+
+\section{Nome da seção}
+
+%Muda estilo do frame
+\setLayout{mainpoint}
+
+\begin{frame}
+\includegraphics[width = .25\linewidth]{Images/evaluate.png} %Adiciona imagem
+\frametitle{\Huge Título da seção}
+\end{frame}
+
+%Muda estilo do frame
+\setLayout{vertical}
+
+\begin{frame}{Slide exemplo (vertical)}
+\begin{center}
+    \large\textbf{Crise de replicação} \cite{opensci2015} $\Longrightarrow$ \textbf{Crise de credibilidade} \cite{mcshane2019}
+\end{center}
+
+\pause{}
+
+\textbf{Tentativas de solução que mantém o método:}
+\begin{itemize}
+    \setlength\itemsep{1em}
+    \item \cite{mayo2022} Mudanças normativas, princípio da severidade;
+    \item \cite{maier2022} Controlar $\alpha$ com base no poder ou tamanho da amostra.
+\end{itemize}
+
+\vspace{.15in}
+\pause{}
+\textbf{Crítica: p-valores não apresentam monotonicidade, poder assume o modelo como verdadeiro} \cite{patriota2017}
+\end{frame}
+
+%Muda estilo do frame
+\setLayout{horizontal}
+
+\begin{frame}{Um pouco de notação matemática (horizontal)}
+    \textbf{Exemplo básico:}
+    $$
+    H_0: \mathbb{E}(X) = 0 \Longrightarrow Pg(H_0): |\mathbb{E}(X)| < \varepsilon.
+    $$
+    \pause
+    \begin{itemize}
+        \item $\varepsilon$ é o limiar;
+        \item $d(\cdot, \cdot)$ é a função de dissimilaridade;
+        \item $\mathbb{H}$ é o epaço de hipóteses.
+    \end{itemize}
+    \pause{}
+    \vspace{.1in}
+    \begin{equation*}
+        Pg(H_0) = \bigcup_{h \in H_0}\{h^* \in \mathbb{H}: d(h,h^*) < \varepsilon\} = \left\{h^* \in \mathbb{H}: \inf_{h \in H_0} d(h,h^*) <\varepsilon \right\}.
+    \end{equation*}
+\end{frame}
+
+%Muda estilo do frame
+\setLayout{blank}
+
+\begin{frame}{Inserção de imagens (blank)}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[height=2cm, width=.2\textwidth]{Images/agreement.png}
+    \caption{Imagem única.}
+\end{figure}
+
+\begin{figure}[ht!]
+	\centering
+	\begin{subfigure}[b]{0.2\textwidth}
+		\centering
+		\includegraphics[height=1.5cm, width=\textwidth]{Images/balance.png}
+		\caption{Imagem 2.1}
+	\end{subfigure}
+        %\hfill %Se desejar separar as imagens uma da outra
+	\begin{subfigure}[b]{0.2\textwidth}
+		\centering
+		\includegraphics[height=1.5cm, width=\textwidth]{Images/battle.png}
+		\caption{Imagem 2.2}
+	\end{subfigure}
+	\caption{Duas imagens.}
+\end{figure}
+\end{frame}
+
+%Muda estilo do frame
+\setLayout{vertical}
+
+\section{Referências}
+\begin{frame}[allowframebreaks]{Referências}
+        \frametitle{Referências}
+        \bibliographystyle{amsalpha}
+        \bibliography{references.bib}
+\end{frame}
+
+
+\section{Agradecimento}
+%---------------------------------------------------------Slide 9
+\setLayout{blank}
+\begin{frame}
+
+    \centering
+    \vspace{2cm}
+
+    \textbf{\Huge Muito obrigado pela atenção!}
+
+    \vspace{1cm}
+
+    \flushleft
+    \textbf{Contatos:}
+    \ \\
+    \begin{itemize}
+    	\item E-mail 1
+    	\item E-mail 2
+    \end{itemize}
+
+    \vspace{.5cm}
+    \begin{figure}
+        \centering
+        \begin{subfigure}{0.4\textwidth}
+            \centering
+            \includegraphics[height=1.5cm]{lib/logos/usp.png}
+        \end{subfigure}%
+        \qquad
+        \begin{subfigure}{0.4\textwidth}
+            \centering
+            \includegraphics[height=1.5cm]{lib/logos/ufscar.png}
+        \end{subfigure}
+
+    \end{figure}
+\end{frame}
+
+\end{document}

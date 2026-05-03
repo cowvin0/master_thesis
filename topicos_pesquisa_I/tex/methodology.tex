@@ -1,4 +1,3 @@
-\chapter{Metodologia}
 
 Este capítulo descreve, de forma sistemática, os procedimentos adotados para a construção,
 treinamento e avaliação dos modelos considerados neste trabalho. Em particular, são detalhados
@@ -67,37 +66,54 @@ tipos de funções kernel, incluindo não apenas os kernels tradicionais (linear
 gaussiano), mas também alternativas como os kernels exponencial, Laplaciano e Cauchy, que
 têm demonstrado bom desempenho em cenários de dados censurados.
 
-\section{Geração de dados experimentais}
+\section{Geração de dados simulados}
 
-Além da aplicação em dados reais, foi conduzido um estudo de simulação com o objetivo de
-avaliar o comportamento dos modelos em cenários controlados. Esse procedimento permite
-analisar, de forma sistemática, o impacto de diferentes características dos dados sobre o
-desempenho dos métodos.
+Com o objetivo de avaliar o desempenho dos modelos em um ambiente controlado,
+foram conduzidos experimentos com dados simulados, seguindo a estratégia adotada
+na literatura recente. A utilização de dados artificiais permite controlar
+características fundamentais do problema, tais como a estrutura de dependência
+entre covariáveis, o grau de não linearidade e a proporção de censura.
 
-A geração dos dados seguiu abordagens clássicas da literatura de análise de sobrevivência,
-nas quais os tempos de falha são simulados a partir de distribuições paramétricas, como a
-distribuição Weibull ou exponencial, possivelmente incorporando efeitos de covariáveis por
-meio de modelos do tipo riscos proporcionais :contentReference[oaicite:2]{index=2}.
+Considere um vetor de covariáveis $\mathbf{X} = (X_1, X_2, X_3)^\top$,
+cujas componentes são geradas independentemente segundo as distribuições:
+\begin{align}
+X_1 &\sim \mathcal{N}(1, 1), \\
+X_2 &\sim \mathcal{N}(2, 2), \\
+X_3 &\sim \text{Exp}(1).
+\end{align}
 
-Seja $\mathbf{x}_i$ um vetor de covariáveis gerado a partir de uma distribuição multivariada
-pré-especificada. O tempo de sobrevivência $T_i$ foi então obtido por meio de uma relação do tipo:
-\[
-T_i = g(\mathbf{x}_i, \bm{\beta}, \varepsilon_i),
-\]
-em que $g(\cdot)$ é uma função que incorpora o efeito das covariáveis, $\bm{\beta}$ é um vetor
-de parâmetros e $\varepsilon_i$ representa um termo aleatório.
+O tempo de sobrevivência $T$ é gerado a partir de uma distribuição Weibull,
+amplamente utilizada em estudos de simulação por sua flexibilidade em modelar
+diferentes formas da função de risco. Especificamente, considera-se:
+\begin{equation}
+T \sim \text{Weibull}(\lambda(\mathbf{X}), k),
+\end{equation}
+em que o parâmetro de forma é fixado em $k = 3$, enquanto o parâmetro de escala
+depende das covariáveis segundo a relação não linear:
+\begin{equation}
+\lambda(\mathbf{X}) = 5 \exp\left( - X_1 \ln|X_2| + \sin(X_3^2) \right).
+\end{equation}
 
-Para introduzir censura, foram gerados tempos de censura $C_i$, independentes de $T_i$, e
-definidos:
-\[
-Y_i = \min(T_i, C_i), \quad \delta_i = \mathbb{I}(T_i \leq C_i),
-\]
-em que $Y_i$ é o tempo observado e $\delta_i$ indica se a observação é não censurada.
+Essa especificação induz uma relação altamente não linear entre as covariáveis
+e o tempo de sobrevivência, constituindo um cenário desafiador para os modelos
+avaliados. Em particular, a presença de termos como $\ln|X_2|$ e $\sin(X_3^2)$
+introduz efeitos não aditivos e não monotônicos, dificultando a captura da
+estrutura subjacente por métodos lineares.
 
-A proporção de censura foi controlada por meio da distribuição de $C_i$, permitindo a
-avaliação dos modelos sob diferentes níveis de informação incompleta.
+Para incorporar censura aos dados, foram gerados tempos de censura $C$
+independentes de $T$, de modo a satisfazer a hipótese de censura não informativa.
+Os tempos observados são então definidos por:
+\begin{equation}
+Y = \min(T, C), \quad \delta = \mathbb{I}(T \leq C),
+\end{equation}
+em que $Y$ representa o tempo observado e $\delta$ é o indicador de falha.
 
-O procedimento de simulação foi repetido diversas vezes, e as métricas de desempenho,
-como o índice de concordância (C-index), foram agregadas ao longo das repetições,
-seguindo a prática adotada no estudo de referência :contentReference[oaicite:3]{index=3}. Essa abordagem
-possibilita uma análise mais abrangente da variabilidade e da robustez dos modelos.
+A distribuição de $C$ foi escolhida de forma a controlar a proporção de
+observações censuradas no conjunto de dados. Dessa forma, diferentes cenários
+foram considerados, variando-se tanto o tamanho da amostra quanto o nível de
+censura, permitindo uma análise abrangente da robustez dos modelos sob condições
+distintas.
+
+Esse procedimento de simulação possibilita avaliar o desempenho dos métodos em
+um ambiente no qual a função geradora dos dados é conhecida, permitindo uma
+comparação mais precisa entre os modelos considerados.
