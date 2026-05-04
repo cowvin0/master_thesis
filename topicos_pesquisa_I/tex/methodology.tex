@@ -12,14 +12,14 @@ validação baseado na divisão dos dados em conjuntos de treinamento e teste. E
 adotou-se uma estratégia de holdout, na qual $70\%$ das observações foram utilizadas para
 treinamento e os $30\%$ restantes reservados para teste.
 
-Seja $\mathcal{D} = \{(\mathbf{x}_i, y_i)\}_{i=1}^{n}$ o conjunto de dados disponível.
-Esse conjunto foi particionado em dois subconjuntos disjuntos, $\mathcal{D}_{\text{train}}$
-e $\mathcal{D}_{\text{test}}$, tais que:
-\[
-\mathcal{D}_{\text{train}} \cup \mathcal{D}_{\text{test}} = \mathcal{D}, \quad
-\mathcal{D}_{\text{train}} \cap \mathcal{D}_{\text{test}} = \emptyset,
-\]
-com $|\mathcal{D}_{\text{train}}| \approx 0{,}7n$ e $|\mathcal{D}_{\text{test}}| \approx 0{,}3n$.
+% Seja $\mathcal{D} = \{(\mathbf{x}_i, y_i)\}_{i=1}^{n}$ o conjunto de dados disponível.
+% Esse conjunto foi particionado em dois subconjuntos disjuntos, $\mathcal{D}_{\text{train}}$
+% e $\mathcal{D}_{\text{test}}$, tais que:
+% \[
+% \mathcal{D}_{\text{train}} \cup \mathcal{D}_{\text{test}} = \mathcal{D}, \quad
+% \mathcal{D}_{\text{train}} \cap \mathcal{D}_{\text{test}} = \emptyset,
+% \]
+% com $|\mathcal{D}_{\text{train}}| \approx 0{,}7n$ e $|\mathcal{D}_{\text{test}}| \approx 0{,}3n$.
 
 A separação foi realizada de forma aleatória, preservando, sempre que aplicável, a estrutura
 dos dados censurados, de modo a garantir que ambos os subconjuntos apresentassem proporções
@@ -28,8 +28,7 @@ importante em problemas de análise de sobrevivência, uma vez que a distribuiç
 censura pode influenciar significativamente o desempenho dos modelos.
 
 Adicionalmente, com o objetivo de reduzir a variabilidade associada a uma única partição,
-o procedimento de holdout foi repetido múltiplas vezes, conforme sugerido na literatura
-empírica :contentReference[oaicite:0]{index=0}. As métricas de desempenho foram então agregadas ao longo dessas
+o procedimento de holdout foi repetido múltiplas vezes. As métricas de desempenho foram então agregadas ao longo dessas
 repetições, considerando medidas como média, mediana e desvio padrão, proporcionando uma
 avaliação mais robusta e estável.
 
@@ -61,7 +60,7 @@ utilizando validação interna, de modo a evitar vazamento de informação do co
 O modelo final foi então treinado com os hiperparâmetros selecionados e avaliado no conjunto
 de teste.
 
-Em consonância com o estudo de referência :contentReference[oaicite:1]{index=1}, foram considerados diferentes
+Em acordo com o estudo de referência, foram considerados diferentes
 tipos de funções kernel, incluindo não apenas os kernels tradicionais (linear, polinomial e
 gaussiano), mas também alternativas como os kernels exponencial, Laplaciano e Cauchy, que
 têm demonstrado bom desempenho em cenários de dados censurados.

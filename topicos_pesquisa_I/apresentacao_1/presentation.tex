@@ -1,4 +1,5 @@
 \documentclass[aspectratio=169,t,xcolor=table]{beamer}
+\usepackage{multirow}
 \usepackage[portuges]{babel}
 \usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
@@ -162,28 +163,28 @@ y_i (w^\top x_i + b) \geq 1 - \xi_i, \quad i = 1, \dots, m
 
 \begin{frame}{SVM para Regressão (SVR)}
 
-\begin{itemize}
-    \item Objetivo: aproximar uma função $f(x)$
-    \item Controle de:
-    \begin{itemize}
-        \item Complexidade do modelo
-        \item Erro de ajuste
-    \end{itemize}
-\end{itemize}
+% \begin{itemize}
+%     \item Objetivo: aproximar uma função $f(x)$
+%     \item Controle de:
+%     \begin{itemize}
+%         \item Complexidade do modelo
+%         \item Erro de ajuste
+%     \end{itemize}
+% \end{itemize}
 
-\vspace{0.3cm}
+% \vspace{0.3cm}
 
-\begin{itemize}
-    \item Ideia central:
-    \begin{itemize}
-        \item Erros menores que $\epsilon$ não são penalizados
-    \end{itemize}
-\end{itemize}
+% \begin{itemize}
+%     \item Ideia central:
+%     \begin{itemize}
+%         \item Erros menores que $\epsilon$ não são penalizados
+%     \end{itemize}
+% \end{itemize}
 
-\vspace{0.3cm}
+% \vspace{0.3cm}
 
 \begin{center}
-    \includegraphics[width=0.45\linewidth]{../images/svm_regression.png}
+    \includegraphics[width=0.65\linewidth]{../images/svm_regression.png}
 \end{center}
 
 \end{frame}
@@ -210,30 +211,30 @@ y_i (w^\top x_i + b) \geq 1 - \xi_i, \quad i = 1, \dots, m
 
 \end{frame}
 
-\begin{frame}{Perda $\epsilon$-insensível}
+% \begin{frame}{Perda $\epsilon$-insensível}
 
-\begin{equation*}
-|y - y'|_\epsilon = \max(0, |y - y'| - \epsilon)
-\end{equation*}
+% \begin{equation*}
+% |y - y'|_\epsilon = \max(0, |y - y'| - \epsilon)
+% \end{equation*}
 
-\vspace{0.4cm}
+% \vspace{0.4cm}
 
-\begin{itemize}
-    \item Ignora pequenos erros
-    \item Apenas desvios relevantes são penalizados
-\end{itemize}
+% \begin{itemize}
+%     \item Ignora pequenos erros
+%     \item Apenas desvios relevantes são penalizados
+% \end{itemize}
 
-\vspace{0.3cm}
+% \vspace{0.3cm}
 
-\begin{itemize}
-    \item Promove:
-    \begin{itemize}
-        \item Esparsidade
-        \item Robustez
-    \end{itemize}
-\end{itemize}
+% \begin{itemize}
+%     \item Promove:
+%     \begin{itemize}
+%         \item Esparsidade
+%         \item Robustez
+%     \end{itemize}
+% \end{itemize}
 
-\end{frame}
+% \end{frame}
 
 \begin{frame}{Problema Primal (SVR)}
 
@@ -316,17 +317,36 @@ h(x) = \sum_{i=1}^{m} (\alpha_i' - \alpha_i) K(x_i, x) + b
 \begin{frame}{Ideia central}
 \begin{itemize}
     \item Extensão do SVR para dados com censura
-    \item Utiliza informação parcial sem imputação
-    \item Proposto por Shivaswamy, Chu e Jansche (2007)
 \end{itemize}
 
-\vspace{0.3cm}
+\vspace{0.4cm}
 
 \begin{itemize}
-    \item Dados: $(x_i, l_i, u_i)$
-    \item Objetivo: $f(x_i) \in [l_i, u_i]$
+    \item Dados: $(\mathbf{x}_i, l_i, u_i)$
+    \item Tempo verdadeiro: $T_i \in [l_i, u_i]$
 \end{itemize}
+
+\vspace{0.4cm}
+
+\begin{itemize}
+    \item Sem censura: $l_i = u_i$
+    \item Censura à direita: $u_i = +\infty$
+    \item Censura à esquerda: $l_i = -\infty$
+\end{itemize}
+
 \end{frame}
+
+% \begin{frame}{Ideia central}
+% \begin{itemize}
+%     \item Extensão do SVR para dados com censura
+% \end{itemize}
+
+% \vspace{0.3cm}
+
+% \begin{itemize}
+%     \item Dados: $(x_i, l_i, u_i)$
+% \end{itemize}
+% \end{frame}
 
 \begin{frame}{Função de perda}
 \begin{itemize}
@@ -342,10 +362,10 @@ c(f(x_i), l_i, u_i) = \max\{l_i - f(x_i),\, f(x_i) - u_i,\, 0\}
 
 \vspace{0.3cm}
 
-\begin{itemize}
-    \item Generaliza censura à direita, esquerda e intervalar
-    \item Função convexa
-\end{itemize}
+% \begin{itemize}
+%     \item Generaliza censura à direita, esquerda e intervalar
+%     \item Função convexa
+% \end{itemize}
 \end{frame}
 
 \begin{frame}{Formulação primal}
@@ -382,20 +402,20 @@ c(f(x_i), l_i, u_i) = \max\{l_i - f(x_i),\, f(x_i) - u_i,\, 0\}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Propriedades}
-\begin{itemize}
-    \item Uso de kernels → não linearidade
-    \item Solução esparsa (vetores de suporte)
-    \item Integra diferentes tipos de censura
-\end{itemize}
+% \begin{frame}{Propriedades}
+% \begin{itemize}
+%     \item Uso de kernels → não linearidade
+%     \item Solução esparsa (vetores de suporte)
+%     \item Integra diferentes tipos de censura
+% \end{itemize}
 
-\vspace{0.3cm}
+% \vspace{0.3cm}
 
-\begin{itemize}
-    \item Complexidade similar ao SVR
-    \item Adequado para dados de sobrevivência
-\end{itemize}
-\end{frame}
+% \begin{itemize}
+%     \item Complexidade similar ao SVR
+%     \item Adequado para dados de sobrevivência
+% \end{itemize}
+% \end{frame}
 
 \begin{frame}{Funções Wavelet}
 \begin{itemize}
@@ -485,33 +505,36 @@ K(\mathbf{x}, \mathbf{x}') =
 
 \setLayout{vertical}
 
-\begin{frame}{Estratégia geral}
-\begin{itemize}
-    \item Construção, treinamento e avaliação dos modelos
-    \item Dados simulados e dados reais
-\end{itemize}
+% \begin{frame}{Estratégia geral}
+% \begin{itemize}
+%     \item Construção, treinamento e avaliação dos modelos
+%     \item Dados simulados e dados reais
+% \end{itemize}
 
-\vspace{0.3cm}
+% \vspace{0.3cm}
 
-\begin{itemize}
-    \item Três etapas principais:
-    \begin{itemize}
-        \item Particionamento dos dados
-        \item Seleção de hiperparâmetros
-        \item Avaliação preditiva
-    \end{itemize}
-\end{itemize}
+% \begin{itemize}
+%     \item Três etapas principais:
+%     \begin{itemize}
+%         \item Particionamento dos dados
+%         \item Seleção de hiperparâmetros
+%         \item Avaliação preditiva
+%     \end{itemize}
+% \end{itemize}
 
-\vspace{0.3cm}
+% \vspace{0.3cm}
 
-\begin{itemize}
-    \item Repetições para maior robustez
-\end{itemize}
-\end{frame}
+% \begin{itemize}
+%     \item Repetições para maior robustez
+% \end{itemize}
+% \end{frame}
 
 \begin{frame}{Particionamento dos dados}
+
+\hfill
+
 \begin{itemize}
-    \item Estratégia holdout:
+    \item Estratégia de partição dos dados:
     \begin{itemize}
         \item 70\% treino
         \item 30\% teste
@@ -520,18 +543,18 @@ K(\mathbf{x}, \mathbf{x}') =
 
 \vspace{0.3cm}
 
-\begin{equation*}
-\mathcal{D} = \mathcal{D}_{train} \cup \mathcal{D}_{test}
-\end{equation*}
+% \begin{equation*}
+% \mathcal{D} = \mathcal{D}_{train} \cup \mathcal{D}_{test}
+% \end{equation*}
 
-\vspace{0.3cm}
+% \vspace{0.3cm}
 
 \begin{itemize}
-    \item Amostragem aleatória
+    % \item Amostragem aleatória
     \item Preservação da proporção de censura
 \end{itemize}
 
-\vspace{0.3cm}
+% \vspace{0.3cm}
 
 \begin{itemize}
     \item Repetição do procedimento
@@ -540,63 +563,80 @@ K(\mathbf{x}, \mathbf{x}') =
 \end{frame}
 
 \begin{frame}{Seleção de hiperparâmetros}
+
+\hfill
+
 \begin{itemize}
     \item Procedimento: Grid Search
-    \item Avaliação em conjunto de treino
+    \item Ajuste em conjunto de treino
 \end{itemize}
-
-\vspace{0.3cm}
 
 \begin{itemize}
     \item Principais parâmetros:
     \begin{itemize}
-        \item $C$: regularização
-        \item $\epsilon$: largura do tubo (SVR)
-        \item Parâmetros dos kernels
+        \item $C$: regularização ($C \in \{0.05, 0.25, 0.5, 1, 2, 4\}$)
+        \item Parâmetros dos kernels ($\gamma, A \in \{0.125, 0.25, 0.5, 1, 2, 4, 8\}$)
     \end{itemize}
 \end{itemize}
 
-\vspace{0.3cm}
+% \vspace{0.3cm}
 
-\begin{itemize}
-    \item Avaliação exaustiva:
-\end{itemize}
+% \begin{itemize}
+%     \item Avaliação exaustiva:
+% \end{itemize}
 
-\begin{equation*}
-\theta^* = \arg\max_{\theta \in \Theta} \text{Desempenho}(\theta)
-\end{equation*}
+% \begin{equation*}
+% \theta^* = \arg\max_{\theta \in \Theta} \text{Desempenho}(\theta)
+% \end{equation*}
 
-\vspace{0.3cm}
+% \vspace{0.3cm}
 
-\begin{itemize}
-    \item Seleção sem uso do conjunto de teste
-\end{itemize}
+% \begin{itemize}
+%     \item Seleção sem uso do conjunto de teste
+% \end{itemize}
 \end{frame}
 
 \begin{frame}{Kernels considerados}
-\begin{itemize}
-    \item Linear
-    \item Polinomial
-    \item RBF (Gaussiano)
-\end{itemize}
 
-\vspace{0.3cm}
+\scriptsize
 
-\begin{itemize}
-    \item Alternativos:
-    \begin{itemize}
-        \item Exponencial
-        \item Laplaciano
-        \item Cauchy
-        \item Wavelet
-    \end{itemize}
-\end{itemize}
+\textbf{Linear}
+\[
+K(\mathbf{x}, \mathbf{x}') = \mathbf{x}^\top \mathbf{x}'
+\]
 
-\vspace{0.3cm}
+\textbf{Polinomial}
+\[
+K(\mathbf{x}, \mathbf{x}') = (\gamma \, \mathbf{x}^\top \mathbf{x}' + r)^d
+\]
 
-\begin{itemize}
-    \item Objetivo: avaliar diferentes estruturas de similaridade
-\end{itemize}
+\textbf{Gaussiano}
+\[
+K(\mathbf{x}, \mathbf{x}') = \exp\left(-\gamma \|\mathbf{x} - \mathbf{x}'\|^2 \right)
+\]
+
+\textbf{Exponencial}
+\[
+K(\mathbf{x}, \mathbf{x}') = \exp\left(-\gamma \|\mathbf{x} - \mathbf{x}'\| \right)
+\]
+
+\textbf{Laplaciano}
+\[
+K(\mathbf{x}, \mathbf{x}') = \exp\left(-\gamma \|\mathbf{x} - \mathbf{x}'\|_1 \right)
+\]
+
+\textbf{Cauchy}
+\[
+K(\mathbf{x}, \mathbf{x}') = \frac{1}{1 + \gamma \|\mathbf{x} - \mathbf{x}'\|^2}
+\]
+
+\textbf{Wavelet}
+\[
+K(\mathbf{x}, \mathbf{x}') = \prod_{k=1}^{p}
+\cos\left(1.75 \frac{x_k - x_k'}{A}\right)
+\exp\left(-\frac{1}{2} \left(\frac{x_k - x_k'}{A}\right)^2 \right)
+\]
+
 \end{frame}
 
 \begin{frame}{Geração de dados simulados}
@@ -628,67 +668,225 @@ T \sim \text{Weibull}(\lambda(\mathbf{X}), k)
 
 \vspace{0.3cm}
 
-\begin{itemize}
-    \item Relação altamente não linear
-\end{itemize}
+% \begin{itemize}
+%     \item Relação altamente não linear
+% \end{itemize}
 \end{frame}
 
-\begin{frame}{Mecanismo de censura}
+% \begin{frame}{Mecanismo de censura}
+% \begin{itemize}
+%     \item Censura não informativa
+%     \item $C$ independente de $T$
+% \end{itemize}
+
+% \vspace{0.3cm}
+
+% \begin{equation*}
+% Y = \min(T, C), \quad \delta = \mathbb{I}(T \leq C)
+% \end{equation*}
+
+% \vspace{0.3cm}
+
+% \begin{itemize}
+%     \item Controle da proporção de censura
+%     \item Cenários:
+%     \begin{itemize}
+%         \item diferentes tamanhos amostrais
+%         \item diferentes níveis de censura
+%     \end{itemize}
+% \end{itemize}
+
+% \vspace{0.3cm}
+
+% \begin{itemize}
+%     \item Avaliação da robustez dos modelos
+% \end{itemize}
+% \end{frame}
+
+
+\begin{frame}{Avaliação dos modelos}
 \begin{itemize}
-    \item Censura não informativa
-    \item $C$ independente de $T$
+    \item Métrica principal: C-index (concordance index)
+\end{itemize}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+    \item Mede concordância entre risco predito $v(\mathbf{x})$ e tempo observado
 \end{itemize}
 
 \vspace{0.3cm}
 
 \begin{equation*}
-Y = \min(T, C), \quad \delta = \mathbb{I}(T \leq C)
+C =
+\frac{
+\sum_{i \neq j} \mathbb{I}\Big[(v(\mathbf{x}_i) - v(\mathbf{x}_j))(y_i - y_j) \geq 0\Big]
+}{
+\sum_{i \neq j} \text{comp}(i,j)
+}
 \end{equation*}
 
-\vspace{0.3cm}
+\vspace{0.2cm}
 
 \begin{itemize}
-    \item Controle da proporção de censura
-    \item Cenários:
-    \begin{itemize}
-        \item diferentes tamanhos amostrais
-        \item diferentes níveis de censura
-    \end{itemize}
+    \item $\text{comp}(i,j)$: pares comparáveis (considera censura)
+    \item $C = 1$: concordância perfeita
 \end{itemize}
 
 \vspace{0.3cm}
 
 \begin{itemize}
-    \item Avaliação da robustez dos modelos
+    \item Resultados agregados: média e desvio padrão
+\end{itemize}
+
+\end{frame}
+
+\setLayout{}
+
+\setLayout{vertical}
+
+\section{Resultado}
+
+\setLayout{mainpoint}
+\begin{frame}
+\frametitle{\Huge Resultado}
+\end{frame}
+
+\setLayout{vertical}
+
+\begin{frame}{Resultado em dados simulados}
+\begin{table}[ht]
+\centering
+\caption{Resultados em dados simulados com a média da métrica C-index para os conjuntos de dados.}
+\label{tab:final_results_refit}
+\scriptsize
+\begin{tabular}{lccccccccc|c}
+\toprule
+\textbf{n} & \multicolumn{3}{c}{\textbf{50}} & \multicolumn{3}{c}{\textbf{100}} & \multicolumn{3}{c}{\textbf{300}} & \multirow{2}{*}{\textbf{Média}} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10}
+\textbf{censura (\%)} & \textbf{0.1} & \textbf{0.25} & \textbf{0.5} & \textbf{0.1} & \textbf{0.25} & \textbf{0.5} & \textbf{0.1} & \textbf{0.25} & \textbf{0.5} & \\
+\midrule
+laplacian    & 0.730 & 0.751 & 0.777 & 0.771 & 0.784 & 0.795 & 0.825 & 0.833 & 0.848 & 0.791 \\
+cauchy       & 0.739 & 0.754 & 0.774 & 0.771 & 0.773 & 0.799 & 0.817 & 0.825 & 0.846 & 0.789 \\
+poly         & 0.734 & 0.757 & 0.779 & 0.776 & 0.783 & 0.813 & 0.798 & 0.808 & 0.842 & 0.788 \\
+exponential  & 0.730 & 0.736 & 0.763 & 0.772 & 0.788 & 0.791 & 0.819 & 0.827 & 0.848 & 0.786 \\
+rbf          & 0.720 & 0.726 & 0.760 & 0.769 & 0.782 & 0.783 & 0.809 & 0.815 & 0.836 & 0.778 \\
+wavelet      & 0.709 & 0.718 & 0.723 & 0.758 & 0.769 & 0.783 & 0.794 & 0.801 & 0.821 & 0.764 \\
+\midrule
+cox        & 0.727 & 0.736 & 0.782 & 0.750 & 0.755 & 0.793 & 0.743 & 0.766 & 0.806 & 0.762 \\
+linear       & 0.704 & 0.742 & 0.755 & 0.730 & 0.750 & 0.782 & 0.748 & 0.764 & 0.804 & 0.753 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{Dados reais}
+\begin{itemize}
+    \item Três bases em análise de sobrevivência:
+    \vspace{0.2cm}
+
+    \item \textbf{gbsg2}
+    \begin{itemize}
+        \item 686 observações, 8 variáveis
+        \item Recorrência do câncer
+        \item $\sim 43{,}6\%$ não censurados
+    \end{itemize}
+
+    \item \textbf{whas500}
+    \begin{itemize}
+        \item 500 observações, 14 variáveis
+        \item Mortalidade
+        \item $\sim 43{,}0\%$ não censurados
+    \end{itemize}
+
+    \item \textbf{veterans}
+    \begin{itemize}
+        \item 137 observações, 6 variáveis
+        \item Câncer de pulmão
+        \item $\sim 93{,}4\%$ não censurados
+    \end{itemize}
+
+    \vspace{0.2cm}
+    % \item Diferentes níveis de censura e complexidade
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Avaliação dos modelos}
+\begin{frame}{Resultados em dados reais}
+\scriptsize
+
+\begin{table}[ht]
+\centering
+\caption{Resultados em dados reais com a média da métrica C-index.}
+\begin{tabular}{lccc|c}
+\toprule
+\textbf{Método} & \textbf{gbsg2} & \textbf{veterans} & \textbf{whas500} & \textbf{Média} \\
+\midrule
+linear      & 0.691 & 0.740 & 0.765 & 0.732 \\
+poly        & 0.682 & 0.712 & 0.762 & 0.719 \\
+\midrule
+cox         & 0.680 & 0.711 & 0.763 & 0.718 \\
+\midrule
+exponential & 0.674 & 0.716 & 0.761 & 0.717 \\
+wavelet     & 0.681 & 0.716 & 0.730 & 0.709 \\
+cauchy      & 0.671 & 0.703 & 0.751 & 0.709 \\
+laplacian   & 0.681 & 0.702 & 0.742 & 0.708 \\
+rbf         & 0.640 & 0.706 & 0.696 & 0.681 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{0.2cm}
+
+% \begin{itemize}
+%     \item Melhor desempenho: modelo linear
+%     \item Modelos simples $\Rightarrow$ maior estabilidade
+%     \item Kernels complexos $\Rightarrow$ risco de overfitting
+% \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Conclusões}
 \begin{itemize}
-    \item Métrica principal: C-index
+    \item Avaliação de modelos de sobrevivência com foco em SVCR e kernels
 \end{itemize}
 
 \vspace{0.3cm}
 
 \begin{itemize}
-    \item Mede concordância entre risco e tempo observado
-\end{itemize}
-
-\vspace{0.3cm}
-
-\begin{itemize}
-    \item Resultados agregados:
+    \item Dados simulados:
     \begin{itemize}
-        \item média
-        \item desvio padrão
+        \item Superioridade de kernels não lineares (Laplaciano, Cauchy, Polinomial)
+        \item Capacidade de capturar relações complexas
     \end{itemize}
 \end{itemize}
 
 \vspace{0.3cm}
 
 \begin{itemize}
-    \item Comparação entre modelos e kernels
+    \item Dados reais:
+    \begin{itemize}
+        \item Modelos lineares e Cox competitivos ou superiores
+        \item Importância do equilíbrio viés--variância
+    \end{itemize}
 \end{itemize}
+
+\vspace{0.3cm}
+
+% \begin{itemize}
+%     \item Escolha do modelo depende de:
+%     \begin{itemize}
+%         \item não linearidade dos dados
+%         % \item tamanho amostral
+%         % \item nível de censura
+%     \end{itemize}
+% \end{itemize}
+
+\vspace{0.3cm}
+
+% \begin{itemize}
+%     \item SVCR: abordagem flexível e promissora, porém sensível à calibração
+% \end{itemize}
+
 \end{frame}
 
 \section{Agradecimento}
