@@ -1,25 +1,16 @@
-% Comando simples para exibir comandos Latex no texto
-% \newcommand{\comando}[1]{\textbf{$\backslash$#1}}
 
-% Este documento explica brevemente como trabalhar com a classe \LaTeX~\textit{icmc} para confeccionar trabalhos acadêmicos seguindo as normas da \sigla{ABNT}{Associação Brasileira de Normas Técnicas} e as \aspas{\textit{Diretrizes para apresentação de dissertações e teses da USP: documento eletrônico e impresso. Parte I (ABNT)}}, publicado pelo \sigla{SIBi}{Sistema Integrado de Bibliotecas} USP. O presente manual também atende as exigências prevista no regimento do Programa de Pós-graduação em \sigla{CCMC}{Ciências da Computação e Matemática Computacional} do \sigla{ICMC}{Instituto de Ciências Matemáticas e de Computação} da \sigla{USP}{Universidade de São Paulo}.
+A análise de sobrevivência constitui um dos principais ramos da estatística aplicada voltado ao estudo do tempo até a ocorrência de um evento de interesse, como falha de um sistema, recorrência de uma doença ou morte de um indivíduo. Uma característica central desse tipo de dado é a presença de censura, isto é, situações nas quais o tempo exato do evento não é completamente observado. Esse aspecto impõe desafios metodológicos relevantes, exigindo o desenvolvimento de modelos capazes de lidar adequadamente com informações incompletas.
 
+Tradicionalmente, modelos como o de Cox têm sido amplamente utilizados nesse contexto, devido à sua flexibilidade semiparamétrica e interpretabilidade. No entanto, tais abordagens assumem, em geral, uma estrutura linear no preditor do risco, o que pode ser inadequado em cenários nos quais a relação entre as covariáveis e o tempo de sobrevivência apresenta padrões não lineares ou de alta complexidade.
 
-% A classe \textit{icmc} foi construída com base na última versão da classe \textit{abntex2} e do pacote \textit{abntex2cite}. Portanto, este documento exemplifica a elaboração de trabalho
-% acadêmico (tese, dissertação e outros do gênero) produzido conforme a ABNT NBR
-% 14724:2011 \textit{Informação e documentação - Trabalhos acadêmicos - Apresentação}.
+Nesse contexto, métodos de aprendizado de máquina têm ganhado destaque como alternativas promissoras. Em particular, modelos baseados em máquinas de vetores de suporte têm sido adaptados para lidar com dados censurados, dando origem ao \textit{Support Vector Censored Regression} (SVCR). Essas abordagens permitem incorporar funções kernel, possibilitando a modelagem de relações não lineares por meio de mapeamentos implícitos para espaços de maior dimensão. A escolha adequada do kernel torna-se, portanto, um elemento central para o desempenho desses modelos.
 
-% Assim, é altamente recomendável que seja consultada a documentação do \textit{abntex2}\footnote{http://abntex.net.br}. A classe \textit{abntex2} foi desenvolvida para facilitar a escrita de documentos seguindo as normas da ABNT no ambiente \LaTeX\;\cite{frasson:2005:classe_abnt}.
+O presente trabalho tem como objetivo investigar o desempenho de diferentes variantes do SVCR, considerando uma variedade de funções kernel, e compará-las com abordagens clássicas, como o modelo de Cox e modelos lineares. Para isso, são conduzidos experimentos tanto em dados simulados, nos quais é possível controlar a estrutura geradora, quanto em bases de dados reais amplamente utilizadas na literatura. A avaliação é realizada por meio do índice de concordância, permitindo analisar a capacidade preditiva dos modelos sob diferentes cenários de tamanho amostral e proporção de censura.
 
-% Todo o trabalho de pesquisa e ajustes da presente classe \LaTeX~\emph{icmc} foram feitos pelo aluno mestrado do Programa de Pós-graduação em Ciência da Computação e Matemática Computacional, Humberto Lidio Antonelli, durante a confecção da sua monografia de qualificação.
+Os resultados obtidos contribuem para uma melhor compreensão das condições sob as quais métodos mais flexíveis apresentam vantagens em relação a abordagens tradicionais, bem como das limitações associadas ao aumento da complexidade do modelo.
 
-% O requisito básico para utilização da classe \textit{icmc} é criar um documento desta classe com o comando
-% \comando{documentclass[@parameters]\{icmc\}} e ter, no diretório de trabalho, o arquivo \emph{icmc.cls} presente. Entretanto, recomenda-se fortemente manter a estrutura de diretório inicial fornecida por este modelo. Além disso, para que o documento esteja em conformidade com as normas exigidas pelo programa de Pós-Graduação, o \textbf{projeto deve ser compilado utilizando \textit{XeLaTeX} ou \textit{LuaLaTeX}}. Esse processo de compilação é necessário para que as fontes externas utilizadas para gerar a capa sejam incluídas.
+\section{Organização do Trabalho}
 
-% Os parâmetros possíveis utilizados pelo \comando{documentclass} são:
-% \begin{description}
-% \item[qualificacao] Exclusivamente para monografias de qualificação em geral;
-% \item[mestrado / doutorado] Identifica o curso ao qual o aluno pertence, sendo utilizado apenas uma das duas opcões disponíveis. O valor padrão é \textbf{doutorado};
-% \item[pre-defesa / pos-defesa] Identifica a situação do documento (exceto para qualificação), sedo necessário apenas uma das duas opções. O valor padrão é \textbf{pos-defesa};
-% \item[impressao] Gera exclusivamente uma versão para impressão do documento;
-% \item[french, spanish, english, brazil] Adiciona o idioma para correta hifenização correta no documento. Os idiomas bases para o modelo (português e inglês) não precisam ser declarados.
-% \end{description}
+Este trabalho está estruturado da seguinte forma. No Capítulo 2, são apresentados os conceitos fundamentais de análise de sobrevivência, incluindo noções de censura, funções de sobrevivência e o modelo de Cox. No Capítulo 3, são introduzidos os principais fundamentos das máquinas de vetores de suporte, com ênfase em regressão e no papel das funções kernel. O Capítulo 4 descreve a formulação do \textit{Support Vector Censored Regression} e suas extensões, incluindo a incorporação de diferentes kernels.
+
+No Capítulo 5, é detalhada a metodologia adotada, abrangendo o particionamento dos dados, o processo de seleção de hiperparâmetros e a geração de dados simulados. O Capítulo 6 apresenta e discute os resultados obtidos tanto em dados simulados quanto em dados reais. Por fim, o Capítulo 7 apresenta as conclusões do trabalho, bem como possíveis direções para pesquisas futuras.

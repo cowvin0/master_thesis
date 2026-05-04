@@ -24,7 +24,7 @@ exponential  & 0.730 & 0.736 & 0.763 & 0.772 & 0.788 & 0.791 & 0.819 & 0.827 & 0
 rbf          & 0.720 & 0.726 & 0.760 & 0.769 & 0.782 & 0.783 & 0.809 & 0.815 & 0.836 & 0.778 \\
 wavelet      & 0.709 & 0.718 & 0.723 & 0.758 & 0.769 & 0.783 & 0.794 & 0.801 & 0.821 & 0.764 \\
 \midrule
-CoxPH        & 0.727 & 0.736 & 0.782 & 0.750 & 0.755 & 0.793 & 0.743 & 0.766 & 0.806 & 0.762 \\
+cox        & 0.727 & 0.736 & 0.782 & 0.750 & 0.755 & 0.793 & 0.743 & 0.766 & 0.806 & 0.762 \\
 linear       & 0.704 & 0.742 & 0.755 & 0.730 & 0.750 & 0.782 & 0.748 & 0.764 & 0.804 & 0.753 \\
 \bottomrule
 \end{tabular}
@@ -78,3 +78,47 @@ cuidadosamente tanto a estrutura dos dados quanto a escolha da métrica de avali
 análise de modelos de sobrevivência.
 
 \section{Aplicação em Dados Reais}
+
+A avaliação empírica em dados reais foi conduzida utilizando três bases amplamente empregadas na literatura de análise de sobrevivência: gbsg2, veterans e whas500. Essas bases apresentam características distintas em termos de tamanho amostral, dimensionalidade e, sobretudo, proporção de censura, o que permite analisar o comportamento dos modelos sob diferentes regimes informacionais.
+
+A base gbsg2 (German Breast Cancer Study Group 2) contém 686 observações e 8 covariáveis, tendo como desfecho o tempo até recorrência da doença, com aproximadamente 43,6\% de eventos observados. Trata-se, portanto, de um cenário com censura moderada e tamanho amostral relativamente elevado. A base whas500 (Worcester Heart Attack Study) possui 500 indivíduos e 14 variáveis explicativas, com desfecho associado à mortalidade, apresentando 43,0\% de eventos. Por fim, a base veterans, oriunda do estudo Veterans’ Administration Lung Cancer Trial, é composta por 137 observações e 6 covariáveis, com uma taxa extremamente elevada de eventos (93,4\%), caracterizando um cenário de baixa censura e alta disponibilidade de informação sobre o tempo de falha.
+
+Os resultados apresentados na Tabela \ref{tab:real_world_results} evidenciam alguns padrões importantes. Em primeiro lugar, observa-se que o desempenho dos modelos varia significativamente entre as bases, refletindo não apenas diferenças estruturais nos dados, mas também a adequação relativa de cada abordagem às características do mecanismo gerador.
+
+\begin{table}[ht]
+\centering
+\caption{C-index médio em conjunto de dados reais.}
+\label{tab:real_world_results}
+\small
+\begin{tabular}{lccc|c}
+\toprule
+\textbf{Método} & \textbf{gbsg2} & \textbf{veterans} & \textbf{whas500} & \textbf{Média} \\
+linear      & 0.691 & 0.740 & 0.765 & 0.732 \\
+poly        & 0.682 & 0.712 & 0.762 & 0.719 \\
+\midrule
+cox       & 0.680 & 0.711 & 0.763 & 0.718 \\
+\midrule
+exponential & 0.674 & 0.716 & 0.761 & 0.717 \\
+wavelet     & 0.681 & 0.716 & 0.730 & 0.709 \\
+cauchy      & 0.671 & 0.703 & 0.751 & 0.709 \\
+laplacian   & 0.681 & 0.702 & 0.742 & 0.708 \\
+rbf         & 0.640 & 0.706 & 0.696 & 0.681 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Na base gbsg2, os desempenhos são relativamente próximos, com valores de C-index
+concentrados no intervalo $[0.64, 0.69]$. O modelo linear apresenta o melhor desempenho
+(0.691), seguido de perto pelo modelo de Cox (0.680) e pelo kernel wavelet (0.681). Esse comportamento sugere que, embora o mecanismo gerador possa conter componentes não lineares, há uma componente aproximadamente linear dominante que é bem capturada por modelos paramétricos clássicos. A pequena vantagem do modelo linear sobre o modelo de Cox pode indicar que a estrutura de risco proporcional não é perfeitamente satisfeita, ou que a regularização implícita do SVR contribui para maior robustez.
+
+Na base veterans, observa-se um aumento geral nos valores de C-index, com destaque novamente para o modelo linear (0.740), seguido pelos kernels exponencial e wavelet (ambos com 0.716) e pelo modelo de Cox (0.711). A elevada proporção de eventos implica menor incerteza associada à censura, o que favorece métodos baseados em ordenação direta dos tempos. Nesse contexto, a superioridade do modelo linear sugere que relações aproximadamente lineares são suficientes para capturar a estrutura do risco, enquanto kernels mais complexos não proporcionam ganhos expressivos, possivelmente devido ao tamanho reduzido da amostra, que limita a estimação confiável de relações altamente não lineares.
+
+A base whas500 apresenta o melhor desempenho geral entre os cenários considerados, com valores de C-index atingindo até 0.765 para o modelo linear. Observa-se que tanto o modelo de Cox (0.763) quanto o kernel polinomial (0.762) apresentam desempenho bastante próximo, indicando forte consistência entre abordagens lineares e levemente não lineares. Nesse caso, a maior dimensionalidade (14 covariáveis) combinada com tamanho amostral intermediário parece favorecer modelos com capacidade moderada de flexibilidade, sem incorrer em sobreajuste significativo.
+
+Quando se considera o desempenho médio entre as bases, o modelo linear apresenta o melhor resultado global (0.732), seguido pelo kernel polinomial (0.719) e pelo modelo de Cox (0.718). Esse resultado é particularmente relevante, pois indica que, apesar da maior flexibilidade teórica dos kernels não lineares, tal flexibilidade não se traduz necessariamente em ganhos empíricos consistentes em dados reais. Pelo contrário, modelos mais simples tendem a apresentar melhor equilíbrio entre viés e variância, especialmente em cenários com tamanho amostral limitado ou estrutura de dependência relativamente suave.
+
+Os kernels mais complexos, como RBF e Cauchy, apresentaram desempenho inferior de forma consistente, com destaque negativo para o RBF (média de 0.681). Esse comportamento pode ser atribuído à maior sensibilidade desses kernels à escolha de hiperparâmetros e ao risco de sobreajuste, especialmente quando o número de observações não é suficientemente grande para sustentar a complexidade do modelo.
+
+Por fim, o kernel wavelet, embora teoricamente atraente por sua capacidade de capturar padrões locais e multiescala, não apresentou vantagem empírica significativa nos conjuntos analisados (média de 0.709). Esse resultado sugere que, nos cenários considerados, a estrutura dos dados não apresenta variações locais suficientemente complexas para justificar o uso de representações multiescala, ou que a parametrização adotada não foi capaz de explorar plenamente essas características.
+
+Em síntese, os resultados indicam que, em aplicações reais, a escolha do modelo deve considerar cuidadosamente o trade-off entre flexibilidade e estabilidade estatística. Modelos lineares e de baixa complexidade continuam a apresentar desempenho competitivo, enquanto abordagens mais sofisticadas exigem maior cautela na calibração e validação para que seus potenciais benefícios possam ser efetivamente realizados.
