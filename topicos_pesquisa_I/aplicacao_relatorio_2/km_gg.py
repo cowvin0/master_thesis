@@ -77,7 +77,6 @@ class GG_KM:
         us_exp_neg_u = np.exp(s * np.log(u) - u)
 
         grad_alpha = -K @ (delta - w * FGG) + self.lambda_reg * K @ alpha
-
         grad_a = -np.sum(
             delta * (p * u - d) / a + w * (p * us_exp_neg_u) / (a * gamma_s)
         )
