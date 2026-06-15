@@ -12,6 +12,7 @@ class PTCMBoost:
         learning_rate=0.05,
         max_depth=3,
         min_samples_leaf=20,
+        tol=1e-6,
         a=1.0,
         d=1.0,
         p=1.0,
@@ -22,6 +23,7 @@ class PTCMBoost:
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
         self.random_state = random_state
+        self.tol = tol
 
         self.a = a
         self.d = d
@@ -134,9 +136,8 @@ class PTCMBoost:
         self,
         tree,
         X,
-        delta,
-        F,
-        f,
+        gradient,
+        hessian,
     ):
 
         leaf_id = tree.apply(X)
@@ -146,12 +147,34 @@ class PTCMBoost:
         for leaf in np.unique(leaf_id):
 
             idx = leaf_id == leaf
-            numerator = np.sum(delta[idx])
-            denominator = np.sum(np.exp(f[idx]) * F[idx])
-            gamma_jm = np.log((numerator + 1e-12) / (denominator + 1e-12))
-            updates[leaf] = gamma_jm
+            numerator = np.sum(gradient[idx])
+            denominator = np.sum(hessian[idx])
+            updates[leaf] = numerator / (denominator + 1e-12)
 
         return updates
+
+    # def _compute_leaf_gammas(
+    #     self,
+    #     tree,
+    #     X,
+    #     delta,
+    #     F,
+    #     f,
+    # ):
+
+    #     leaf_id = tree.apply(X)
+
+    #     updates = {}
+
+    #     for leaf in np.unique(leaf_id):
+
+    #         idx = leaf_id == leaf
+    #         numerator = np.sum(delta[idx])
+    #         denominator = np.sum(np.exp(f[idx]) * F[idx])
+    #         gamma_jm = np.log((numerator + 1e-12) / (denominator + 1e-12))
+    #         updates[leaf] = gamma_jm
+
+    #     return updates
 
     def fit(self, X, t, delta):
 
@@ -168,21 +191,31 @@ class PTCMBoost:
         for _ in range(self.n_estimators):
 
             F = self._FGG(t)
-            residuals = delta - np.exp(f) * F
+            gradient = delta - np.exp(f) * F
+            hessian = np.exp(f) * F
+            pseudo_response = gradient / (hessian + 1e-12)
+            # residuals = delta - np.exp(f) * F
             tree = DecisionTreeRegressor(
                 max_depth=self.max_depth,
                 min_samples_leaf=self.min_samples_leaf,
                 random_state=self.random_state,
             )
-            tree.fit(X, residuals)
+            # tree.fit(X, residuals)
+            tree.fit(X, pseudo_response, sample_weight=hessian)
 
             gamma_dict = self._compute_leaf_gammas(
                 tree=tree,
                 X=X,
-                delta=delta,
-                F=F,
-                f=f,
+                gradient=gradient,
+                hessian=hessian,
             )
+            # gamma_dict = self._compute_leaf_gammas(
+            #     tree=tree,
+            #     X=X,
+            #     delta=delta,
+            #     F=F,
+            #     f=f,
+            # )
 
             leaves = tree.apply(X)
             update = np.array([gamma_dict[l] for l in leaves])
