@@ -84,7 +84,7 @@
     \vfill
 
     \[
-    \mathcal{L}(f(x_1), \dots, f(x_n)) + \lambda \|f\|_{\mathcal{H}}^2
+    \mathcal{L}(h(x_1), \dots, h(x_n)) + \lambda \|h\|_{\mathcal{H}}^2
     \]
 
     \vfill
@@ -113,7 +113,7 @@
     \vfill
 
     \[
-    f(x_1), \dots, f(x_n)
+    h(x_1), \dots, h(x_n)
     \]
 
     \vfill
@@ -197,7 +197,8 @@ seu RHKS correspondente. Então, para qualquer função não-descrescente $G\tex
 e qualquer função de perda $\mathcal{L}\text{ : } \mathbb{R}^n \to \mathbb{R} \cup \{+\infty\}$, a solução do problema
 
 \[
-{\arg\min}_{f \in \mathcal{H}} \left\{ \mathcal{L}(f(x_1), \dots, f(x_n)) + \lambda \|f\|_{\mathcal{H}}^2 \right\}
+\arg\min_{h\in \mathcal{H}} \left\{ \mathcal{L}(h(x_1), \dots, h(x_n)) + G(\|h\|_{\mathcal{H}}) \right\}
+% {\arg\min}_{h \in \mathcal{H}} \left\{ \mathcal{L}(h(x_1), \dots, h(x_n)) + \lambda \|h\|_{\mathcal{H}}^2 \right\}
 \]
 
 % \[
@@ -212,7 +213,7 @@ e qualquer função de perda $\mathcal{L}\text{ : } \mathbb{R}^n \to \mathbb{R} 
 admite uma solução na forma
 
 \[
-f^*(x)=\sum_{i=1}^{n}\alpha_i K(x_i,x)\text{.}
+h^*(x)=\sum_{i=1}^{n}\alpha_i K(x_i,x)\text{.}
 \]
 
 % \end{teo}
@@ -250,65 +251,153 @@ f^*(x)=\sum_{i=1}^{n}\alpha_i K(x_i,x)\text{.}
 
 \begin{frame}
 % \includegraphics[width = .25\linewidth]{Images/evaluate.png} %Adiciona imagem
-\frametitle{\Huge Exemplos de aplicação do Representer Theorem}
+\frametitle{\Huge Exemplo de aplicação do Representer Theorem}
 \end{frame}
 
 %------------------------------------------------Slide 7
 \setLayout{vertical}
-\begin{frame}{SVM e Representer Theorem}
 
-No SVM, resolvemos o seguinte problema de otimização:
+\begin{frame}{Kernel Ridge Regression}
 
-\[
-\begin{aligned}
-\min_{\mathbf{w},\, b} \quad & \frac{1}{2}\|\mathbf{w}\|^2 \\
-\text{sujeito a} \quad & y_i\bigl(\mathbf{w}^\top x_i + b\bigr) \geq 1,
-\quad i \in [n]
-\end{aligned}
-\]
-
-A solução ótima $\mathbf{w}^*$ pode ser expressa como uma combinação linear, como visto no Representer Theorem:
-
-\[
-\mathbf{w}^* = \sum_{i=1}^{n} \alpha_i y_i x_i\text{, em que } y_i \in \{-1, 1\}\text{.}
-\]
-
-Portanto, o problema se torna equivalente a otimizar sobre os coeficientes $\alpha_1, \dots, \alpha_n$ em vez de $\mathbf{w}$.
-
-\end{frame}
-
-\begin{frame}{SVM e Representer Theorem}
-
-Dessa forma, o problema de otimização do SVM pode ser reformulado como:
+No Kernel Ridge Regression, resolvemos:
 
 \[
 \begin{aligned}
-\min \quad & \frac{1}{2}\sum_{i}\sum_{j}\alpha_i\alpha_j y_i y_j \left\langle x_i, x_j\right\rangle \\
-\text{sujeito a} \quad & y_i\left( \sum_{j}\alpha_j y_j \left\langle x_j, x_i\right\rangle + b \right) \geq 1, \quad i \in [n]
+\min_{\mathbf{w}} \quad &
+\sum_{i=1}^n
+\left(
+\mathbf{w}\cdot\Phi(x_i)-y_i
+\right)^2
++
+\lambda \|\mathbf{w}\|^2
 \end{aligned}
+\]
+
+Pelo Teorema do Representante, a solução ótima deve pertencer ao subespaço gerado por:
+
+\[
+\mathbf{w}
+=
+\sum_{i=1}^n
+\alpha_i \Phi(x_i)
+\]
+
+Substituindo essa representação no modelo:
+
+\[
+h(x)
+=
+\mathbf{w}\cdot\Phi(x)
+=
+\sum_{i=1}^n
+\alpha_i K(x_i,x)
 \]
 
 
 \end{frame}
 
-\begin{frame}{Kernel Ridge Regression e Representer Theorem}
 
-No Kernel Ridge Regression, resolvemos o seguinte problema de otimização:
+\begin{frame}{Support Vector Machine}
+
+No Support Vector Machine (sem intercepto), resolvemos:
 
 \[
 \begin{aligned}
-\min_{\mathbf{w}} \quad & \sum_{i=1}^n \left(\mathbf{w}\Phi\left(x_i\right) - y_i\right)^2 \\
-\text{sujeito a} \quad & \|\mathbf{w}\|^2 \leq \Lambda^2
+\min_{f \in \mathcal{H}} \quad &
+\frac{1}{n}\sum_{i=1}^{n}\max\left(0,1-y_if(x_i)\right)
++ \frac{\lambda}{2}\|f\|_{\mathcal H}^2
 \end{aligned}
 \]
 
-Pelas condições de KKT, $\mathbf{w}$ pode ser determinado por
-$$
-\mathbf{w} = \sum_{i=1}^n\alpha_i\Phi\left(x_i\right) = \mathbf{X}\mathbf{\alpha}\text{, } \mathbf{\alpha} = \mathbf{X}\left(\mathbf{K} + \lambda \mathbf{I}\right)^{-1}\mathbf{Y}\text{,}
-$$
-em que a resposta final é dada por $h\left(x\right) = \mathbf{w}\Phi\left(x\right) = \sum_{i=1}^n \alpha_i K\left(x_i, x\right)$.
+Pelo Teorema do Representante, a solução ótima tem a forma:
+
+\[
+f(x)=\sum_{i=1}^{n}\alpha_iK(x_i,x)
+\]
+
+Substituindo na otimização:
+
+\[
+\begin{aligned}
+\min_{\alpha}\quad &
+-\sum_{i=1}^{n}\alpha_i
++
+\frac12\sum_{i=1}^{n}\sum_{j=1}^{n}
+y_iy_j\alpha_i\alpha_jK(x_i,x_j)\quad &
+\text{sujeito a}\quad &
+0\leq \alpha_i \leq \frac{1}{n\lambda}
+\end{aligned}
+\]
 
 \end{frame}
 
+%------------------------------------------------Conclusão
+\section{Conclusão}
+
+\setLayout{mainpoint}
+
+\begin{frame}
+\frametitle{\Huge Conclusão}
+\end{frame}
+
+%------------------------------------------------Slide conclusão
+\setLayout{vertical}
+
+\begin{frame}{Conclusões}
+
+\begin{itemize}
+    \item O Teorema do Representante reduz problemas de dimensão infinita para dimensão finita
+
+    \vspace{0.4cm}
+
+    \item A solução ótima pertence ao subespaço gerado pelos dados:
+
+    \[
+    f^*(x)=\sum_{i=1}^n \alpha_i K(x_i,x)
+    \]
+
+    \vspace{0.4cm}
+
+    \item Isso torna métodos de kernel computacionalmente viáveis
+
+    \vspace{0.4cm}
+
+    \item Kernel Ridge Regression e SVM são aplicações diretas desse resultado
+
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------Referências
+\section{Referências}
+
+\setLayout{mainpoint}
+
+% \setLayout{vertical}
+% \begin{frame}[allowframebreaks]{Referências}
+% \bibliographystyle{plain}
+% \bibliography{references}
+
+% \cite{mohri2018foundations}
+% \end{frame}
+
+\begin{frame}
+\frametitle{\Huge Referências}
+\end{frame}
+
+%------------------------------------------------Slide referências
+\setLayout{vertical}
+
+\begin{frame}[allowframebreaks]{Referências}
+
+\footnotesize
+\bibliographystyle{plain}
+\bibliography{references}
+
+\cite{mohri2018foundations}
+
+\cite{wahba2019representer}
+
+\end{frame}
 
 \end{document}
