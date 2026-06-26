@@ -1,6 +1,7 @@
 /* ID: specfun.c, last updated 2019/08/05, F. Osorio */
 
 #include <float.h>
+#include <stdio.h>
 #include "specfun.h"
 
 /* static functions.. */
@@ -16,6 +17,16 @@ cdf_gamma_derivatives(double *x, double *shape, double *scale, double *deriv)
 
   pgamma_derivative(y, a, b, deriv);
 }
+
+// double
+// pgamma_1st_derivative(double x, double a, double scale)
+// {
+//     double deriv[3] = {0.0, 0.0, 0.0};
+
+//     pgamma_derivative(x, a, scale, deriv);
+
+//     return deriv[1];
+// }
 
 void
 pgamma_derivative(double x, double a, double scale, double *deriv)
@@ -144,7 +155,7 @@ pg_continued_fraction(double x, double a, double *deriv)
   }
 
   /* must not reach here */
-  warning("non-convergence in pg_continued_fraction");
+  fprintf(stderr, "non-convergence in pg_continued_fraction");
   s_dot  = (d5 - s * d6) / c6;
   s_ddot = (e5 - s * e6 - 2.0 * s_dot * d6) / c6;
   deriv[0] = 1.0 - f * s;
@@ -198,7 +209,7 @@ pg_series_expansion(double x, double a, double *deriv)
     sum_ddot += term_ddot;
 
     if (p > max_it + a) { /* convergence of the expansion is not achieved */
-      warning("non-convergence in pg_series_expansion");
+      fprintf(stderr, "non-convergence in pg_series_expansion");
       break;
     }
 

@@ -1,6 +1,24 @@
 import numpy as np
 
 
+def monte_carlo_bias(pi_hat_runs, pi_true_runs):
+    pi_hat_runs = np.array(pi_hat_runs)
+    pi_true_runs = np.array(pi_true_runs)
+
+    run_bias = np.mean(pi_hat_runs - pi_true_runs, axis=1)
+
+    return np.mean(run_bias)
+
+
+def monte_carlo_mse(pi_hat_runs, pi_true_runs):
+    pi_hat_runs = np.array(pi_hat_runs)
+    pi_true_runs = np.array(pi_true_runs)
+
+    run_mse = np.mean((pi_hat_runs - pi_true_runs) ** 2, axis=1)
+
+    return np.mean(run_mse)
+
+
 def kaplan_meier(t, delta):
     order = np.argsort(t)
     t_ord = t[order]

@@ -41,8 +41,9 @@
 
 
 % -------------------------------------- Title Slide Information
-\title[Inf PIPGES]{Relatório I}
+\title[Inf PIPGES]{Representer Theorem}
 
+% \author[Discente, Docente]{Gabriel de Jesus Pereira\inst{1} \and Vera Lucia Damasceno Tomazella}
 \author[Discente, Docente]{Gabriel de Jesus Pereira\inst{1} \and Vera Lucia Damasceno Tomazella}
 
 \institute[UFSCar] % (optional)
@@ -70,859 +71,244 @@
 
 \begin{frame}
 % \includegraphics[width = .25\linewidth]{Images/evaluate.png} %Adiciona imagem
-\frametitle{\Huge Vetores de Suporte}
+\frametitle{\Huge Representer Theorem}
 \end{frame}
 
-
-% Muda estilo do frame
+%------------------------------------------------Slide 2
 \setLayout{vertical}
-
-\begin{frame}{Máquina de Vetores de Suporte}
-
-\hfill
+\begin{frame}{Por que é importante?}
 
 \begin{itemize}
-    \item Método de aprendizado supervisionado
-    \item Objetivo: maximizar a margem entre classes
-    \item Relações não lineares podem ser modeladas a através de funções de kernel
-    \item A solução é determinada apenas por parte dos conjuntos de dados, conhecidos como vetores de suporte
-    \item Formulação como problema de otimização convexa
+    \item Muitos problemas minimizam:
+
+    \vfill
+
+    \[
+    \mathcal{L}(f(x_1), \dots, f(x_n)) + \lambda \|f\|_{\mathcal{H}}^2
+    \]
+
+    \vfill
+
+    \item Mas $\mathcal{H}$ pode ser infinito-dimensional
+
+    \vfill
+    % \vspace{0.3cm}
+
+    \item Como otimizar sobre infinitas funções?
+
+    \vfill
+    % \vspace{0.3cm}
+
+    \item O Teorema do Representante fornece a resposta.
 \end{itemize}
 
 \end{frame}
 
-% \setLayout{vertical}
-
-\begin{frame}
-    \begin{center}
-        \includegraphics[width=0.8\linewidth]{../images/hyperplan_non_separable.png}
-    \end{center}
-\end{frame}
-
-\begin{frame}{SVM: Formulação Primal}
-
-\textbf{Problema de otimização:}
-
-\vspace{0.3cm}
-
-\begin{equation*}
-\min_{w,b,\boldsymbol{\xi}} \;\; \frac{1}{2}\|w\|^2 + C \sum_{i=1}^{m} \xi_i
-\end{equation*}
-
-\vspace{0.3cm}
-
-\textbf{Sujeito a:}
-
-\begin{equation*}
-y_i (w^\top x_i + b) \geq 1 - \xi_i, \quad i = 1, \dots, m
-\end{equation*}
-
-\begin{equation*}
-\xi_i \geq 0, \quad i = 1, \dots, m
-\end{equation*}
-
-\vspace{0.3cm}
+%------------------------------------------------Slide 3
+\begin{frame}{Intuição}
 
 \begin{itemize}
-    \item $C$: parâmetro de regularização
-    \item $\xi_i$: variáveis de folga
+    \item A perda depende apenas de:
+
+    \vfill
+
+    \[
+    f(x_1), \dots, f(x_n)
+    \]
+
+    \vfill
+
+    \item Portanto, apenas o comportamento no conjunto de treino importa
+
+    \vfill
+
+    \item Qualquer componente extra fora dessas observações apenas aumenta a complexidade
+
+    \vfill
+
+    \item A melhor solução pertence a um subespaço de dimensão finita
 \end{itemize}
 
 \end{frame}
 
-\begin{frame}{SVM: Formulação Dual}
 
-\textbf{Problema dual (Lagrangiano):}
+\begin{frame}{Intuição}
 
-\vspace{0.3cm}
-
-\begin{equation*}
-\max_{\boldsymbol{\alpha}} \;\; \sum_{i=1}^{m} \alpha_i
-- \frac{1}{2} \sum_{i=1}^{m} \sum_{j=1}^{m} \alpha_i \alpha_j y_i y_j \langle x_i, x_j \rangle
-\end{equation*}
-
-\vspace{0.3cm}
-
-\textbf{Sujeito a:}
-
-\begin{equation*}
-0 \leq \alpha_i \leq C, \quad i = 1, \dots, m
-\end{equation*}
-
-\begin{equation*}
-\sum_{i=1}^{m} \alpha_i y_i = 0
-\end{equation*}
-
-\vspace{0.3cm}
-
-\begin{itemize}
-    \item $\alpha_i$: multiplicadores de Lagrange
-    % \item Base para uso de kernels
-\end{itemize}
-\end{frame}
-
-\begin{frame}{SVM para Regressão (SVR)}
-
-% \begin{itemize}
-%     \item Objetivo: aproximar uma função $f(x)$
-%     \item Controle de:
-%     \begin{itemize}
-%         \item Complexidade do modelo
-%         \item Erro de ajuste
-%     \end{itemize}
-% \end{itemize}
-
-% \vspace{0.3cm}
-
-% \begin{itemize}
-%     \item Ideia central:
-%     \begin{itemize}
-%         \item Erros menores que $\epsilon$ não são penalizados
-%     \end{itemize}
-% \end{itemize}
-
-% \vspace{0.3cm}
-
-\begin{center}
-    \includegraphics[width=0.65\linewidth]{../images/svm_regression.png}
-\end{center}
-
-\end{frame}
-
-\begin{frame}{Interpretação Geométrica}
-
-\begin{itemize}
-    \item Ajuste de um tubo de largura $2\epsilon$
-    \item Pontos dentro do tubo:
-    \begin{itemize}
-        \item Sem penalização
-    \end{itemize}
-    \item Pontos fora do tubo:
-    \begin{itemize}
-        \item Penalização proporcional ao erro
-    \end{itemize}
-\end{itemize}
-
-\vspace{0.4cm}
-
-\begin{itemize}
-    \item Solução tende a ser esparsa
-\end{itemize}
-
-\end{frame}
-
-% \begin{frame}{Perda $\epsilon$-insensível}
-
-% \begin{equation*}
-% |y - y'|_\epsilon = \max(0, |y - y'| - \epsilon)
-% \end{equation*}
-
-% \vspace{0.4cm}
-
-% \begin{itemize}
-%     \item Ignora pequenos erros
-%     \item Apenas desvios relevantes são penalizados
-% \end{itemize}
-
-% \vspace{0.3cm}
-
-% \begin{itemize}
-%     \item Promove:
-%     \begin{itemize}
-%         \item Esparsidade
-%         \item Robustez
-%     \end{itemize}
-% \end{itemize}
-
-% \end{frame}
-
-\begin{frame}{Problema Primal (SVR)}
-
-\begin{equation*}
-\min_{w,b,\xi,\xi'} \;\;
-\frac{1}{2} \|w\|^2 + C \sum_{i=1}^{m} (\xi_i + \xi_i')
-\end{equation*}
-
-\vspace{0.3cm}
-
-\textbf{sujeito a:}
-
-\begin{equation*}
-w \cdot \Phi(x_i) + b - y_i \leq \epsilon + \xi_i
-\end{equation*}
-
-\begin{equation*}
-y_i - w \cdot \Phi(x_i) - b \leq \epsilon + \xi_i'
-\end{equation*}
-
-\begin{equation*}
-\xi_i, \xi_i' \geq 0
-\end{equation*}
-
-\end{frame}
-
-\begin{frame}{Problema Dual (SVR)}
-
-\begin{equation*}
-\max_{\alpha,\alpha'} \;\;
-\epsilon \sum (\alpha_i + \alpha_i')
-- \sum y_i (\alpha_i' - \alpha_i)
-\end{equation*}
-
-\begin{equation*}
-- \frac{1}{2} \sum_{i,j} (\alpha_i' - \alpha_i)(\alpha_j' - \alpha_j) K_{ij}
-\end{equation*}
-
-\vspace{0.3cm}
-
-\textbf{sujeito a:}
-
-\begin{equation*}
-\sum (\alpha_i' - \alpha_i) = 0
-\end{equation*}
-
-\begin{equation*}
-0 \leq \alpha_i, \alpha_i' \leq C
-\end{equation*}
-
-\end{frame}
-
-\begin{frame}{Solução Final}
-
-\begin{equation*}
-h(x) = \sum_{i=1}^{m} (\alpha_i' - \alpha_i) K(x_i, x) + b
-\end{equation*}
-
-\vspace{0.4cm}
-
-\begin{itemize}
-    \item Apenas vetores de suporte contribuem
-    \item Pontos dentro do tubo:
-    \begin{itemize}
-        \item $\alpha_i = \alpha_i' = 0$
-    \end{itemize}
-\end{itemize}
-
-\end{frame}
-
-\section{Support Vector Censored Regression}
-
-\setLayout{mainpoint}
-\begin{frame}
-\frametitle{\Huge SVCR}
-\end{frame}
-
-\setLayout{vertical}
-
-\begin{frame}{Ideia central}
-\begin{itemize}
-    \item Extensão do SVR para dados com censura
-\end{itemize}
-
-\vspace{0.4cm}
-
-\begin{itemize}
-    \item Dados: $(\mathbf{x}_i, l_i, u_i)$
-    \item Tempo verdadeiro: $T_i \in [l_i, u_i]$
-\end{itemize}
-
-\vspace{0.4cm}
-
-\begin{itemize}
-    \item Sem censura: $l_i = u_i$
-    \item Censura à direita: $u_i = +\infty$
-    \item Censura à esquerda: $l_i = -\infty$
-\end{itemize}
-
-\end{frame}
-
-% \begin{frame}{Ideia central}
-% \begin{itemize}
-%     \item Extensão do SVR para dados com censura
-% \end{itemize}
-
-% \vspace{0.3cm}
-
-% \begin{itemize}
-%     \item Dados: $(x_i, l_i, u_i)$
-% \end{itemize}
-% \end{frame}
-
-\begin{frame}{Função de perda}
-\begin{itemize}
-    \item Sem penalização dentro do intervalo
-    \item Penaliza apenas violações
-\end{itemize}
-
-\vspace{0.3cm}
-
-\begin{equation*}
-c(f(x_i), l_i, u_i) = \max\{l_i - f(x_i),\, f(x_i) - u_i,\, 0\}
-\end{equation*}
-
-\vspace{0.3cm}
-
-% \begin{itemize}
-%     \item Generaliza censura à direita, esquerda e intervalar
-%     \item Função convexa
-% \end{itemize}
-\end{frame}
-
-\begin{frame}{Formulação primal}
-\begin{equation*}
-\min_{w,b,\xi,\xi^*} \frac{1}{2}\|w\|^2 + C \left( \sum_{i\in U}\xi_i + \sum_{i\in L}\xi_i^* \right)
-\end{equation*}
-
-\begin{itemize}
-    \item Restrições:
-    \begin{itemize}
-        \item $w^\top x_i + b \leq u_i + \xi_i^*$
-        \item $w^\top x_i + b \geq l_i - \xi_i$
-    \end{itemize}
-    \item $\xi_i, \xi_i^* \geq 0$
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Formulação dual}
-\begin{equation*}
-\max_{\alpha,\alpha^*}
-- \frac{1}{2} \sum_{i,j} (\alpha_i - \alpha_i^*)(\alpha_j - \alpha_j^*) K(x_i,x_j)
-- \sum_{i\in L} l_i \alpha_i + \sum_{i\in U} u_i \alpha_i^*
-\end{equation*}
-
-\begin{itemize}
-    \item $0 \leq \alpha_i, \alpha_i^* \leq C$
-    \item $\sum \alpha_i = \sum \alpha_i^*$
-\end{itemize}
-
-\vspace{0.3cm}
-
-\begin{itemize}
-    \item Problema quadrático convexo
-\end{itemize}
-\end{frame}
-
-% \begin{frame}{Propriedades}
-% \begin{itemize}
-%     \item Uso de kernels → não linearidade
-%     \item Solução esparsa (vetores de suporte)
-%     \item Integra diferentes tipos de censura
-% \end{itemize}
-
-% \vspace{0.3cm}
-
-% \begin{itemize}
-%     \item Complexidade similar ao SVR
-%     \item Adequado para dados de sobrevivência
-% \end{itemize}
-% \end{frame}
-
-\begin{frame}{Funções Wavelet}
-\begin{itemize}
-    \item Ferramenta para \textbf{decompor funções e sinais}
-    \item Capturam simultaneamente:
-    \begin{itemize}
-        \item \textbf{localização} (onde ocorre)
-        \item \textbf{escala} (nível de detalhe)
-    \end{itemize}
-\end{itemize}
-
-\vspace{0.3cm}
-
-\begin{itemize}
-    \item Diferente de bases globais (ex.: Fourier)
-    \item Permitem análise \textbf{local} e \textbf{multiescala}
-\end{itemize}
-
-\vspace{0.3cm}
-
-\begin{equation*}
-h_{A,B}(x) = |A|^{-1/2} \, h\left(\frac{x - B}{A}\right)
-\end{equation*}
-
-\vspace{0.3cm}
-
-\begin{itemize}
-    \item $A$: escala → controla o nível de detalhe
-    \item $B$: translação → desloca a função no domínio
-\end{itemize}
-
-\vspace{0.3cm}
-
-\begin{itemize}
-    \item Aproximação de funções:
-\end{itemize}
-
-\begin{equation*}
-\hat{g}(x) = \sum_{i=1}^{t} w_i \, h_{A_i,B_i}(x)
-\end{equation*}
-
-\begin{itemize}
-    \item Ideal para fenômenos \textbf{não lineares} e \textbf{não estacionários}
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Kernel Wavelet}
-
-\vspace{0.3cm}
-
-\begin{itemize}
-    \item Wavelet mãe:
-\end{itemize}
-
-\begin{equation*}
-h(x) = \cos(1.75x)\exp(-0.5x^2)
-\end{equation*}
-
-\vspace{0.3cm}
-
-\begin{itemize}
-    \item Kernel multidimensional:
-\end{itemize}
-
-\begin{equation*}
-K(\mathbf{x}, \mathbf{x}') =
-\prod_{k=1}^{p} h\left(\frac{x_k - x_k'}{A}\right)
-\end{equation*}
-
-\vspace{0.3cm}
-
-\begin{itemize}
-    \item Compara diferenças \textbf{localmente} em cada dimensão
-    \item $A$: controla a escala da similaridade
-\end{itemize}
-
-\vspace{0.3cm}
-
-\end{frame}
-
-\section{Metodologia}
-
-\setLayout{mainpoint}
-\begin{frame}
-\frametitle{\Huge Metodologia}
-\end{frame}
-
-\setLayout{vertical}
-
-% \begin{frame}{Estratégia geral}
-% \begin{itemize}
-%     \item Construção, treinamento e avaliação dos modelos
-%     \item Dados simulados e dados reais
-% \end{itemize}
-
-% \vspace{0.3cm}
-
-% \begin{itemize}
-%     \item Três etapas principais:
-%     \begin{itemize}
-%         \item Particionamento dos dados
-%         \item Seleção de hiperparâmetros
-%         \item Avaliação preditiva
-%     \end{itemize}
-% \end{itemize}
-
-% \vspace{0.3cm}
-
-% \begin{itemize}
-%     \item Repetições para maior robustez
-% \end{itemize}
-% \end{frame}
-
-\begin{frame}{Particionamento dos dados}
-
-\hfill
-
-\begin{itemize}
-    \item Estratégia de partição dos dados:
-    \begin{itemize}
-        \item 70\% treino
-        \item 30\% teste
-    \end{itemize}
-\end{itemize}
-
-\vspace{0.3cm}
-
-% \begin{equation*}
-% \mathcal{D} = \mathcal{D}_{train} \cup \mathcal{D}_{test}
-% \end{equation*}
-
-% \vspace{0.3cm}
-
-\begin{itemize}
-    % \item Amostragem aleatória
-    \item Preservação da proporção de censura
-\end{itemize}
-
-% \vspace{0.3cm}
-
-\begin{itemize}
-    \item Repetição do procedimento
-    \item Redução da variabilidade
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Seleção de hiperparâmetros}
-
-\hfill
-
-\begin{itemize}
-    \item Procedimento: Grid Search
-    \item Ajuste em conjunto de treino
-\end{itemize}
-
-\begin{itemize}
-    \item Principais parâmetros:
-    \begin{itemize}
-        \item $C$: regularização ($C \in \{0.05, 0.25, 0.5, 1, 2, 4\}$)
-        \item Parâmetros dos kernels ($\gamma, A \in \{0.125, 0.25, 0.5, 1, 2, 4, 8\}$)
-    \end{itemize}
-\end{itemize}
-
-% \vspace{0.3cm}
-
-% \begin{itemize}
-%     \item Avaliação exaustiva:
-% \end{itemize}
-
-% \begin{equation*}
-% \theta^* = \arg\max_{\theta \in \Theta} \text{Desempenho}(\theta)
-% \end{equation*}
-
-% \vspace{0.3cm}
-
-% \begin{itemize}
-%     \item Seleção sem uso do conjunto de teste
-% \end{itemize}
-\end{frame}
-
-\begin{frame}{Kernels considerados}
-
-\scriptsize
-
-\textbf{Linear}
-\[
-K(\mathbf{x}, \mathbf{x}') = \mathbf{x}^\top \mathbf{x}'
-\]
-
-\textbf{Polinomial}
-\[
-K(\mathbf{x}, \mathbf{x}') = (\gamma \, \mathbf{x}^\top \mathbf{x}' + r)^d
-\]
-
-\textbf{Gaussiano}
-\[
-K(\mathbf{x}, \mathbf{x}') = \exp\left(-\gamma \|\mathbf{x} - \mathbf{x}'\|^2 \right)
-\]
-
-\textbf{Exponencial}
-\[
-K(\mathbf{x}, \mathbf{x}') = \exp\left(-\gamma \|\mathbf{x} - \mathbf{x}'\| \right)
-\]
-
-\textbf{Laplaciano}
-\[
-K(\mathbf{x}, \mathbf{x}') = \exp\left(-\gamma \|\mathbf{x} - \mathbf{x}'\|_1 \right)
-\]
-
-\textbf{Cauchy}
-\[
-K(\mathbf{x}, \mathbf{x}') = \frac{1}{1 + \gamma \|\mathbf{x} - \mathbf{x}'\|^2}
-\]
-
-\textbf{Wavelet}
-\[
-K(\mathbf{x}, \mathbf{x}') = \prod_{k=1}^{p}
-\cos\left(1.75 \frac{x_k - x_k'}{A}\right)
-\exp\left(-\frac{1}{2} \left(\frac{x_k - x_k'}{A}\right)^2 \right)
-\]
-
-\end{frame}
-
-\begin{frame}{Geração de dados simulados}
-\begin{itemize}
-    \item Covariáveis:
-\end{itemize}
-
-\begin{align*}
-X_1 &\sim \mathcal{N}(1,1) \\
-X_2 &\sim \mathcal{N}(2,2) \\
-X_3 &\sim \text{Exp}(1)
-\end{align*}
-
-\vspace{0.3cm}
-
-\begin{itemize}
-    \item Tempo de sobrevivência:
-\end{itemize}
-
-\begin{equation*}
-T \sim \text{Weibull}(\lambda(\mathbf{X}), k)
-\end{equation*}
-
-\vspace{0.3cm}
-
-\begin{equation*}
-\lambda(\mathbf{X}) = 5 \exp(-X_1 \ln|X_2| + \sin(X_3^2))
-\end{equation*}
-
-\vspace{0.3cm}
-
-% \begin{itemize}
-%     \item Relação altamente não linear
-% \end{itemize}
-\end{frame}
-
-% \begin{frame}{Mecanismo de censura}
-% \begin{itemize}
-%     \item Censura não informativa
-%     \item $C$ independente de $T$
-% \end{itemize}
-
-% \vspace{0.3cm}
-
-% \begin{equation*}
-% Y = \min(T, C), \quad \delta = \mathbb{I}(T \leq C)
-% \end{equation*}
-
-% \vspace{0.3cm}
-
-% \begin{itemize}
-%     \item Controle da proporção de censura
-%     \item Cenários:
-%     \begin{itemize}
-%         \item diferentes tamanhos amostrais
-%         \item diferentes níveis de censura
-%     \end{itemize}
-% \end{itemize}
-
-% \vspace{0.3cm}
-
-% \begin{itemize}
-%     \item Avaliação da robustez dos modelos
-% \end{itemize}
-% \end{frame}
-
-
-\begin{frame}{Avaliação dos modelos}
-\begin{itemize}
-    \item Métrica principal: C-index (concordance index)
-\end{itemize}
-
-\vspace{0.3cm}
-
-\begin{itemize}
-    \item Mede concordância entre risco predito $v(\mathbf{x})$ e tempo observado
-\end{itemize}
-
-\vspace{0.3cm}
-
-\begin{equation*}
-C =
-\frac{
-\sum_{i \neq j} \mathbb{I}\Big[(v(\mathbf{x}_i) - v(\mathbf{x}_j))(y_i - y_j) \geq 0\Big]
-}{
-\sum_{i \neq j} \text{comp}(i,j)
-}
-\end{equation*}
-
-\vspace{0.2cm}
-
-\begin{itemize}
-    \item $\text{comp}(i,j)$: pares comparáveis (considera censura)
-    \item $C = 1$: concordância perfeita
-\end{itemize}
-
-\vspace{0.3cm}
-
-\begin{itemize}
-    \item Resultados agregados: média e desvio padrão
-\end{itemize}
-
-\end{frame}
-
-\setLayout{}
-
-\setLayout{vertical}
-
-\section{Resultado}
-
-\setLayout{mainpoint}
-\begin{frame}
-\frametitle{\Huge Resultado}
-\end{frame}
-
-\setLayout{vertical}
-
-\begin{frame}{Resultado em dados simulados}
-\begin{table}[ht]
 \centering
-\caption{Resultados em dados simulados com a média da métrica C-index para os conjuntos de dados.}
-\label{tab:final_results_refit}
-\scriptsize
-\begin{tabular}{lccccccccc|c}
-\toprule
-\textbf{n} & \multicolumn{3}{c}{\textbf{50}} & \multicolumn{3}{c}{\textbf{100}} & \multicolumn{3}{c}{\textbf{300}} & \multirow{2}{*}{\textbf{Média}} \\
-\cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10}
-\textbf{censura (\%)} & \textbf{0.1} & \textbf{0.25} & \textbf{0.5} & \textbf{0.1} & \textbf{0.25} & \textbf{0.5} & \textbf{0.1} & \textbf{0.25} & \textbf{0.5} & \\
-\midrule
-laplacian    & 0.730 & 0.751 & 0.777 & 0.771 & 0.784 & 0.795 & 0.825 & 0.833 & 0.848 & 0.791 \\
-cauchy       & 0.739 & 0.754 & 0.774 & 0.771 & 0.773 & 0.799 & 0.817 & 0.825 & 0.846 & 0.789 \\
-poly         & 0.734 & 0.757 & 0.779 & 0.776 & 0.783 & 0.813 & 0.798 & 0.808 & 0.842 & 0.788 \\
-exponential  & 0.730 & 0.736 & 0.763 & 0.772 & 0.788 & 0.791 & 0.819 & 0.827 & 0.848 & 0.786 \\
-rbf          & 0.720 & 0.726 & 0.760 & 0.769 & 0.782 & 0.783 & 0.809 & 0.815 & 0.836 & 0.778 \\
-wavelet      & 0.709 & 0.718 & 0.723 & 0.758 & 0.769 & 0.783 & 0.794 & 0.801 & 0.821 & 0.764 \\
-\midrule
-cox        & 0.727 & 0.736 & 0.782 & 0.750 & 0.755 & 0.793 & 0.743 & 0.766 & 0.806 & 0.762 \\
-linear       & 0.704 & 0.742 & 0.755 & 0.730 & 0.750 & 0.782 & 0.748 & 0.764 & 0.804 & 0.753 \\
-\bottomrule
-\end{tabular}
-\end{table}
-\end{frame}
 
-\begin{frame}{Dados reais}
+\begin{tikzpicture}[scale=1.1]
+
+% Eixos
+\draw[->] (0,0,0) -- (5,0,0) node[right] {$x_1$};
+\draw[->] (0,0,0) -- (0,4,0) node[above] {$x_2$};
+\draw[->] (0,0,0) -- (0,0,4) node[left] {$x_3$};
+
+% Plano x3 = 0
+\filldraw[fill=blue!10,opacity=0.5]
+(0,0,0) -- (4,0,0) -- (4,3,0) -- (0,3,0) -- cycle;
+
+\node at (4.4,2.8,0) {$x_3=0$};
+
+% Classe +
+\filldraw[red] (1,1,0) circle (2pt);
+\filldraw[red] (1.4,1.8,0) circle (2pt);
+\filldraw[red] (2,1.2,0) circle (2pt);
+
+% Classe -
+\filldraw[black] (3,2.2,0) circle (2pt);
+\filldraw[black] (3.3,1.3,0) circle (2pt);
+\filldraw[black] (2.8,0.8,0) circle (2pt);
+
+% Hiperplano vertical
+\filldraw[fill=green!20,opacity=0.4]
+(2.4,0,0) --
+(2.4,3,0) --
+(2.4,3,3) --
+(2.4,0,3) -- cycle;
+
+\node at (2.7,3.2,2) {$\mathbf{w}^\top x + b = 0$};
+
+% Vetor normal no plano x1-x2
+\draw[->, thick, red] (2.4,1.5,0) -- (3.3,1.5,0);
+\node[above] at (3.3,1.5,0) {$\mathbf{w}$};
+
+\end{tikzpicture}
+
+\vspace{0.4cm}
+
 \begin{itemize}
-    \item Três bases em análise de sobrevivência:
-    \vspace{0.2cm}
-
-    \item \textbf{gbsg2}
-    \begin{itemize}
-        \item 686 observações, 8 variáveis
-        \item Recorrência do câncer
-        \item $\sim 43{,}6\%$ não censurados
-    \end{itemize}
-
-    \item \textbf{whas500}
-    \begin{itemize}
-        \item 500 observações, 14 variáveis
-        \item Mortalidade
-        \item $\sim 43{,}0\%$ não censurados
-    \end{itemize}
-
-    \item \textbf{veterans}
-    \begin{itemize}
-        \item 137 observações, 6 variáveis
-        \item Câncer de pulmão
-        \item $\sim 93{,}4\%$ não censurados
-    \end{itemize}
-
-    \vspace{0.2cm}
-    % \item Diferentes níveis de censura e complexidade
+    \item Os dados vivem no plano \(x_3=0\)
+    \item Logo, a direção \(x_3\) não influencia a separação
+    \item Portanto, \(w_3 = 0\)
 \end{itemize}
-\end{frame}
-
-\begin{frame}{Resultados em dados reais}
-\scriptsize
-
-\begin{table}[ht]
-\centering
-\caption{Resultados em dados reais com a média da métrica C-index.}
-\begin{tabular}{lccc|c}
-\toprule
-\textbf{Método} & \textbf{gbsg2} & \textbf{veterans} & \textbf{whas500} & \textbf{Média} \\
-\midrule
-linear      & 0.691 & 0.740 & 0.765 & 0.732 \\
-poly        & 0.682 & 0.712 & 0.762 & 0.719 \\
-\midrule
-cox         & 0.680 & 0.711 & 0.763 & 0.718 \\
-\midrule
-exponential & 0.674 & 0.716 & 0.761 & 0.717 \\
-wavelet     & 0.681 & 0.716 & 0.730 & 0.709 \\
-cauchy      & 0.671 & 0.703 & 0.751 & 0.709 \\
-laplacian   & 0.681 & 0.702 & 0.742 & 0.708 \\
-rbf         & 0.640 & 0.706 & 0.696 & 0.681 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\vspace{0.2cm}
-
-% \begin{itemize}
-%     \item Melhor desempenho: modelo linear
-%     \item Modelos simples $\Rightarrow$ maior estabilidade
-%     \item Kernels complexos $\Rightarrow$ risco de overfitting
-% \end{itemize}
 
 \end{frame}
 
-\begin{frame}{Conclusões}
-\begin{itemize}
-    \item Avaliação de modelos de sobrevivência com foco em SVCR e kernels
-\end{itemize}
 
-\vspace{0.3cm}
+%------------------------------------------------Slide 5
+\begin{frame}{Representer theorem}
 
-\begin{itemize}
-    \item Dados simulados:
-    \begin{itemize}
-        \item Superioridade de kernels não lineares (Laplaciano, Cauchy, Polinomial)
-        \item Capacidade de capturar relações complexas
-    \end{itemize}
-\end{itemize}
+\vfill
 
-\vspace{0.3cm}
+% \begin{teo}
 
-\begin{itemize}
-    \item Dados reais:
-    \begin{itemize}
-        \item Modelos lineares e Cox competitivos ou superiores
-        \item Importância do equilíbrio viés--variância
-    \end{itemize}
-\end{itemize}
+Seja $K\text{ : } \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ um kernel PDS e $\mathcal{H}$
+seu RHKS correspondente. Então, para qualquer função não-descrescente $G\text{ : } \mathbb{R} \to \mathbb{R}$
+e qualquer função de perda $\mathcal{L}\text{ : } \mathbb{R}^n \to \mathbb{R} \cup \{+\infty\}$, a solução do problema
 
-\vspace{0.3cm}
+\[
+{\arg\min}_{f \in \mathcal{H}} \left\{ \mathcal{L}(f(x_1), \dots, f(x_n)) + \lambda \|f\|_{\mathcal{H}}^2 \right\}
+\]
 
-% \begin{itemize}
-%     \item Escolha do modelo depende de:
-%     \begin{itemize}
-%         \item não linearidade dos dados
-%         % \item tamanho amostral
-%         % \item nível de censura
-%     \end{itemize}
-% \end{itemize}
+% \[
+% \min_{f \in \mathcal{H}}
+% \left\{
+% \mathcal{L}(f(x_1), \dots, f(x_n))
+% +
+% \lambda \|f\|_{\mathcal{H}}^2
+% \right\}
+% \]
 
-\vspace{0.3cm}
+admite uma solução na forma
 
-% \begin{itemize}
-%     \item SVCR: abordagem flexível e promissora, porém sensível à calibração
-% \end{itemize}
+\[
+f^*(x)=\sum_{i=1}^{n}\alpha_i K(x_i,x)\text{.}
+\]
+
+% \end{teo}
 
 \end{frame}
 
-\section{Agradecimento}
-%---------------------------------------------------------Slide 9
-\setLayout{blank}
+%------------------------------------------------Slide 6
+\begin{frame}{O que isso significa?}
+
+\begin{itemize}
+    \item Problema de dimensão infinita
+
+    % [
+    % \Downarrow
+    % \]
+    \vfill
+
+    \item Otimização em dimensão finita
+
+    % \[
+    % \Downarrow
+    % \]
+    \vfill
+
+    \item Apenas os coeficientes $\alpha_1,\dots,\alpha_n$ são necessários
+
+    \vfill
+
+    \item Métodos de kernel tornam-se computacionalmente viáveis
+\end{itemize}
+
+\end{frame}
+
+\setLayout{mainpoint}
+
 \begin{frame}
-
-    \centering
-    \vspace{2cm}
-
-    \textbf{\Huge Muito obrigado pela atenção!}
-
-    \vspace{1cm}
-
-    \flushleft
-    \textbf{Contatos:}
-    \ \\
-    \begin{itemize}
-    	\item E-mail 1
-    	\item E-mail 2
-    \end{itemize}
-
-    \vspace{.5cm}
-    \begin{figure}
-        \centering
-        \begin{subfigure}{0.4\textwidth}
-            \centering
-            \includegraphics[height=1.5cm]{lib/logos/usp.png}
-        \end{subfigure}%
-        \qquad
-        \begin{subfigure}{0.4\textwidth}
-            \centering
-            \includegraphics[height=1.5cm]{lib/logos/ufscar.png}
-        \end{subfigure}
-
-    \end{figure}
+% \includegraphics[width = .25\linewidth]{Images/evaluate.png} %Adiciona imagem
+\frametitle{\Huge Exemplos de aplicação do Representer Theorem}
 \end{frame}
+
+%------------------------------------------------Slide 7
+\setLayout{vertical}
+\begin{frame}{SVM e Representer Theorem}
+
+No SVM, resolvemos o seguinte problema de otimização:
+
+\[
+\begin{aligned}
+\min_{\mathbf{w},\, b} \quad & \frac{1}{2}\|\mathbf{w}\|^2 \\
+\text{sujeito a} \quad & y_i\bigl(\mathbf{w}^\top x_i + b\bigr) \geq 1,
+\quad i \in [n]
+\end{aligned}
+\]
+
+A solução ótima $\mathbf{w}^*$ pode ser expressa como uma combinação linear, como visto no Representer Theorem:
+
+\[
+\mathbf{w}^* = \sum_{i=1}^{n} \alpha_i y_i x_i\text{, em que } y_i \in \{-1, 1\}\text{.}
+\]
+
+Portanto, o problema se torna equivalente a otimizar sobre os coeficientes $\alpha_1, \dots, \alpha_n$ em vez de $\mathbf{w}$.
+
+\end{frame}
+
+\begin{frame}{SVM e Representer Theorem}
+
+Dessa forma, o problema de otimização do SVM pode ser reformulado como:
+
+\[
+\begin{aligned}
+\min \quad & \frac{1}{2}\sum_{i}\sum_{j}\alpha_i\alpha_j y_i y_j \left\langle x_i, x_j\right\rangle \\
+\text{sujeito a} \quad & y_i\left( \sum_{j}\alpha_j y_j \left\langle x_j, x_i\right\rangle + b \right) \geq 1, \quad i \in [n]
+\end{aligned}
+\]
+
+
+\end{frame}
+
+\begin{frame}{Kernel Ridge Regression e Representer Theorem}
+
+No Kernel Ridge Regression, resolvemos o seguinte problema de otimização:
+
+\[
+\begin{aligned}
+\min_{\mathbf{w}} \quad & \sum_{i=1}^n \left(\mathbf{w}\Phi\left(x_i\right) - y_i\right)^2 \\
+\text{sujeito a} \quad & \|\mathbf{w}\|^2 \leq \Lambda^2
+\end{aligned}
+\]
+
+Pelas condições de KKT, $\mathbf{w}$ pode ser determinado por
+$$
+\mathbf{w} = \sum_{i=1}^n\alpha_i\Phi\left(x_i\right) = \mathbf{X}\mathbf{\alpha}\text{, } \mathbf{\alpha} = \mathbf{X}\left(\mathbf{K} + \lambda \mathbf{I}\right)^{-1}\mathbf{Y}\text{,}
+$$
+em que a resposta final é dada por $h\left(x\right) = \mathbf{w}\Phi\left(x\right) = \sum_{i=1}^n \alpha_i K\left(x_i, x\right)$.
+
+\end{frame}
+
 
 \end{document}

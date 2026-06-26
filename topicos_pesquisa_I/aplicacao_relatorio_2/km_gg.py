@@ -1,20 +1,16 @@
 import ctypes
 import numpy as np
 
-_lib = ctypes.CDLL("./libspecfun.so")
-
-_lib.pgamma_1st_derivative.argtypes = [
-    ctypes.c_double,  # x
-    ctypes.c_double,  # shape
-    ctypes.c_double,  # scale
-]
-
-_lib.pgamma_1st_derivative.restype = ctypes.c_double
-
-import numpy as np
-
 from scipy.special import gamma, gammainc, digamma, gammaln
 from scipy.optimize import minimize
+
+_lib = ctypes.CDLL("./libspecfun.so")
+_lib.pgamma_1st_derivative.argtypes = [
+    ctypes.c_double,
+    ctypes.c_double,
+    ctypes.c_double,
+]
+_lib.pgamma_1st_derivative.restype = ctypes.c_double
 
 
 def pgamma_shape_derivative(x, shape, scale=1.0):
@@ -151,9 +147,6 @@ class GG_KM:
 
         G = pgamma_shape_derivative_vec(u, s)
 
-        # eps = 1e-5
-        # G = (gammainc(s + eps, u) - gammainc(s - eps, u)) / (2 * eps)
-
         log_ta = np.log(t / a)
         psi_s = digamma(s)
         gamma_s = gamma(s)
@@ -178,7 +171,6 @@ class GG_KM:
     def fit(self, X, t, delta):
         n = len(t)
         self.X_train_ = X
-        # self.K_ = self.gaussian_kernel(X, X)
         self.K_ = self._compute_kernel(X, X)
 
         params_0 = np.concatenate([np.zeros(n), [self.a, self.d, self.p]])
@@ -200,7 +192,6 @@ class GG_KM:
         return self
 
     def predict_survival(self, X_new, t_grid):
-        # K_new = self.gaussian_kernel(X_new, self.X_train_)
         K_new = self._compute_kernel(X_new, self.X_train_)
         w = np.exp(K_new @ self.alpha_)
         F = self._FGG(t_grid)
@@ -208,6 +199,5 @@ class GG_KM:
         return S
 
     def predict_cure_probability(self, X_new):
-        # K_new = self.gaussian_kernel(X_new, self.X_train_)
         K_new = self._compute_kernel(X_new, self.X_train_)
         return np.exp(-np.exp(K_new @ self.alpha_))
