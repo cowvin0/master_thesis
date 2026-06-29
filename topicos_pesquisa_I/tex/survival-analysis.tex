@@ -6,7 +6,7 @@ avaliar a eficácia de diferentes intervenções terapêuticas, mas também em e
 tempo de sobrevivência associado a cada estratégia. De maneira análoga, no setor
 financeiro, instituições buscam modelar o tempo até a ocorrência de inadimplência de
 um cliente, com o objetivo de aprimorar mecanismos de controle e gestão de risco.
-De forma semelhante, em aplicações de marketing e negócios, o fenômeno de \textit{churn}
+De forma semelhante, em aplicações de marketing e negócios, o fenômeno de churn
 refere-se ao tempo até que um cliente deixe de utilizar um serviço, sendo sua antecipação
 fundamental para a implementação de políticas eficazes de retenção.
 
@@ -202,165 +202,321 @@ aprendizado de máquina, que buscam maior flexibilidade na modelagem de relaçõ
 entre covariáveis e o risco de ocorrência do evento, especialmente em cenários de alta
 dimensionalidade.
 
-\section{SVR com Censura (SVCR)}
+\section{Modelos de Longa Duração}
 
-O modelo de Support Vector Regression (SVR), apresentado na Seção \ref{sec:svr}, pode ser
-estendido de forma natural para o caso em que as observações estão sujeitas à censura. Essa
-generalização, proposta por \citeonline{shivaswamy2007support}, permite incorporar explicitamente
-a informação parcial contida nos dados censurados, evitando a necessidade de procedimentos
-auxiliares, como imputações ou transformações ad hoc, que podem introduzir viés ou perda de
-informação.
+Existem dados de sobrevivência em que uma porcentagem dos indivíduos não apresentará a ocorrência de um evento,
+mesmo se acompanhados por um longo período de tempo. Neste caso, diz-se que os indivíduos são imunes, ou curados,
+ao evento de interesse. Tem-se assim a análise de sobrevivência com dados de longa duração.
 
-Considere um conjunto de dados censurados $\left\{(\mathbf{x}_i, l_i, u_i)\right\}_{i=1}^{n}$,
-em que $\mathbf{x}_i \in \mathbb{R}^p$ representa o vetor de covariáveis, enquanto $l_i$ e
-$u_i$ denotam, respectivamente, os limites inferior e superior do intervalo no qual o valor
-alvo verdadeiro está contido. O objetivo consiste em estimar uma função
-$f: \mathbb{R}^p \to \mathbb{R}$ tal que, idealmente, $f(\mathbf{x}_i) \in [l_i, u_i]$ para a
-maior parte das observações.
+Diferentemente dos modelos tradicionais de sobrevivência, em que se assume que todos os indivíduos eventualmente
+experimentarão o evento de interesse, nos modelos de longa duração admite-se a existência de uma fração da população
+para a qual o evento nunca ocorrerá. Essa característica é usualmente denominada fração de cura.
 
-Nesse contexto, não há penalização quando a predição pertence ao intervalo observado. A
-penalização ocorre apenas quando há violação dos limites, isto é, quando $f(\mathbf{x}_i) < l_i$ ou
-$f(\mathbf{x}_i) > u_i$. A função de perda correspondente pode ser definida por:
-\begin{equation}
-c\left(f(\mathbf{x}_i), l_i, u_i\right) = \max\left\{l_i - f(\mathbf{x}_i), \; f(\mathbf{x}_i) - u_i, \; 0\right\}.
-\end{equation}
+Seja $T$ uma variável aleatória representando o tempo até a ocorrência do evento. Em modelos clássicos de sobrevivência,
+a função de sobrevivência é definida por
+\[
+S(t)=P(T>t), \quad t\geq 0,
+\]
+satisfazendo $\lim_{t\to\infty}S(t)=0$. Entretanto, em modelos com fração de cura, essa condição deixa de valer, pois
+há uma probabilidade positiva de o evento nunca ocorrer. Assim, a função de sobrevivência torna-se imprópria, isto é,
+\[
+\lim_{t\to\infty}S(t)=p_0 > 0,
+\]
+em que $p_0$ representa a fração de indivíduos curados.
 
-Essa função de perda é convexa e coincide com o erro absoluto fora do intervalo permitido,
-sendo nula quando a predição se encontra dentro do intervalo. Nos casos particulares em que
-$l_i = -\infty$ ou $u_i = +\infty$, a perda torna-se unilateral, refletindo, respectivamente,
-situações de censura à esquerda e à direita.
+Equivalentemente, pode-se escrever a função de sobrevivência populacional como
+\[
+S_{pop}(t)=p_0+(1-p_0)S_0(t),
+\]
+em que $S_0(t)$ representa a função de sobrevivência dos indivíduos suscetíveis ao evento. Nessa formulação,
+a população é vista como uma mistura entre indivíduos curados e suscetíveis.
 
-Para a formulação do problema, particiona-se o conjunto de índices $\{1, \ldots, n\}$ em três
-subconjuntos disjuntos:
-\begin{align}
-I_u &= \{i \mid l_i > -\infty,\; u_i < +\infty\}, \\
-I_r &= \{i \mid u_i = +\infty\}, \\
-I_l &= \{i \mid l_i = -\infty\}.
-\end{align}
+Os modelos de fração de cura podem ser classificados em duas abordagens principais: os modelos de mistura e os modelos de não mistura. Nos modelos de mistura,
+a fração de cura é modelada explicitamente como uma combinação entre curados e suscetíveis. Já nos modelos de não mistura,
+a estrutura da função de sobrevivência incorpora a fração de cura de forma implícita.
 
-O conjunto $I_u$ corresponde às observações com limites inferior e superior finitos,
-enquanto $I_r$ e $I_l$ representam, respectivamente, observações censuradas à direita e à
-esquerda. Define-se ainda:
-\begin{equation}
-L = I_u \cup I_r, \quad U = I_u \cup I_l,
-\end{equation}
-em que $L$ contém os índices das observações com limite inferior finito, e $U$ aqueles com
-limite superior finito.
+Entre os modelos de não mistura, destaca-se o modelo de tempo de promoção,
+também conhecido como modelo de risco acumulado limitado.
 
-Com base nessas definições, o problema de otimização associado ao SVCR pode ser formulado como:
-\begin{equation}
-\begin{aligned}
-\min_{\mathbf{w}, b, \bm{\xi}, \bm{\xi}^*} \quad
-& \frac{1}{2}\|\mathbf{w}\|^2 + C \left( \sum_{i \in U} \xi_i + \sum_{i \in L} \xi_i^* \right) \\
-\text{sujeito a:} \quad
-& \mathbf{w}^\top \mathbf{x}_i + b - u_i \leq \xi_i^*, \quad \forall i \in U, \\
-& l_i - \mathbf{w}^\top \mathbf{x}_i - b \leq \xi_i, \quad \forall i \in L, \\
-& \xi_i \geq 0, \quad \forall i \in U, \\
-& \xi_i^* \geq 0, \quad \forall i \in L.
-\end{aligned}
-\label{eq:svcr_primal}
-\end{equation}
+\subsection{Modelo de Tempo de Promoção}
 
-Essa formulação evidencia que o modelo utiliza de forma integrada todas as informações disponíveis,
-tratando simultaneamente observações não censuradas, censuradas à direita, à esquerda e
-intervalares. As variáveis de folga $\xi_i$ e $\xi_i^*$ quantificam, respectivamente, as
-violações dos limites inferior e superior impostos pelos intervalos observados.
+O modelo de tempo de promoção possui motivação biológica e foi proposto para situações em que o evento de interesse
+é desencadeado por múltiplos fatores latentes. Considere que cada indivíduo esteja exposto a $N$ riscos latentes,
+por exemplo, células cancerígenas residuais após um tratamento.
 
-Introduzindo multiplicadores de Lagrange $\alpha_i \geq 0$ e $\alpha_i^* \geq 0$ associados
-às restrições, obtém-se a formulação dual do problema:
-\begin{equation}
-\begin{aligned}
-\max_{\bm{\alpha}, \bm{\alpha}^*} \quad
-& -\frac{1}{2} \sum_{i,j=1}^{n} (\alpha_i - \alpha_i^*)(\alpha_j - \alpha_j^*) K(\mathbf{x}_i, \mathbf{x}_j) \\
-& - \sum_{i \in L} l_i \alpha_i + \sum_{i \in U} u_i \alpha_i^* \\
-\text{sujeito a:} \quad
-& \sum_{i \in L} \alpha_i - \sum_{i \in U} \alpha_i^* = 0, \\
-& 0 \leq \alpha_i \leq C, \quad 0 \leq \alpha_i^* \leq C.
-\end{aligned}
-\label{eq:svcr_dual}
-\end{equation}
+Assume-se que o número de riscos latentes segue uma distribuição de Poisson com média $\theta(\mathbf{x})>0$, isto é,
+\[
+N \sim \text{Poisson}(\theta(\mathbf{x})),
+\]
+em que $\mathbf{x}$ representa o vetor de covariáveis.
 
-A função objetivo dual é côncava, uma vez que a matriz de Gram associada ao kernel é
-semidefinida positiva, o que garante que o problema constitui um programa quadrático convexo
-bem posto. Além disso, variáveis $\alpha_i$ e $\alpha_i^*$ fora de seus respectivos conjuntos
-podem ser consideradas nulas, permitindo uma formulação uniforme para todo $i = 1, \ldots, n$.
+Seja $T_j$ o tempo necessário para que o $j$-ésimo risco latente produza o evento clínico, com função de distribuição
+acumulada $F(t)$. O tempo observado até a ocorrência do evento é definido pelo mínimo entre os tempos latentes:
+\[
+T=\min(T_1,\ldots,T_N).
+\]
+Dessa forma, a função de sobrevivência populacional corresponde à probabilidade de que nenhum dos riscos latentes
+tenha promovido o evento até o tempo $t$, dada por
+\[
+S_{pop}(t|\mathbf{x})=P(N=0)+P(N>0,T_1>t,\ldots,T_N>t).
+\]
 
-Assim como no SVR clássico, a solução depende exclusivamente de produtos internos entre
-vetores de entrada, o que permite a substituição desses produtos por uma função de kernel
-$K(\mathbf{x}_i, \mathbf{x}_j)$, viabilizando a modelagem de relações não lineares no espaço
-original. Consequentemente, a função estimada pode ser expressa como:
-\begin{equation}
-h(\mathbf{x}) = \sum_{i=1}^{n} (\alpha_i - \alpha_i^*) K(\mathbf{x}_i, \mathbf{x}) + b.
-\end{equation}
+Sob as hipóteses de independência entre os riscos latentes, obtém-se
+\[
+S_{pop}(t|\mathbf{x})=\exp\{-\theta(\mathbf{x})F(t)\}.
+\]
 
-Na solução ótima, apenas uma fração dos coeficientes $\alpha_i - \alpha_i^*$ assume valores
-não nulos, caracterizando os vetores de suporte. Essa propriedade de esparsidade é
-fundamental tanto para a eficiência computacional quanto para a interpretabilidade do modelo.
+Observa-se que, quando $t \to \infty$, tem-se $F(t)\to 1$, de modo que
+\[
+\lim_{t\to\infty}S_{pop}(t|\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
+\]
 
-Do ponto de vista computacional, o problema dual consiste em um programa quadrático com
-restrições lineares, podendo ser resolvido por métodos clássicos de otimização convexa, como
-métodos de pontos interiores, ou por abordagens mais escaláveis, como o método de otimização
-mínima sequencial (SMO). Em termos de complexidade, o SVCR apresenta comportamento comparável
-ao do SVR padrão, tornando-o adequado para problemas de dimensão moderada a elevada.
+Portanto, a fração de cura é dada por
+\[
+p_0(\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
+\]
 
-\section{Wavelet Support Vector Censored Regression}
+Uma característica importante desse modelo é que a probabilidade de cura está diretamente associada ao número esperado
+de riscos latentes. Quanto maior $\theta(\mathbf{x})$, menor a probabilidade de cura. Essa formulação torna o modelo
+particularmente atrativo por fornecer interpretação biológica clara e permitir a incorporação de covariáveis na modelagem
+da fração de cura.
 
-Wavelets constituem uma ferramenta matemática amplamente utilizada para a decomposição de
-funções, sinais e operadores em componentes localizadas no tempo (ou espaço) e na frequência.
-Diferentemente de abordagens baseadas em transformadas globais, a análise por wavelets permite
-capturar simultaneamente características locais e multiescala, sendo particularmente adequada
-para a modelagem de fenômenos não lineares e não estacionários.
+\subsection{Extensão não paramétrica via máquinas de kernel}
 
-A ideia central consiste em representar uma função $g: \mathbb{R} \to \mathbb{R}$ como uma
-combinação de funções geradas a partir de uma função base, denominada wavelet mãe, por meio
-de operações de dilatação e translação. Formalmente, define-se a família de wavelets como:
-\begin{equation}
-h_{A,B}(x) = |A|^{-1/2} \, h\left(\frac{x - B}{A}\right),
-\end{equation}
-em que $h(x)$ é a wavelet mãe, $A \in \mathbb{R} \setminus \{0\}$ é o parâmetro de escala e
-$B \in \mathbb{R}$ é o parâmetro de translação.
+Embora o modelo de tempo de promoção clássico permita incorporar covariáveis por meio de funções paramétricas para $\theta(\mathbf{x})$, essa abordagem pode ser restritiva em cenários onde a relação entre as covariáveis e a fração de cura apresenta estruturas complexas ou altamente não lineares.
 
-A partir dessa construção, uma função $g(x)$ pode ser aproximada por:
-\begin{equation}
-\hat{g}(x) = \sum_{i=1}^{t} w_i \, h_{A_i, B_i}(x),
-\end{equation}
-em que $w_i \in \mathbb{R}$ são coeficientes reais. Essa representação evidencia a capacidade
-das wavelets de aproximar funções complexas, especialmente em contextos com variações locais.
+Com o objetivo de contornar essa limitação, propõe-se modelar a intensidade média dos riscos latentes por meio de uma função não paramétrica. Para isso, define-se
 
-No contexto de máquinas de vetores de suporte, essas propriedades podem ser incorporadas por
-meio da definição de funções kernel. Para que uma função $K(\mathbf{x}, \mathbf{x}')$ seja
-um kernel válido, ela deve satisfazer as condições do teorema de Mercer, assegurando a existência
-de um espaço de características associado.
+\[
+f(\mathbf{x})=\log(\theta(\mathbf{x})).
+\]
 
-Uma escolha amplamente utilizada é a wavelet cosseno-Gaussiana, definida por:
-\begin{equation}
-h(x) = \cos(1.75x)\exp(-0.5x^2),
-\end{equation}
-que corresponde à parte real da wavelet de Morlet. Essa função apresenta boas propriedades
-de localização conjunta no domínio do tempo e da frequência.
+A utilização da função de ligação logarítmica garante que
 
-Com base nessa função, define-se o kernel de wavelet multidimensional como:
-\begin{equation}
-K(\mathbf{x}, \mathbf{x}') = \prod_{k=1}^{p} h\left(\frac{x_k - x_k'}{A}\right),
-\end{equation}
-em que $A > 0$ é um parâmetro de escala.
+\[
+\theta(\mathbf{x})=\exp(f(\mathbf{x}))>0,
+\]
 
-Esse kernel é invariante por translação e capaz de capturar estruturas locais e não lineares
-nos dados, oferecendo maior flexibilidade em comparação com kernels clássicos.
+preservando a interpretação probabilística da intensidade dos riscos latentes.
 
-O modelo Wavelet Support Vector Censored Regression incorpora esse kernel na formulação dual
-do SVCR. Dessa forma, substituindo o kernel na Equação \eqref{eq:svcr_dual}, obtém-se:
-\begin{equation}
-\begin{aligned}
-\max_{\bm{\alpha}, \bm{\alpha}^*} \quad
-& -\frac{1}{2} \sum_{i,j=1}^{n} (\alpha_i - \alpha_i^*)(\alpha_j - \alpha_j^*)
-\prod_{k=1}^{p} h\left(\frac{x_{ik} - x_{jk}}{A}\right) \\
-& - \sum_{i \in L} l_i \alpha_i + \sum_{i \in U} u_i \alpha_i^*,
-\end{aligned}
-\end{equation}
-sob as mesmas restrições definidas anteriormente.
+Assume-se que a função $f$ pertence a um Reproducing Kernel Hilbert Space (RKHS) $\mathcal{H}_K$, associado a um kernel positivo definido $K(\cdot,\cdot)$. Dessa forma, pelo Teorema do Representante, a solução do problema de otimização penalizado pode ser expressa como uma combinação linear das funções kernel centradas nas observações:
 
-Essa formulação permite combinar a robustez do SVCR com a capacidade de representação
-multiescala dos kernels de wavelet, tornando o modelo particularmente adequado para cenários
-em que a relação entre covariáveis e tempo de sobrevivência apresenta elevada complexidade
-não linear.
+\[
+f(\mathbf{x})=\sum_{j=1}^{n}\alpha_jK(\mathbf{x},\mathbf{x}_j),
+\]
+
+em que $\alpha_1,\ldots,\alpha_n \in \mathbb{R}$ são coeficientes a serem estimados.
+
+Consequentemente, a intensidade média dos riscos latentes para o indivíduo $i$ pode ser escrita como
+
+\[
+\theta(\mathbf{x}_i)=\exp\left(\sum_{j=1}^{n}\alpha_jK(\mathbf{x}_i,\mathbf{x}_j)\right).
+\]
+
+Neste trabalho, adota-se principalmente o kernel Gaussiano (RBF), definido por
+
+\[
+K(\mathbf{x}_i,\mathbf{x}_j)=\exp\left(-\gamma\|\mathbf{x}_i-\mathbf{x}_j\|^2\right),
+\]
+
+onde $\gamma>0$ é um hiperparâmetro que controla a influência local de cada observação.
+
+Essa formulação amplia significativamente a flexibilidade do modelo, permitindo capturar relações complexas e interações entre covariáveis sem impor, a priori, uma estrutura funcional específica para a componente de cura.
+
+\subsection{Modelagem da sobrevivência dos suscetíveis}
+
+Além da modelagem flexível da fração de cura, é necessário especificar a distribuição dos tempos de falha dos indivíduos suscetíveis. Para isso, propõe-se o uso da distribuição Gama Generalizada (GG), devido à sua elevada flexibilidade e capacidade de acomodar diferentes formatos da função de risco.
+
+A função densidade de probabilidade da distribuição GG é dada por
+
+\[
+f_{GG}(t;a,d,p)=
+\frac{pt^{d-1}\exp\left(-(t/a)^p\right)}
+{a^d\Gamma(d/p)},
+\]
+
+e sua função de distribuição acumulada é definida como
+
+\[
+F_{GG}(t;a,d,p)=
+\frac{\gamma\left(d/p,(t/a)^p\right)}
+{\Gamma(d/p)},
+\]
+
+onde $a>0$ é o parâmetro de escala, $d>0$ e $p>0$ são parâmetros de forma, $\Gamma(\cdot)$ é a função gama e $\gamma(\cdot,\cdot)$ denota a função gama incompleta inferior.
+
+A escolha dessa distribuição se justifica pelo fato de incluir importantes modelos clássicos como casos particulares:
+
+\begin{itemize}
+    \item Weibull, quando $d=p$;
+    \item Gama, quando $p=1$;
+    \item Log-normal, como caso limite quando $d/p \to \infty$.
+\end{itemize}
+
+Essa generalidade permite ao modelo adaptar-se a diferentes comportamentos da taxa de risco, incluindo funções monotônicas crescentes, decrescentes, unimodais e em formato de banheira.
+
+
+\subsection{Estimação e verossimilhança penalizada}
+
+Considere uma amostra observada composta por $n$ indivíduos,
+
+\[
+\mathcal{D}=\{(\mathbf{x}_i,t_i,\delta_i)\}_{i=1}^{n},
+\]
+
+em que $\mathbf{x}_i$ representa o vetor de covariáveis, $t_i$ o tempo observado e $\delta_i$ o indicador de falha, tal que $\delta_i=1$ indica ocorrência do evento e $\delta_i=0$ indica censura.
+
+No modelo de tempo de promoção, a contribuição individual para a função de verossimilhança é dada por
+
+\[
+L_i=h_{pop}(t_i|\mathbf{x}_i)^{\delta_i}S_{pop}(t_i|\mathbf{x}_i),
+\]
+
+de modo que a log-verossimilhança individual é
+
+\[
+\ell_i=\delta_i\log\left(h_{pop}(t_i|\mathbf{x}_i)\right)+\log\left(S_{pop}(t_i|\mathbf{x}_i)\right).
+\]
+
+No modelo GG-KM, a função de sobrevivência populacional é dada por
+
+\[
+S_{pop}(t|\mathbf{x})=\exp\left\{-\theta(\mathbf{x})F_{GG}(t)\right\},
+\]
+
+enquanto a função de risco populacional pode ser escrita como
+
+\[
+h_{pop}(t|\mathbf{x})=\theta(\mathbf{x})f_{GG}(t).
+\]
+
+Substituindo essas expressões na log-verossimilhança, obtém-se
+
+\[
+\ell_i=
+\delta_i
+\left[
+\log(\theta(\mathbf{x}_i))
++
+\log(f_{GG}(t_i))
+\right]
+-
+\theta(\mathbf{x}_i)F_{GG}(t_i).
+\]
+
+Como $\theta(\mathbf{x})=\exp(f(\mathbf{x}))$ e
+
+\[
+f(\mathbf{x})=\sum_{j=1}^{n}\alpha_jK(\mathbf{x},\mathbf{x}_j),
+\]
+
+a log-verossimilhança conjunta torna-se
+
+\[
+\ell(\Theta)
+=
+\sum_{i=1}^{n}
+\left\{
+\delta_i
+\left[
+f(\mathbf{x}_i)+\log(f_{GG}(t_i))
+\right]
+-
+\exp(f(\mathbf{x}_i))F_{GG}(t_i)
+\right\},
+\]
+
+onde $\Theta=(\alpha,a,d,p)$ representa o conjunto completo de parâmetros.
+
+Para controlar a complexidade da função estimada no RKHS e evitar sobreajuste, adiciona-se um termo de penalização quadrática baseado na norma induzida pelo kernel. Assim, define-se a função objetivo penalizada:
+
+\[
+J(\Theta)
+=
+-\ell(\Theta)
++
+\frac{\lambda_{reg}}{2}\alpha^\top K\alpha.
+\]
+
+Equivalentemente,
+
+\[
+J(\Theta)
+=
+-
+\sum_{i=1}^{n}
+\left\{
+\delta_i
+\left[
+f(\mathbf{x}_i)+\log(f_{GG}(t_i))
+\right]
+-
+\exp(f(\mathbf{x}_i))F_{GG}(t_i)
+\right\}
++
+\frac{\lambda_{reg}}{2}\alpha^\top K\alpha.
+\]
+
+Em notação matricial, essa expressão pode ser escrita como
+
+\[
+J(\Theta)
+=
+-
+\left[
+\delta^\top(K\alpha+\log f_{GG})
+-
+w^\top F_{GG}
+\right]
++
+\frac{\lambda_{reg}}{2}\alpha^\top K\alpha,
+\]
+
+em que:
+
+\begin{itemize}
+    \item $\delta=(\delta_1,\ldots,\delta_n)^\top$ é o vetor de indicadores de censura;
+    \item $K$ é a matriz de Gram associada ao kernel escolhido;
+    \item $w=\exp(K\alpha)$ representa o vetor das intensidades latentes;
+    \item $\log f_{GG}=(\log f_{GG}(t_1),\ldots,\log f_{GG}(t_n))^\top$;
+    \item $F_{GG}=(F_{GG}(t_1),\ldots,F_{GG}(t_n))^\top$.
+\end{itemize}
+
+A estimação dos parâmetros é realizada por minimização numérica da função objetivo $J(\Theta)$.
+Como não existe solução analítica fechada, utiliza-se um algoritmo iterativo baseado em gradientes, especificamente o método L-BFGS, devido à sua eficiência em problemas de alta dimensão e sua boa estabilidade numérica.
+
+\subsection{Gradientes analíticos}
+
+Para tornar o processo de otimização mais eficiente, derivam-se explicitamente os gradientes da função objetivo em relação a todos os parâmetros do modelo.
+
+O gradiente em relação aos coeficientes do kernel $\alpha$ é dado por
+
+\[
+\nabla_{\alpha}J
+=
+-K(\delta-w\odot F_{GG})
++
+\lambda_{reg}K\alpha,
+\]
+
+em que $\odot$ denota o produto de Hadamard.
+
+Para os parâmetros da distribuição Gama Generalizada, define-se
+
+\[
+u_i=\left(\frac{t_i}{a}\right)^p
+\quad\text{e}\quad
+s=\frac{d}{p}.
+\]
+
+Os gradientes em relação aos parâmetros $a$, $d$ e $p$ são obtidos analiticamente e utilizados conjuntamente no procedimento iterativo de otimização.
+
+Dessa forma, em cada iteração, atualizam-se simultaneamente os parâmetros
+
+\[
+\Theta=(\alpha,a,d,p),
+\]
+
+até a convergência do algoritmo.
+
+Esse procedimento permite estimar de maneira conjunta tanto a estrutura não linear da fração de cura quanto a dinâmica paramétrica da sobrevivência dos indivíduos suscetíveis, resultando em um modelo semiparamétrico altamente flexível.

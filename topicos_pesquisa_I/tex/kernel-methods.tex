@@ -1,0 +1,88 @@
+\noindent Métodos baseados em Kernel são técnicas extremamente flexíveis que podem ser utilizados
+para estender modelos ou algoritmos para regiões de decisão não lineares \cite{mohri2018foundations}. Estes métodos
+são baseados nas conheecidas funções de kernel, os quais, sob condições de simetria e positiva definida, definem
+produtos internos em espaços de alta dimensão, conhecidos como espaços de Hilbert. Dessa forma, este capítulo
+terá como objetivo definir e apresentar os conceitos fundamentais sobre métodos baseados em kernel,
+incluindo a definição de funções de kernel, o teorema do representer e Reproducing Kernel Hilbert
+Space (RKHS).
+
+\section{Kernels}
+
+Por definição, uma função $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ é chamada de kernel sobre
+$\mathcal{X}$.
+A ideia central é construir um kernel $K$ tal que, para quaisquer dois pontos $x, x' \in \mathcal{X}$, $K(x, x')$
+corresponda ao produto interno entre duas representações desses pontos em um espaço de Hilbert
+$\mathcal{H}$, isto é,
+$$
+\forall x, x' \in \mathcal{X}, \quad K(x,x') = \langle \phi(x), \phi(x') \rangle,
+$$
+para algum mapeamento $\phi: \mathcal{X} \to \mathcal{H}$. O espaço $\mathcal{H}$ é chamado de
+feature space.
+
+Sob essa perspectiva, o kernel pode ser interpretado como uma medida de similaridade entre elementos
+de $\mathcal{X}$, uma vez que o produto interno mensura a similaridade entre dois vetores.
+
+Uma vantagem fundamental dessa abordagem é computacional. Isto é, muitas vezes é significativamente mais eficiente
+calcular diretamente $K(x,x')$ do que computar explicitamente $\phi(x)$ e $\phi(x')$ e então avaliar
+seu produto interno.
+
+\subsection{Kernels positivos definidos}
+
+Para que uma função $K$ possa ser utilizada como kernel, é necessário que sejam satisfeitas duas condições, que
+a função seja simétrica e positiva definida. Satisfazendo essas condições, o kernel é capaz de induzir uma geometria
+em um espaço de Hilbert.
+
+Formalmente, um kernel $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ é dito simétrico e positivo
+definido se, para qualquer conjunto finito $\{x_1, \ldots, x_n\} \subset \mathcal{X}$, a matriz de Gram
+$$
+\mathbf{K} = [K(x_i,x_j)]_{i,j=1}^n \in \mathbb{R}^{n \times n}
+$$
+for positiva semidefinida. Isto é, para qualquer vetor $\mathbf{c}=(c_1,\ldots,c_n)^\top \in \mathbb{R}^n$,
+$$
+\mathbf{c}^\top \mathbf{K}\mathbf{c}
+=
+\sum_{i=1}^n \sum_{j=1}^n c_i c_j K(x_i,x_j)
+\geq 0.
+$$
+
+Equivalentemente, todos os autovalores de $\mathbf{K}$ são não negativos. Essa propriedade é essencial,
+pois garante a existência de uma representação geométrica consistente do kernel.
+
+\subsection{Espaços de Hilbert}
+
+A noção de espaço de Hilbert fornece a estrutura matemática necessária para a teoria de kernels.
+
+Por definição, um espaço de Hilbert $\mathcal{H}$ é um espaço vetorial munido de um produto interno
+$\langle \cdot, \cdot \rangle_{\mathcal{H}}$ e que é completo com relação à norma induzida por esse produto interno. A norma em $\mathcal{H}$ é definida por
+$$
+\forall h \in \mathcal{H}, \quad \|h\|_{\mathcal{H}} = \sqrt{\langle h,h\rangle}.
+$$
+
+A completude implica que toda sequência de Cauchy em $\mathcal{H}$ converge para um elemento do próprio
+espaço, garantindo estabilidade analítica para problemas de otimização e aproximação.
+
+No contexto de kernels, o espaço de Hilbert atua como o espaço onde os dados são representados via o
+mapeamento $\phi$.
+
+\subsection{Reproducing Kernel Hilbert Spaces}
+
+A relação entre kernels positivos definidos e espaços de Hilbert é formalizada pelo teorema.
+
+Seja $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ um kernel simétrico e positivo definido. Então existe um espaço de Hilbert $\mathcal{H}$ e um mapeamento $\phi: \mathcal{X} \to \mathcal{H}$ tais que
+
+$$
+\forall x,x' \in \mathcal{X}, \quad K(x,x') = \langle \phi(x), \phi(x') \rangle_{\mathcal{H}}.
+$$
+
+Além disso, esse espaço satisfaz a chamada propriedade de reprodução:
+
+$$
+\forall h \in \mathcal{H}, \forall x \in \mathcal{X}, \quad h(x) = \langle h, K(x,\cdot)\rangle_{\mathcal{H}}.
+$$
+
+Essa propriedade estabelece que a avaliação funcional é contínua e pode ser representada por meio do próprio
+ kernel.
+
+O espaço $\mathcal{H}$ associado a $K$ é chamado de Reproducing Kernel Hilbert Space (RKHS), desempenhando
+papel central em métodos de aprendizado estatístico, particularmente em problemas de regularização,
+estimação não paramétrica e aprendizado supervisionado.

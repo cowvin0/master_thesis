@@ -1,124 +1,124 @@
-\section{Aplicação em Dados Simulados}
+% \section{Aplicação em Dados Simulados}
 
-A Tabela \ref{tab:final_results_refit} apresenta o desempenho preditivo dos modelos
-considerados em dados simulados, avaliados por meio do C-index, para diferentes tamanhos
-amostrais e proporções de censura. Os resultados refletem um cenário no qual a relação
-entre as covariáveis e o tempo de falha é explicitamente não linear, o que permite analisar
-a capacidade dos métodos em capturar tais estruturas.
+% A Tabela \ref{tab:final_results_refit} apresenta o desempenho preditivo dos modelos
+% considerados em dados simulados, avaliados por meio do C-index, para diferentes tamanhos
+% amostrais e proporções de censura. Os resultados refletem um cenário no qual a relação
+% entre as covariáveis e o tempo de falha é explicitamente não linear, o que permite analisar
+% a capacidade dos métodos em capturar tais estruturas.
 
-\begin{table}[ht]
-\centering
-\caption{Resultados em dados simulados com a média da métrica C-index para os conjuntos de dados.}
-\label{tab:final_results_refit}
-\small
-\begin{tabular}{lccccccccc|c}
-\toprule
-\textbf{n} & \multicolumn{3}{c}{\textbf{50}} & \multicolumn{3}{c}{\textbf{100}} & \multicolumn{3}{c}{\textbf{300}} & \multirow{2}{*}{\textbf{Média}} \\
-\cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10}
-\textbf{censura (\%)} & \textbf{0.1} & \textbf{0.25} & \textbf{0.5} & \textbf{0.1} & \textbf{0.25} & \textbf{0.5} & \textbf{0.1} & \textbf{0.25} & \textbf{0.5} & \\
-\midrule
-laplacian    & 0.730 & 0.751 & 0.777 & 0.771 & 0.784 & 0.795 & 0.825 & 0.833 & 0.848 & 0.791 \\
-cauchy       & 0.739 & 0.754 & 0.774 & 0.771 & 0.773 & 0.799 & 0.817 & 0.825 & 0.846 & 0.789 \\
-poly         & 0.734 & 0.757 & 0.779 & 0.776 & 0.783 & 0.813 & 0.798 & 0.808 & 0.842 & 0.788 \\
-exponential  & 0.730 & 0.736 & 0.763 & 0.772 & 0.788 & 0.791 & 0.819 & 0.827 & 0.848 & 0.786 \\
-rbf          & 0.720 & 0.726 & 0.760 & 0.769 & 0.782 & 0.783 & 0.809 & 0.815 & 0.836 & 0.778 \\
-wavelet      & 0.709 & 0.718 & 0.723 & 0.758 & 0.769 & 0.783 & 0.794 & 0.801 & 0.821 & 0.764 \\
-\midrule
-cox        & 0.727 & 0.736 & 0.782 & 0.750 & 0.755 & 0.793 & 0.743 & 0.766 & 0.806 & 0.762 \\
-linear       & 0.704 & 0.742 & 0.755 & 0.730 & 0.750 & 0.782 & 0.748 & 0.764 & 0.804 & 0.753 \\
-\bottomrule
-\end{tabular}
-\end{table}
+% \begin{table}[ht]
+% \centering
+% \caption{Resultados em dados simulados com a média da métrica C-index para os conjuntos de dados.}
+% \label{tab:final_results_refit}
+% \small
+% \begin{tabular}{lccccccccc|c}
+% \toprule
+% \textbf{n} & \multicolumn{3}{c}{\textbf{50}} & \multicolumn{3}{c}{\textbf{100}} & \multicolumn{3}{c}{\textbf{300}} & \multirow{2}{*}{\textbf{Média}} \\
+% \cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10}
+% \textbf{censura (\%)} & \textbf{0.1} & \textbf{0.25} & \textbf{0.5} & \textbf{0.1} & \textbf{0.25} & \textbf{0.5} & \textbf{0.1} & \textbf{0.25} & \textbf{0.5} & \\
+% \midrule
+% laplacian    & 0.730 & 0.751 & 0.777 & 0.771 & 0.784 & 0.795 & 0.825 & 0.833 & 0.848 & 0.791 \\
+% cauchy       & 0.739 & 0.754 & 0.774 & 0.771 & 0.773 & 0.799 & 0.817 & 0.825 & 0.846 & 0.789 \\
+% poly         & 0.734 & 0.757 & 0.779 & 0.776 & 0.783 & 0.813 & 0.798 & 0.808 & 0.842 & 0.788 \\
+% exponential  & 0.730 & 0.736 & 0.763 & 0.772 & 0.788 & 0.791 & 0.819 & 0.827 & 0.848 & 0.786 \\
+% rbf          & 0.720 & 0.726 & 0.760 & 0.769 & 0.782 & 0.783 & 0.809 & 0.815 & 0.836 & 0.778 \\
+% wavelet      & 0.709 & 0.718 & 0.723 & 0.758 & 0.769 & 0.783 & 0.794 & 0.801 & 0.821 & 0.764 \\
+% \midrule
+% cox        & 0.727 & 0.736 & 0.782 & 0.750 & 0.755 & 0.793 & 0.743 & 0.766 & 0.806 & 0.762 \\
+% linear       & 0.704 & 0.742 & 0.755 & 0.730 & 0.750 & 0.782 & 0.748 & 0.764 & 0.804 & 0.753 \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
 
-De forma geral, observa-se que os modelos baseados em SVCR com kernels não lineares
-apresentam desempenho superior ao modelo de Cox e ao modelo linear em praticamente todos
-os cenários considerados. Em particular, os kernels Laplaciano, Cauchy e Polinomial
-destacam-se como os mais eficazes, apresentando os maiores valores médios de C-index. Esse
-comportamento é consistente com o fato de que tais kernels são capazes de modelar relações
-não lineares complexas por meio de mapeamentos implícitos para espaços de maior dimensão, o
-que lhes confere maior flexibilidade em comparação a modelos lineares.
+% De forma geral, observa-se que os modelos baseados em SVCR com kernels não lineares
+% apresentam desempenho superior ao modelo de Cox e ao modelo linear em praticamente todos
+% os cenários considerados. Em particular, os kernels Laplaciano, Cauchy e Polinomial
+% destacam-se como os mais eficazes, apresentando os maiores valores médios de C-index. Esse
+% comportamento é consistente com o fato de que tais kernels são capazes de modelar relações
+% não lineares complexas por meio de mapeamentos implícitos para espaços de maior dimensão, o
+% que lhes confere maior flexibilidade em comparação a modelos lineares.
 
-O modelo de Cox, por sua vez, apresenta desempenho intermediário. Embora seja competitivo
-em algumas configurações, seu desempenho é, em média,
-inferior ao dos melhores modelos baseados em kernel. Esse resultado é esperado, dado que o
-modelo de Cox assume uma estrutura linear no preditor do log-risco, o que o torna
-potencialmente inadequado quando a verdadeira relação entre as covariáveis e o tempo de
-sobrevivência é não linear, como no caso do mecanismo gerador dos dados considerado neste
-estudo.
+% O modelo de Cox, por sua vez, apresenta desempenho intermediário. Embora seja competitivo
+% em algumas configurações, seu desempenho é, em média,
+% inferior ao dos melhores modelos baseados em kernel. Esse resultado é esperado, dado que o
+% modelo de Cox assume uma estrutura linear no preditor do log-risco, o que o torna
+% potencialmente inadequado quando a verdadeira relação entre as covariáveis e o tempo de
+% sobrevivência é não linear, como no caso do mecanismo gerador dos dados considerado neste
+% estudo.
 
-Outro aspecto relevante refere-se ao efeito do tamanho amostral. Observa-se um aumento
-consistente do C-index à medida que o número de observações cresce de $n = 50$ para $n = 300$.
-Esse padrão é verificado para todos os modelos analisados e está alinhado com resultados
-teóricos, uma vez que o aumento do tamanho da amostra reduz a variabilidade dos estimadores e
-melhora a capacidade de generalização dos modelos, especialmente em abordagens mais flexíveis,
-como aquelas baseadas em kernels.
+% Outro aspecto relevante refere-se ao efeito do tamanho amostral. Observa-se um aumento
+% consistente do C-index à medida que o número de observações cresce de $n = 50$ para $n = 300$.
+% Esse padrão é verificado para todos os modelos analisados e está alinhado com resultados
+% teóricos, uma vez que o aumento do tamanho da amostra reduz a variabilidade dos estimadores e
+% melhora a capacidade de generalização dos modelos, especialmente em abordagens mais flexíveis,
+% como aquelas baseadas em kernels.
 
-No que diz respeito à proporção de censura, nota-se, em diversos casos, um aumento do valor
-do C-index à medida que a censura se eleva de 10\% para 50\%. No entanto, essa evidência
-deve ser interpretada com cautela. Do ponto de vista metodológico, o aumento da censura
-reduz o número de pares comparáveis utilizados no cálculo do C-index, o que pode levar a
-estimativas mais instáveis e, em alguns casos, artificialmente elevadas. Assim, esse
-comportamento não deve ser interpretado como uma melhoria efetiva da capacidade preditiva
-dos modelos, mas sim como um efeito da estrutura da censura sobre a métrica de avaliação.
+% No que diz respeito à proporção de censura, nota-se, em diversos casos, um aumento do valor
+% do C-index à medida que a censura se eleva de 10\% para 50\%. No entanto, essa evidência
+% deve ser interpretada com cautela. Do ponto de vista metodológico, o aumento da censura
+% reduz o número de pares comparáveis utilizados no cálculo do C-index, o que pode levar a
+% estimativas mais instáveis e, em alguns casos, artificialmente elevadas. Assim, esse
+% comportamento não deve ser interpretado como uma melhoria efetiva da capacidade preditiva
+% dos modelos, mas sim como um efeito da estrutura da censura sobre a métrica de avaliação.
 
-Entre os diferentes kernels, o kernel Laplaciano apresenta o melhor desempenho médio global,
-seguido de perto pelos kernels Cauchy e Polinomial. Esses resultados sugerem que kernels
-com maior sensibilidade a variações locais podem ser mais adequados para capturar a
-estrutura dos dados simulados. Por outro lado, o kernel Gaussiano (RBF), embora também não
-linear, apresenta desempenho ligeiramente inferior, possivelmente devido à sua maior suavidade.
-O kernel wavelet, por sua vez, apresenta desempenho competitivo, porém inferior aos demais
-kernels não lineares, o que pode estar relacionado à sua dependência de parâmetros de escala
-e à natureza oscilatória de suas funções base.
+% Entre os diferentes kernels, o kernel Laplaciano apresenta o melhor desempenho médio global,
+% seguido de perto pelos kernels Cauchy e Polinomial. Esses resultados sugerem que kernels
+% com maior sensibilidade a variações locais podem ser mais adequados para capturar a
+% estrutura dos dados simulados. Por outro lado, o kernel Gaussiano (RBF), embora também não
+% linear, apresenta desempenho ligeiramente inferior, possivelmente devido à sua maior suavidade.
+% O kernel wavelet, por sua vez, apresenta desempenho competitivo, porém inferior aos demais
+% kernels não lineares, o que pode estar relacionado à sua dependência de parâmetros de escala
+% e à natureza oscilatória de suas funções base.
 
-Em síntese, os resultados obtidos indicam que, em cenários caracterizados por relações não
-lineares e presença de censura, métodos baseados em SVCR com kernels adequados apresentam
-vantagens relevantes em termos de desempenho preditivo quando comparados a abordagens
-lineares ou semiparamétricas clássicas. Além disso, reforçam a importância de considerar
-cuidadosamente tanto a estrutura dos dados quanto a escolha da métrica de avaliação na
-análise de modelos de sobrevivência.
+% Em síntese, os resultados obtidos indicam que, em cenários caracterizados por relações não
+% lineares e presença de censura, métodos baseados em SVCR com kernels adequados apresentam
+% vantagens relevantes em termos de desempenho preditivo quando comparados a abordagens
+% lineares ou semiparamétricas clássicas. Além disso, reforçam a importância de considerar
+% cuidadosamente tanto a estrutura dos dados quanto a escolha da métrica de avaliação na
+% análise de modelos de sobrevivência.
 
-\section{Aplicação em Dados Reais}
+% \section{Aplicação em Dados Reais}
 
-A avaliação empírica em dados reais foi conduzida utilizando três bases amplamente empregadas na literatura de análise de sobrevivência: gbsg2, veterans e whas500. Essas bases apresentam características distintas em termos de tamanho amostral, dimensionalidade e, sobretudo, proporção de censura, o que permite analisar o comportamento dos modelos sob diferentes regimes informacionais.
+% A avaliação empírica em dados reais foi conduzida utilizando três bases amplamente empregadas na literatura de análise de sobrevivência: gbsg2, veterans e whas500. Essas bases apresentam características distintas em termos de tamanho amostral, dimensionalidade e, sobretudo, proporção de censura, o que permite analisar o comportamento dos modelos sob diferentes regimes informacionais.
 
-A base gbsg2 (German Breast Cancer Study Group 2) contém 686 observações e 8 covariáveis, tendo como desfecho o tempo até recorrência da doença, com aproximadamente 43,6\% de eventos observados. Trata-se, portanto, de um cenário com censura moderada e tamanho amostral relativamente elevado. A base whas500 (Worcester Heart Attack Study) possui 500 indivíduos e 14 variáveis explicativas, com desfecho associado à mortalidade, apresentando 43,0\% de eventos. Por fim, a base veterans, oriunda do estudo Veterans’ Administration Lung Cancer Trial, é composta por 137 observações e 6 covariáveis, com uma taxa extremamente elevada de eventos (93,4\%), caracterizando um cenário de baixa censura e alta disponibilidade de informação sobre o tempo de falha.
+% A base gbsg2 (German Breast Cancer Study Group 2) contém 686 observações e 8 covariáveis, tendo como desfecho o tempo até recorrência da doença, com aproximadamente 43,6\% de eventos observados. Trata-se, portanto, de um cenário com censura moderada e tamanho amostral relativamente elevado. A base whas500 (Worcester Heart Attack Study) possui 500 indivíduos e 14 variáveis explicativas, com desfecho associado à mortalidade, apresentando 43,0\% de eventos. Por fim, a base veterans, oriunda do estudo Veterans’ Administration Lung Cancer Trial, é composta por 137 observações e 6 covariáveis, com uma taxa extremamente elevada de eventos (93,4\%), caracterizando um cenário de baixa censura e alta disponibilidade de informação sobre o tempo de falha.
 
-Os resultados apresentados na Tabela \ref{tab:real_world_results} evidenciam alguns padrões importantes. Em primeiro lugar, observa-se que o desempenho dos modelos varia significativamente entre as bases, refletindo não apenas diferenças estruturais nos dados, mas também a adequação relativa de cada abordagem às características do mecanismo gerador.
+% Os resultados apresentados na Tabela \ref{tab:real_world_results} evidenciam alguns padrões importantes. Em primeiro lugar, observa-se que o desempenho dos modelos varia significativamente entre as bases, refletindo não apenas diferenças estruturais nos dados, mas também a adequação relativa de cada abordagem às características do mecanismo gerador.
 
-\begin{table}[ht]
-\centering
-\caption{C-index médio em conjunto de dados reais.}
-\label{tab:real_world_results}
-\small
-\begin{tabular}{lccc|c}
-\toprule
-\textbf{Método} & \textbf{gbsg2} & \textbf{veterans} & \textbf{whas500} & \textbf{Média} \\
-linear      & 0.691 & 0.740 & 0.765 & 0.732 \\
-poly        & 0.682 & 0.712 & 0.762 & 0.719 \\
-\midrule
-cox       & 0.680 & 0.711 & 0.763 & 0.718 \\
-\midrule
-exponential & 0.674 & 0.716 & 0.761 & 0.717 \\
-wavelet     & 0.681 & 0.716 & 0.730 & 0.709 \\
-cauchy      & 0.671 & 0.703 & 0.751 & 0.709 \\
-laplacian   & 0.681 & 0.702 & 0.742 & 0.708 \\
-rbf         & 0.640 & 0.706 & 0.696 & 0.681 \\
-\bottomrule
-\end{tabular}
-\end{table}
+% \begin{table}[ht]
+% \centering
+% \caption{C-index médio em conjunto de dados reais.}
+% \label{tab:real_world_results}
+% \small
+% \begin{tabular}{lccc|c}
+% \toprule
+% \textbf{Método} & \textbf{gbsg2} & \textbf{veterans} & \textbf{whas500} & \textbf{Média} \\
+% linear      & 0.691 & 0.740 & 0.765 & 0.732 \\
+% poly        & 0.682 & 0.712 & 0.762 & 0.719 \\
+% \midrule
+% cox       & 0.680 & 0.711 & 0.763 & 0.718 \\
+% \midrule
+% exponential & 0.674 & 0.716 & 0.761 & 0.717 \\
+% wavelet     & 0.681 & 0.716 & 0.730 & 0.709 \\
+% cauchy      & 0.671 & 0.703 & 0.751 & 0.709 \\
+% laplacian   & 0.681 & 0.702 & 0.742 & 0.708 \\
+% rbf         & 0.640 & 0.706 & 0.696 & 0.681 \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
 
-Na base gbsg2, os desempenhos são relativamente próximos, com valores de C-index
-concentrados no intervalo $[0.64, 0.69]$. O modelo linear apresenta o melhor desempenho
-(0.691), seguido de perto pelo modelo de Cox (0.680) e pelo kernel wavelet (0.681). Esse comportamento sugere que, embora o mecanismo gerador possa conter componentes não lineares, há uma componente aproximadamente linear dominante que é bem capturada por modelos paramétricos clássicos. A pequena vantagem do modelo linear sobre o modelo de Cox pode indicar que a estrutura de risco proporcional não é perfeitamente satisfeita, ou que a regularização implícita do SVR contribui para maior robustez.
+% Na base gbsg2, os desempenhos são relativamente próximos, com valores de C-index
+% concentrados no intervalo $[0.64, 0.69]$. O modelo linear apresenta o melhor desempenho
+% (0.691), seguido de perto pelo modelo de Cox (0.680) e pelo kernel wavelet (0.681). Esse comportamento sugere que, embora o mecanismo gerador possa conter componentes não lineares, há uma componente aproximadamente linear dominante que é bem capturada por modelos paramétricos clássicos. A pequena vantagem do modelo linear sobre o modelo de Cox pode indicar que a estrutura de risco proporcional não é perfeitamente satisfeita, ou que a regularização implícita do SVR contribui para maior robustez.
 
-Na base veterans, observa-se um aumento geral nos valores de C-index, com destaque novamente para o modelo linear (0.740), seguido pelos kernels exponencial e wavelet (ambos com 0.716) e pelo modelo de Cox (0.711). A elevada proporção de eventos implica menor incerteza associada à censura, o que favorece métodos baseados em ordenação direta dos tempos. Nesse contexto, a superioridade do modelo linear sugere que relações aproximadamente lineares são suficientes para capturar a estrutura do risco, enquanto kernels mais complexos não proporcionam ganhos expressivos, possivelmente devido ao tamanho reduzido da amostra, que limita a estimação confiável de relações altamente não lineares.
+% Na base veterans, observa-se um aumento geral nos valores de C-index, com destaque novamente para o modelo linear (0.740), seguido pelos kernels exponencial e wavelet (ambos com 0.716) e pelo modelo de Cox (0.711). A elevada proporção de eventos implica menor incerteza associada à censura, o que favorece métodos baseados em ordenação direta dos tempos. Nesse contexto, a superioridade do modelo linear sugere que relações aproximadamente lineares são suficientes para capturar a estrutura do risco, enquanto kernels mais complexos não proporcionam ganhos expressivos, possivelmente devido ao tamanho reduzido da amostra, que limita a estimação confiável de relações altamente não lineares.
 
-A base whas500 apresenta o melhor desempenho geral entre os cenários considerados, com valores de C-index atingindo até 0.765 para o modelo linear. Observa-se que tanto o modelo de Cox (0.763) quanto o kernel polinomial (0.762) apresentam desempenho bastante próximo, indicando forte consistência entre abordagens lineares e levemente não lineares. Nesse caso, a maior dimensionalidade (14 covariáveis) combinada com tamanho amostral intermediário parece favorecer modelos com capacidade moderada de flexibilidade, sem incorrer em sobreajuste significativo.
+% A base whas500 apresenta o melhor desempenho geral entre os cenários considerados, com valores de C-index atingindo até 0.765 para o modelo linear. Observa-se que tanto o modelo de Cox (0.763) quanto o kernel polinomial (0.762) apresentam desempenho bastante próximo, indicando forte consistência entre abordagens lineares e levemente não lineares. Nesse caso, a maior dimensionalidade (14 covariáveis) combinada com tamanho amostral intermediário parece favorecer modelos com capacidade moderada de flexibilidade, sem incorrer em sobreajuste significativo.
 
-Quando se considera o desempenho médio entre as bases, o modelo linear apresenta o melhor resultado global (0.732), seguido pelo kernel polinomial (0.719) e pelo modelo de Cox (0.718). Esse resultado é particularmente relevante, pois indica que, apesar da maior flexibilidade teórica dos kernels não lineares, tal flexibilidade não se traduz necessariamente em ganhos empíricos consistentes em dados reais. Pelo contrário, modelos mais simples tendem a apresentar melhor equilíbrio entre viés e variância, especialmente em cenários com tamanho amostral limitado ou estrutura de dependência relativamente suave.
+% Quando se considera o desempenho médio entre as bases, o modelo linear apresenta o melhor resultado global (0.732), seguido pelo kernel polinomial (0.719) e pelo modelo de Cox (0.718). Esse resultado é particularmente relevante, pois indica que, apesar da maior flexibilidade teórica dos kernels não lineares, tal flexibilidade não se traduz necessariamente em ganhos empíricos consistentes em dados reais. Pelo contrário, modelos mais simples tendem a apresentar melhor equilíbrio entre viés e variância, especialmente em cenários com tamanho amostral limitado ou estrutura de dependência relativamente suave.
 
-Os kernels mais complexos, como RBF e Cauchy, apresentaram desempenho inferior de forma consistente, com destaque negativo para o RBF (média de 0.681). Esse comportamento pode ser atribuído à maior sensibilidade desses kernels à escolha de hiperparâmetros e ao risco de sobreajuste, especialmente quando o número de observações não é suficientemente grande para sustentar a complexidade do modelo.
+% Os kernels mais complexos, como RBF e Cauchy, apresentaram desempenho inferior de forma consistente, com destaque negativo para o RBF (média de 0.681). Esse comportamento pode ser atribuído à maior sensibilidade desses kernels à escolha de hiperparâmetros e ao risco de sobreajuste, especialmente quando o número de observações não é suficientemente grande para sustentar a complexidade do modelo.
 
-Por fim, o kernel wavelet, embora teoricamente atraente por sua capacidade de capturar padrões locais e multiescala, não apresentou vantagem empírica significativa nos conjuntos analisados (média de 0.709). Esse resultado sugere que, nos cenários considerados, a estrutura dos dados não apresenta variações locais suficientemente complexas para justificar o uso de representações multiescala, ou que a parametrização adotada não foi capaz de explorar plenamente essas características.
+% Por fim, o kernel wavelet, embora teoricamente atraente por sua capacidade de capturar padrões locais e multiescala, não apresentou vantagem empírica significativa nos conjuntos analisados (média de 0.709). Esse resultado sugere que, nos cenários considerados, a estrutura dos dados não apresenta variações locais suficientemente complexas para justificar o uso de representações multiescala, ou que a parametrização adotada não foi capaz de explorar plenamente essas características.
 
-Em síntese, os resultados indicam que, em aplicações reais, a escolha do modelo deve considerar cuidadosamente o trade-off entre flexibilidade e estabilidade estatística. Modelos lineares e de baixa complexidade continuam a apresentar desempenho competitivo, enquanto abordagens mais sofisticadas exigem maior cautela na calibração e validação para que seus potenciais benefícios possam ser efetivamente realizados.
+% Em síntese, os resultados indicam que, em aplicações reais, a escolha do modelo deve considerar cuidadosamente o trade-off entre flexibilidade e estabilidade estatística. Modelos lineares e de baixa complexidade continuam a apresentar desempenho competitivo, enquanto abordagens mais sofisticadas exigem maior cautela na calibração e validação para que seus potenciais benefícios possam ser efetivamente realizados.

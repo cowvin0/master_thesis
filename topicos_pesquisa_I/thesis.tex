@@ -57,58 +57,32 @@
 % conter no máximo 500 palavras
 % conter no mínimo 1 e no máximo 5 palavras-chave
 \textoresumo[brazil]{
-    O presente trabalho é inspirado no artigo de \citeonline{maia2023wavelet}, cujo foco central é a proposição
-do modelo Wavelet Support Vector Censored Regression (WSVCR), uma extensão do Support
-Vector Censored Regression (SVCR) que incorpora o uso de kernels wavelet para aprimorar a
-modelagem de relações não lineares em dados de sobrevivência com censura. A análise de
-sobrevivência é tradicionalmente conduzida por meio do modelo de riscos proporcionais de Cox
-\cite{cox1972regression}, amplamente utilizado, mas dependente da suposição de proporcionalidade dos
-riscos, frequentemente inadequada em cenários de alta dimensionalidade .
-Nesse contexto, métodos baseados em máquinas de vetores de suporte \cite{vapnik1997support}
-destacam-se por sua capacidade de generalização e pela utilização de funções kernel, permitindo
-capturar estruturas não lineares de forma eficiente. O modelo SVCR \cite{shivaswamy2007support}
-estende o Support Vector Regression \cite{drucker1996support} para lidar com dados censurados,
-incorporando informações parciais no processo de estimação. A principal contribuição de \citeonline{maia2023wavelet}
-consiste na introdução do kernel wavelet, o qual apresenta desempenho superior
-em relação a kernels tradicionais, como o linear, polinomial e gaussiano, conforme evidenciado
-pelo índice de concordância (C-index). Motivado por essa abordagem, o presente estudo tem
-como objetivo investigar, reproduzir e analisar o modelo WSVCR, com ênfase no papel do
-kernel wavelet no desempenho preditivo em análise de sobrevivência. Para isso, serão
-conduzidos estudos de simulação, considerando diferentes tamanhos amostrais e proporções de
-censura, bem como aplicações em dados reais, visando avaliar a robustez e a aplicabilidade do
-modelo. Dessa forma, pretende-se ampliar a compreensão sobre o uso de kernels wavelet em
-modelos baseados em SVM para dados censurados, evidenciando seu potencial na modelagem
-de estruturas complexas e na melhoria do desempenho preditivo em análise de sobrevivência
-\cite{maia2023wavelet}.
-    }{Análise de Sobrevivência, Censura, Máquinas de Vetores de Suporte, Kernel Wavelet, WSVCR}
+Este artigo introduz o GG-KM, uma nova abordagem semiparamétrica para modelagem de taxa
+de cura no modelo de tempo de promoção. Abordamos as limitações dos preditores lineares
+tradicionais ao empregar Máquinas de Kernel para modelar o componente de cura dentro de um
+Reproducing Kernel Hilbert Space (RKHS) \cite{mohri2018foundations}. Para fornecer máxima flexibilidade à função
+de risco dos indivíduos suscetíveis, incorporamos a distribuição Gama Generalizada \cite{stacy1962generalization},
+que engloba diversos modelos clássicos de sobrevivência. Derivamos uma estrutura de
+log-verossimilhança penalizada e fornecemos gradientes analíticos explícitos para a
+otimização conjunta dos pesos do kernel, hiperparâmetros e parâmetros da distribuição.
+O desempenho do modelo é validado por meio do Integrated Brier Score (IBS) com ajuste por
+IPCW \cite{prince2025estimation}.
+}{Análise de Sobrevivência, Censura, Reproducing Kernel Hilbert Space, Gama Generalizada, Representer Theorem}
 
 
 % resumo em INGLÊS
 % conter no máximo 500 palavras
 % conter no mínimo 1 e no máximo 5 palavras-chave
 \textoresumo[english]{
-    The present work is inspired by the study of \citeonline{maia2023wavelet}, whose central focus is the
-proposal of the Wavelet Support Vector Censored Regression (WSVCR) model, an extension of
-Support Vector Censored Regression (SVCR) that incorporates wavelet kernels to enhance the
-modeling of nonlinear relationships in censored survival data. Survival analysis is traditionally
-conducted using the Cox proportional hazards model \cite{cox1972regression}, which is widely
-adopted but relies on the proportional hazards assumption, often inadequate in high-dimensional
-settings. In this context, methods based on Support Vector Machines \cite{vapnik1997support} stand out
-due to their strong generalization capability and the use of kernel functions, allowing the efficient
-capture of nonlinear structures. The SVCR model \cite{shivaswamy2007support} extends Support
-Vector Regression \cite{drucker1996support} to handle censored data by incorporating partial
-information into the estimation process. The main contribution of \citeonline{maia2023wavelet}
-lies in the introduction of the wavelet kernel, which demonstrates superior performance compared
-to traditional kernels, such as linear, polynomial, and Gaussian, as evidenced by the concordance
-index (C-index). Motivated by this approach, the present study aims to investigate, reproduce, and analyze the
-WSVCR model, with emphasis on the role of the wavelet kernel in predictive performance for
-survival analysis. To this end, simulation studies will be conducted considering different sample
-sizes and censoring proportions, along with applications to real-world datasets, in order to assess
-the robustness and applicability of the model. Thus, this work seeks to deepen the understanding
-of wavelet kernels in SVM-based models for censored data, highlighting their potential for modeling
-complex structures and improving predictive performance in survival analysis
-\cite{maia2023wavelet}.
-    }{Survival Analysis, Censoring, Support Vector Machines, Wavelet Kernel, WSVCR}
+This paper introduces GG-KM, a novel semiparametric approach to promotion time cure rate modeling.
+We address the limitations of traditional linear predictors by employing Kernel Machines to model the cure
+component within a Reproducing Kernel Hilbert Space (RKHS) \cite{mohri2018foundations}. To provide maximum
+flexibility for the hazard of susceptible individuals, we incorporate the Generalized Gamma (GG)
+distribution \cite{stacy1962generalization}, which encompasses several standard survival models. We derive
+a penalized log-likelihood framework and provide explicit analytical gradients for the joint optimization
+of kernel weights, hyperparameters, and distribution parameters. Model performance is validated through
+the Integrated Brier Score (IBS) with IPCW adjustment \cite{prince2025estimation}.
+    }{Survival Analysis, Censoring, Reproducing Kernel Hilbert Space, Generalized Gamma, Representer Theorem}
 
 
 % ----------------------------------------------------------
@@ -161,9 +135,13 @@ complex structures and improving predictive performance in survival analysis
 \label{chapter:computational_resources}
 \input{tex/computational_resources}
 
-\chapter{Máquinas de Vetores de Suporte}
-\label{chapter:support-vector-machine}
-\input{tex/svm-ml}
+\chapter{Fundações Sobre Métodos Baseados em Kernel}
+\label{chapter:kernel_methods}
+\input{tex/kernel-methods}
+
+% \chapter{Máquinas de Vetores de Suporte}
+% \label{chapter:support-vector-machine}
+% \input{tex/svm-ml}
 
 \chapter{Análise de Sobrevivência}
 \label{chapter:survival-analysis}
@@ -236,17 +214,17 @@ complex structures and improving predictive performance in survival analysis
 % ---
 % Inicia os apêndices
 % ---
-\begin{apendicesenv}
+% \begin{apendicesenv}
 
-    \chapter{Resultados de Otimização Convexa}
-    \label{chapter:otimizacao_convexa}
-    \input{tex/appendix/otimizacao_convexa.tex}
+%     \chapter{Resultados de Otimização Convexa}
+%     \label{chapter:otimizacao_convexa}
+%     \input{tex/appendix/otimizacao_convexa.tex}
 
-    % \chapter{Configuração do programa JabRef}
-    % \label{chapter:configuracao-jabref}
-    % \input{tex/appendix/configuracao-jabref}
+%     % \chapter{Configuração do programa JabRef}
+%     % \label{chapter:configuracao-jabref}
+%     % \input{tex/appendix/configuracao-jabref}
 
-\end{apendicesenv}
+% \end{apendicesenv}
 % ---
 
 

@@ -65,54 +65,148 @@ tipos de funções kernel, incluindo não apenas os kernels tradicionais (linear
 gaussiano), mas também alternativas como os kernels exponencial, Laplaciano e Cauchy, que
 têm demonstrado bom desempenho em cenários de dados censurados.
 
-\section{Geração de dados simulados}
+\section{Estudo de simulação}
 
-Com o objetivo de avaliar o desempenho dos modelos em um ambiente controlado,
-foram conduzidos experimentos com dados simulados, seguindo a estratégia adotada
-na literatura recente. A utilização de dados artificiais permite controlar
-características fundamentais do problema, tais como a estrutura de dependência
-entre covariáveis, o grau de não linearidade e a proporção de censura.
+Com o objetivo de avaliar o desempenho do modelo GG-KM em diferentes cenários de complexidade da fração
+de cura, foi conduzido um estudo de simulação via Monte Carlo, seguindo a mesma estrutura de geração
+de dados proposta por Pal e Aselisewine (2023), adaptada ao contexto do modelo de tempo de promoção.
 
-Considere um vetor de covariáveis $\mathbf{X} = (X_1, X_2, X_3)^\top$,
-cujas componentes são geradas independentemente segundo as distribuições:
-\begin{align}
-X_1 &\sim \mathcal{N}(1, 1), \\
-X_2 &\sim \mathcal{N}(2, 2), \\
-X_3 &\sim \text{Exp}(1).
-\end{align}
+Foram considerados dois tamanhos amostrais, $n=300$ e $n=600$. Em cada replicação, os dados foram
+particionados em conjunto de treinamento e teste, sendo dois terços das observações destinados ao
+treinamento e o terço restante utilizado para avaliação preditiva.
 
-O tempo de sobrevivência $T$ é gerado a partir de uma distribuição Weibull,
-amplamente utilizada em estudos de simulação por sua flexibilidade em modelar
-diferentes formas da função de risco. Especificamente, considera-se:
-\begin{equation}
-T \sim \text{Weibull}(\lambda(\mathbf{X}), k),
-\end{equation}
-em que o parâmetro de forma é fixado em $k = 3$, enquanto o parâmetro de escala
-depende das covariáveis segundo a relação não linear:
-\begin{equation}
-\lambda(\mathbf{X}) = 5 \exp\left( - X_1 \ln|X_2| + \sin(X_3^2) \right).
-\end{equation}
+Cada conjunto de dados foi gerado a partir de duas covariáveis independentes,
 
-Essa especificação induz uma relação altamente não linear entre as covariáveis
-e o tempo de sobrevivência, constituindo um cenário desafiador para os modelos
-avaliados. Em particular, a presença de termos como $\ln|X_2|$ e $\sin(X_3^2)$
-introduz efeitos não aditivos e não monotônicos, dificultando a captura da
-estrutura subjacente por métodos lineares.
+\[
+x_1,x_2 \sim N(0,1),
+\]
 
-Para incorporar censura aos dados, foram gerados tempos de censura $C$
-independentes de $T$, de modo a satisfazer a hipótese de censura não informativa.
-Os tempos observados são então definidos por:
-\begin{equation}
-Y = \min(T, C), \quad \delta = \mathbb{I}(T \leq C),
-\end{equation}
-em que $Y$ representa o tempo observado e $\delta$ é o indicador de falha.
+de modo que o vetor de covariáveis foi definido como
 
-A distribuição de $C$ foi escolhida de forma a controlar a proporção de
-observações censuradas no conjunto de dados. Dessa forma, diferentes cenários
-foram considerados, variando-se tanto o tamanho da amostra quanto o nível de
-censura, permitindo uma análise abrangente da robustez dos modelos sob condições
-distintas.
+\[
+\mathbf{x}=(x_1,x_2).
+\]
 
-Esse procedimento de simulação possibilita avaliar o desempenho dos métodos em
-um ambiente no qual a função geradora dos dados é conhecida, permitindo uma
-comparação mais precisa entre os modelos considerados.
+A estrutura de cura foi construída a partir de três mecanismos distintos para a geração da probabilidade
+de não cura, permitindo avaliar o comportamento do modelo sob diferentes graus de linearidade e não
+linearidade.
+
+O primeiro mecanismo considera uma fronteira linear, dada por
+\[
+\pi(\mathbf{x})
+=
+\frac{\exp(0.3-5x_1-3x_2)}
+{1+\exp(0.3-5x_1-3x_2)}.
+\]
+
+Esse cenário representa a estrutura clássica de regressão logística, em que indivíduos curados e não curados são linearmente separáveis.
+
+O segundo mecanismo introduz uma relação quadrática entre as covariáveis:
+\[
+\pi(\mathbf{x})
+=
+\frac{\exp(0.3+5x_1^2-3x_2^2)}
+{1+\exp(0.3+5x_1^2-3x_2^2)}.
+\]
+
+Esse caso permite avaliar a capacidade do modelo em capturar superfícies de decisão não lineares.
+
+O terceiro mecanismo considera uma estrutura altamente não linear e periódica:
+\[
+\pi(\mathbf{x})
+=
+\exp\left\{-\exp(0.3-5\cos(x_1)-3\sin(x_2))\right\}.
+\]
+
+Esse cenário impõe fronteiras de classificação complexas, sendo particularmente útil para avaliar a flexibilidade da abordagem baseada em kernels.
+
+Para a componente de latência, os tempos associados aos riscos latentes foram gerados a partir de uma distribuição Weibull, cuja função de risco é dada por
+
+\[
+h(t|\mathbf{x})
+=
+h_0(t)\exp(\beta_1x_1+\beta_2x_2),
+\]
+
+onde a função de risco basal foi definida como
+
+\[
+h_0(t)=\alpha t^{\alpha-1}, \quad \alpha>0.
+\]
+
+Essa especificação implica que os tempos latentes seguem uma distribuição Weibull com parâmetro de forma $\alpha$ e parâmetro de escala
+
+\[
+\lambda(\mathbf{x})
+=
+\left\{
+\exp(\beta_1x_1+\beta_2x_2)
+\right\}^{-1/\alpha}.
+\]
+
+Os valores verdadeiros utilizados para os parâmetros foram
+
+\[
+(\alpha,\beta_1,\beta_2)=(2,1,0.5).
+\]
+
+Os tempos de censura foram gerados independentemente a partir de uma distribuição exponencial com taxa
+igual a $0.2$:
+
+\[
+C_i \sim \text{Exp}(0.2).
+\]
+
+A geração dos dados de sobrevivência foi realizada para cada indivíduo $i$ segundo o seguinte algoritmo:
+
+\begin{enumerate}
+    \item Gerar $U_i \sim \text{Uniform}(0,1)$ e $C_i \sim \text{Exp}(0.2)$;
+
+    \item Se $U_i \leq 1-\pi(\mathbf{x}_i)$, o indivíduo é considerado curado, definindo-se
+    \[
+    t_i=C_i
+    \quad\text{e}\quad
+    \delta_i=0.
+    \]
+
+    \item Se $U_i > 1-\pi(\mathbf{x}_i)$, o indivíduo é suscetível:
+    \begin{enumerate}
+        \item Gerar $U_i^* \sim \text{Uniform}(1-\pi(\mathbf{x}_i),1)$;
+
+        \item Obter o tempo latente $Y_i$ resolvendo
+        \[
+        (1-\pi(\mathbf{x}_i))F(Y_i|\mathbf{x}_i)=U_i^*,
+        \]
+
+        ou equivalentemente,
+
+        \[
+        Y_i=
+        F^{-1}
+        \left(
+        \frac{\log(U_i^*)}
+        {\log(1-\pi(\mathbf{x}_i))}
+        \right);
+        \]
+
+        \item Definir o tempo observado:
+        \[
+        t_i=\min(Y_i,C_i);
+        \]
+
+        \item Definir o indicador de falha:
+        \[
+        \delta_i=
+        \begin{cases}
+        1, & \text{se } t_i=Y_i,\\
+        0, & \text{caso contrário.}
+        \end{cases}
+        \]
+    \end{enumerate}
+\end{enumerate}
+
+Esse procedimento foi repetido em $500$ replicações de Monte Carlo para cada cenário.
+
+O desempenho do modelo GG-KM foi avaliado com base no viés, erro quadrático médio (EQM) e no
+Integrated Brier Score (IBS), permitindo mensurar tanto a qualidade da estimação dos parâmetros
+quanto a capacidade preditiva do modelo.
