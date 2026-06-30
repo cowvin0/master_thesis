@@ -283,6 +283,10 @@ da fração de cura.
 
 \section{GG-KM}
 
+O modelo proposto GG-KM, nada mais é que uma proposta de modelar a componente de cura do modelo de tempo de promoção
+a partir de kernels, de forma que funcione como uma extensão não paramétrica. Esta seção terá como objetivo
+descrever o processo de estimação e fundamentação do modelo.
+
 \subsection{Extensão não paramétrica via kernel}
 
 Embora o modelo de tempo de promoção clássico permita incorporar covariáveis por meio de funções paramétricas
@@ -300,7 +304,6 @@ A utilização da função de ligação logarítmica garante que
 \[
 \theta(\mathbf{x})=\exp(f(\mathbf{x}))>0,
 \]
-
 preservando a interpretação probabilística da intensidade dos riscos latentes.
 
 Assume-se que a função $f$ pertence a um Reproducing Kernel Hilbert Space (RKHS) $\mathcal{H}_K$, associado a um kernel positivo definido $K(\cdot,\cdot)$. Dessa forma, pelo Teorema do Representante, a solução do problema de otimização penalizado pode ser expressa como uma combinação linear das funções kernel centradas nas observações:
@@ -327,7 +330,6 @@ f_{GG}(t;a,d,p)=
 \frac{pt^{d-1}\exp\left(-(t/a)^p\right)}
 {a^d\Gamma(d/p)},
 \]
-
 e sua função de distribuição acumulada é definida como
 
 \[
@@ -335,7 +337,6 @@ F_{GG}(t;a,d,p)=
 \frac{\gamma\left(d/p,(t/a)^p\right)}
 {\Gamma(d/p)},
 \]
-
 onde $a>0$ é o parâmetro de escala, $d>0$ e $p>0$ são parâmetros de forma, $\Gamma(\cdot)$ é a função gama e $\gamma(\cdot,\cdot)$ denota a função gama incompleta inferior.
 
 A escolha dessa distribuição se justifica pelo fato de incluir importantes modelos clássicos como casos particulares. Por exemplo, quando $d=p$, $p=1$ ou $d/p \to \infty$, tem-se uma
@@ -348,7 +349,6 @@ Considere uma amostra observada composta por $n$ indivíduos,
 \[
 \mathcal{D}=\{(\mathbf{x}_i,t_i,\delta_i)\}_{i=1}^{n},
 \]
-
 em que $\mathbf{x}_i$ representa o vetor de covariáveis, $t_i$ o tempo observado e $\delta_i$ o indicador de falha, tal que $\delta_i=1$ indica ocorrência do evento e $\delta_i=0$ indica censura.
 
 No modelo de tempo de promoção, a contribuição individual para a log-verossimilhança é dada por
@@ -365,7 +365,6 @@ No modelo GG-KM, a função de sobrevivência populacional é definida por
 S_{pop}(t|\mathbf{x})=
 \exp\left\{-\theta(\mathbf{x})F_{GG}(t)\right\},
 \]
-
 enquanto a função de risco populacional é dada por
 
 \[
@@ -385,7 +384,6 @@ com
 f(\mathbf{x})=
 \sum_{j=1}^{n}\alpha_jK(\mathbf{x},\mathbf{x}_j),
 \]
-
 obtém-se a função objetivo penalizada
 
 \[
@@ -399,7 +397,6 @@ w^\top F_{GG}
 +
 \frac{\lambda_{reg}}{2}\alpha^\top K\alpha,
 \]
-
 em que:
 
 \begin{itemize}
@@ -453,17 +450,19 @@ f_i+\log p +(d-1)\log t_i-\left(\frac{t_i}{a}\right)^p-d\log a-\log\Gamma\left(\
 +
 \frac{\lambda_{reg}}{2}\alpha^\top K\alpha,
 \]
-
 em que $f_i=f(\mathbf{x}_i)$.
 
 A estimação dos parâmetros $\Theta=(\alpha,a,d,p)$ é realizada por minimização numérica da função objetivo $J(\Theta)$. Como não existe solução analítica fechada, utiliza-se o algoritmo L-BFGS \cite{liu1989limited}, que apresenta boa eficiência computacional e estabilidade numérica em problemas de otimização de alta dimensão.
 
 \subsection{Gradientes analíticos}
 
-Para tornar o processo de otimização mais eficiente, derivam-se explicitamente os gradientes da função objetivo em relação a todos os parâmetros do modelo.
+A otimização da função objetivo penalizada $J(\Theta)$ requer o cálculo de seus gradientes em relação a todos os parâmetros do modelo. A obtenção dessas expressões em forma analítica é fundamental para aumentar a eficiência computacional do algoritmo, além de melhorar sua estabilidade numérica durante o processo iterativo.
 
-O gradiente em relação aos coeficientes do kernel $\alpha$ é dado por
-
+Seja
+\[
+w_i=\exp(f(\mathbf{x}_i))
+\]
+a intensidade estimada de riscos latentes para o indivíduo $i$. O gradiente em relação ao vetor de coeficientes do kernel $\alpha \in \mathbb{R}^n$ é dado por
 \[
 \nabla_{\alpha}J
 =
@@ -471,25 +470,96 @@ O gradiente em relação aos coeficientes do kernel $\alpha$ é dado por
 +
 \lambda_{reg}K\alpha,
 \]
+em que $\odot$ representa o produto de Hadamard.
 
-em que $\odot$ denota o produto de Hadamard.
-
-Para os parâmetros da distribuição Gama Generalizada, define-se
-
+Para os parâmetros da distribuição Gama Generalizada, definem-se as quantidades auxiliares
 \[
 u_i=\left(\frac{t_i}{a}\right)^p
 \quad\text{e}\quad
 s=\frac{d}{p}.
 \]
 
-Os gradientes em relação aos parâmetros $a$, $d$ e $p$ são obtidos analiticamente e utilizados conjuntamente no procedimento iterativo de otimização.
-
-Dessa forma, em cada iteração, atualizam-se simultaneamente os parâmetros
-
+Os gradientes em relação aos parâmetros $a$, $d$ e $p$ são dados, respectivamente, por
 \[
-\Theta=(\alpha,a,d,p),
+\frac{\partial J}{\partial a}
+=
+-
+\sum_{i=1}^{n}
+\left[
+\delta_i
+\left(
+\frac{pu_i-d}{a}
+\right)
++
+w_i
+\left(
+\frac{p e^{-u_i}u_i^s}{a\Gamma(s)}
+\right)
+\right],
 \]
 
-até a convergência do algoritmo.
+\[
+\frac{\partial J}{\partial d}
+=
+-
+\sum_{i=1}^{n}
+\left[
+\delta_i\left(\log\left(\frac{t_i}{a}\right)
+-
+\frac{\psi(s)}{p}\right)
+-
+\frac{w_i}{p}G(s,u_i)
+\right],
+\]
 
-Esse procedimento permite estimar de maneira conjunta tanto a estrutura não linear da fração de cura quanto a dinâmica paramétrica da sobrevivência dos indivíduos suscetíveis, resultando em um modelo semiparamétrico altamente flexível.
+\[
+\frac{\partial J}{\partial p}
+=
+-
+\sum_{i=1}^{n}
+\left[
+\delta_i
+\left(
+\frac{1}{p}
+-
+u_i\log\left(\frac{t_i}{a}\right)
++
+\frac{s\psi(s)}{p}
+\right)
+-
+w_i
+\left(
+\frac{dG(s,u_i)}{p^2}
++
+\frac{u_i^s e^{-u_i}\log(t_i/a)}{\Gamma(s)}
+\right)
+\right].
+\]
+
+Nessas expressões:
+
+\begin{itemize}
+    \item $\Gamma(s)$ é a função Gama;
+    \item $\psi(s)=\frac{d}{ds}\log\Gamma(s)$ é a função digama;
+    \item $G(s,u)=\frac{\partial P(s,u)}{\partial s}$ é a derivada parcial da função gama incompleta regularizada em relação ao seu primeiro argumento.
+\end{itemize}
+
+O processo de estimação do modelo GG-KM pode ser resumido pelo Algoritmo~\ref{alg:ggkm}.
+
+\begin{algorithm}[H]
+\caption{Processo de estimação do modelo GG-KM}
+\label{alg:ggkm}
+\begin{algorithmic}[1]
+\State \textbf{Entrada:} Dados $(X,t,\delta)$, hiperparâmetros $(\lambda_{reg},\gamma)$
+\State Inicializar $\alpha \leftarrow 0$ e $\theta_{GG} \leftarrow \{a=1,d=1,p=1\}$
+\State Construir a matriz de Gram $K$, com $K_{ij}=K(\mathbf{x}_i,\mathbf{x}_j)$
+\While{critério de convergência não satisfeito}
+    \State Calcular $w_i=\exp\left(\sum_j\alpha_jK_{ij}\right)$
+    \State Calcular $f_{GG}(t_i)$ e $F_{GG}(t_i)$ para os parâmetros atuais
+    \State Avaliar a função objetivo $J(\alpha,\theta_{GG})$
+    \State Calcular os gradientes $\nabla_{\alpha}J$ e $\nabla_{\theta_{GG}}J$
+    \State Atualizar $\Theta=\{\alpha,a,d,p\}$ utilizando L-BFGS
+\EndWhile
+\State \textbf{Saída:} $\hat{\alpha},\hat{a},\hat{d},\hat{p}$
+\end{algorithmic}
+\end{algorithm}

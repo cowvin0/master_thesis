@@ -25,21 +25,18 @@ avaliação mais robusta e estável.
 \section{Estudo de simulação}
 
 Com o objetivo de avaliar o desempenho do modelo GG-KM em diferentes cenários de complexidade da fração
-de cura, foi conduzido um estudo de simulação via Monte Carlo, seguindo a mesma estrutura de geração
-de dados proposta por Pal e Aselisewine (2023), adaptada ao contexto do modelo de tempo de promoção.
+de cura, foi conduzido um estudo de simulação, seguindo a mesma estrutura de geração
+de dados proposta por \citeonline{pal2023semiparametric}, adaptada ao contexto do modelo de tempo de promoção.
 
 Foram considerados dois tamanhos amostrais, $n=300$ e $n=600$. Em cada replicação, os dados foram
 particionados em conjunto de treinamento e teste, sendo dois terços das observações destinados ao
 treinamento e o terço restante utilizado para avaliação preditiva.
 
 Cada conjunto de dados foi gerado a partir de duas covariáveis independentes,
-
 \[
 x_1,x_2 \sim N(0,1),
 \]
-
 de modo que o vetor de covariáveis foi definido como
-
 \[
 \mathbf{x}=(x_1,x_2).
 \]
@@ -79,21 +76,20 @@ O terceiro mecanismo considera uma estrutura altamente não linear e periódica:
     \centering
     \includegraphics[width=1\textwidth]{images/plot_metodos123.png}
     \caption{Simulação de curados e não curados sobre os três métodos descritos. Respectivamente, pode-se observar o método 1, 2 e 3.}
-    \label{fig:exemplo}
+    \label{fig:exemplo_metodo}
 \end{figure}
 
-Esse cenário impõe fronteiras de classificação complexas, sendo particularmente útil para avaliar a flexibilidade da abordagem baseada em kernels.
+Esse cenário impõe fronteiras de classificação complexas, sendo particularmente útil para avaliar a
+flexibilidade da abordagem baseada em kernels. Os dados simulados, considerando cada um dos três casos, pode
+ser visualizado na Figura~\ref{fig:exemplo_metodo}.
 
 Para a componente de latência, os tempos associados aos riscos latentes foram gerados a partir de uma distribuição Weibull, cuja função de risco é dada por
-
 \[
 h(t|\mathbf{x})
 =
 h_0(t)\exp(\beta_1x_1+\beta_2x_2),
 \]
-
 onde a função de risco basal foi definida como
-
 \[
 h_0(t)=\alpha t^{\alpha-1}, \quad \alpha>0.
 \]
@@ -169,7 +165,7 @@ A geração dos dados de sobrevivência foi realizada para cada indivíduo $i$ s
     \end{enumerate}
 \end{enumerate}
 
-Esse procedimento foi repetido em $500$ replicações de Monte Carlo para cada cenário.
+% Esse procedimento foi repetido em $500$ replicações de Monte Carlo para cada cenário.
 
 O desempenho do modelo GG-KM foi avaliado com base no viés, erro quadrático médio (EQM) e no Integrated Brier Score (IBS)
 com ajuste IPCW \cite{dong2020inverse}, permitindo mensurar tanto a qualidade da estimação dos

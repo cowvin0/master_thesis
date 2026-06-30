@@ -29,28 +29,27 @@ programação Python, devido à sua ampla adoção na área de ciência de dados
 de máquina, bem como à disponibilidade de bibliotecas eficientes para computação numérica.
 
 O Python foi utilizado tanto para a geração de dados simulados quanto para a implementação
-dos algoritmos de Support Vector Regression (SVR) e sua extensão para dados censurados
-(SVCR e WSVCR). A manipulação de dados foi realizada com o auxílio da biblioteca NumPy,
-que oferece estruturas eficientes para operações matriciais e vetoriais, fundamentais
-para a implementação de métodos baseados em kernel.
+do algoritmo proposto, o GG-KM. As bibliotecas utilizadas para estimação do modelo foram NumPy \cite{harris2020array},
+que oferece estruturas eficientes para operações matriciais e vetoriais, e o SciPy \cite{virtanen2020scipy}, que contém
+diferentes métodos de otimização, como, por exemplo, o L-BFGS.
 
-Além disso, o Python permite uma integração natural com bibliotecas de otimização e
-facilita a prototipagem de modelos matemáticos complexos, o que foi essencial para o
-desenvolvimento e validação das abordagens propostas neste trabalho.
+% Além disso, o Python permite uma integração natural com bibliotecas de otimização e
+% facilita a prototipagem de modelos matemáticos complexos, o que foi essencial para o
+% desenvolvimento e validação das abordagens propostas neste trabalho.
 
-\subsection{Otimização convexa}
+% \subsection{Otimização convexa}
 
-A resolução dos problemas de otimização associados aos modelos SVCR e WSVCR foi realizada
-por meio da biblioteca CVXOPT, uma biblioteca especializada em programação convexa
-desenvolvida para a linguagem Python.
+% A resolução dos problemas de otimização associados aos modelos SVCR e WSVCR foi realizada
+% por meio da biblioteca CVXOPT, uma biblioteca especializada em programação convexa
+% desenvolvida para a linguagem Python.
 
-A escolha do CVXOPT deve-se ao fato de que os problemas dual dos modelos baseados em
-máquinas de vetores de suporte podem ser formulados como problemas de programação
-quadrática convexa. Nesse contexto, o CVXOPT fornece rotinas eficientes e numericamente
-estáveis para a obtenção da solução ótima global, garantindo a correta resolução do
-problema sem a necessidade de implementação manual de algoritmos iterativos, como o
-Sequential Minimal Optimization (SMO).
+% A escolha do CVXOPT deve-se ao fato de que os problemas dual dos modelos baseados em
+% máquinas de vetores de suporte podem ser formulados como problemas de programação
+% quadrática convexa. Nesse contexto, o CVXOPT fornece rotinas eficientes e numericamente
+% estáveis para a obtenção da solução ótima global, garantindo a correta resolução do
+% problema sem a necessidade de implementação manual de algoritmos iterativos, como o
+% Sequential Minimal Optimization (SMO).
 
-O uso de uma biblioteca consolidada como o CVXOPT também contribui para a reprodutibilidade
-dos resultados, uma vez que os algoritmos de otimização empregados são amplamente testados
-e documentados na literatura.
+% O uso de uma biblioteca consolidada como o CVXOPT também contribui para a reprodutibilidade
+% dos resultados, uma vez que os algoritmos de otimização empregados são amplamente testados
+% e documentados na literatura.
