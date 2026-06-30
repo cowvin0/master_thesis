@@ -109,3 +109,258 @@ infinita para um problema de otimização em dimensão finita, dependente apenas
 $\boldsymbol{\alpha} = (\alpha_1, \ldots, \alpha_n)$. Na prática, isso torna viável o uso de métodos
 baseados em kernel, além de evidenciar que toda a informação necessária para a estimação está contida na
 matriz kernel $K$, sem necessidade de explicitar o mapeamento $\phi(\cdot)$.
+
+\subsection{Principais funções kernel}
+
+Uma vez estabelecido pelo Teorema do Representante que a solução ótima pode ser escrita
+como uma combinação linear de kernels avaliados nos dados observados, a escolha da função
+kernel passa a desempenhar papel central na modelagem. Diferentes kernels induzem distintas
+geometrias no espaço de características, o que afeta diretamente a flexibilidade e a capacidade
+de generalização do modelo.
+
+Entre os kernels mais utilizados, destacam-se:
+
+\begin{itemize}
+
+    \item \textbf{Kernel linear}
+    \[
+    K(x_i,x_j)=x_i^\top x_j
+    \]
+
+    \item \textbf{Kernel polinomial}
+    \[
+    K(x_i,x_j)=\left(x_i^\top x_j + c\right)^d
+    \]
+
+    \item \textbf{Kernel Gaussiano (RBF)}
+    \[
+    K(x_i,x_j)=\exp\left(-\gamma \|x_i-x_j\|^2\right)
+    \]
+
+    \item \textbf{Kernel Laplaciano}
+    \[
+    K(x_i,x_j)=\exp\left(-\gamma \|x_i-x_j\|\right)
+    \]
+
+    \item \textbf{Kernel Sigmoidal}
+    \[
+    K(x_i,x_j)=\tanh\left(\gamma x_i^\top x_j + c\right)
+    \]
+
+    \item \textbf{Kernel Cauchy}
+    \[
+    K(x_i,x_j)=\left(1+\frac{\|x_i-x_j\|^2}{\sigma^2}\right)^{-1}
+    \]
+
+    \item \textbf{Kernel exponencial}
+    \[
+    K(x_i,x_j)=\exp\left(-\gamma \|x_i-x_j\|\right)
+    \]
+\end{itemize}
+
+A escolha do kernel determina implicitamente a classe de funções admissíveis no espaço RKHS e,
+consequentemente, o grau de complexidade que o modelo pode representar. Neste contexto, os kernels podem ser
+visto como um hiperparâmetro de complexidade do modelo, bem como as variáveis que os compõe, $\gamma\text{, } d\text{ e } \sigma$.
+
+\section{GG-KM}
+
+O modelo proposto GG-KM, nada mais é que uma proposta de modelar a componente de cura do modelo de tempo de promoção
+a partir de kernels, de forma que seja uma extensão semi-paramétrico. Esta seção terá como objetivo
+descrever o processo de estimação e fundamentação do modelo.
+
+\subsection{Extensão não paramétrica via kernel}
+
+Embora o modelo de tempo de promoção clássico permita incorporar covariáveis por meio de funções paramétricas
+para $\theta(\mathbf{x})$, essa abordagem pode ser restritiva em cenários onde a relação entre as covariáveis
+e a fração de cura apresenta estruturas complexas ou altamente não lineares.
+
+Com o objetivo de contornar essa limitação, propõe-se modelar a intensidade média dos riscos latentes por
+meio de uma função não paramétrica. Para isso, define-se
+\[
+f(\mathbf{x})=\log(\theta(\mathbf{x})).
+\]
+
+A utilização da função de ligação logarítmica garante que
+
+\[
+\theta(\mathbf{x})=\exp(f(\mathbf{x}))>0,
+\]
+preservando a interpretação probabilística da intensidade dos riscos latentes.
+
+Assume-se que a função $f$ pertence a um Reproducing Kernel Hilbert Space (RKHS) $\mathcal{H}_K$, associado a um kernel positivo definido $K(\cdot,\cdot)$. Dessa forma, pelo Teorema do Representante, a solução do problema de otimização penalizado pode ser expressa como uma combinação linear das funções kernel centradas nas observações:
+\[
+f(\mathbf{x})=\sum_{j=1}^{n}\alpha_jK(\mathbf{x},\mathbf{x}_j),
+\]
+em que $\alpha_1,\ldots,\alpha_n \in \mathbb{R}$ são coeficientes a serem estimados.
+
+Consequentemente, a intensidade média dos riscos latentes para o indivíduo $i$ pode ser escrita como
+\[
+\theta(\mathbf{x}_i)=\exp\left(\sum_{j=1}^{n}\alpha_jK(\mathbf{x}_i,\mathbf{x}_j)\right).
+\]
+
+Neste trabalho, serão consideradas diferentes funções kernel para verificar o comportamento do modelo. Essa formulação amplia significativamente a flexibilidade do modelo, permitindo capturar relações complexas e interações entre covariáveis sem impor, a priori, uma estrutura funcional específica para a componente de cura.
+
+
+% \noindent Métodos baseados em Kernel são técnicas extremamente flexíveis que podem ser utilizados
+% para estender modelos ou algoritmos para regiões de decisão não lineares \cite{mohri2018foundations}. Estes métodos
+% são baseados nas conheecidas funções de kernel, os quais, sob condições de simetria e positiva definida, definem
+% produtos internos em espaços de alta dimensão, conhecidos como espaços de Hilbert. Dessa forma, este capítulo
+% terá como objetivo definir e apresentar os conceitos fundamentais sobre métodos baseados em kernel,
+% incluindo a definição de funções de kernel, o teorema do representer e Reproducing Kernel Hilbert
+% Space (RKHS).
+
+% \section{Kernels}
+
+% Por definição, uma função $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ é chamada de kernel sobre
+% $\mathcal{X}$.
+% A ideia central é construir um kernel $K$ tal que, para quaisquer dois pontos $x, x' \in \mathcal{X}$, $K(x, x')$
+% corresponda ao produto interno entre duas representações desses pontos em um espaço de Hilbert
+% $\mathcal{H}$, isto é,
+% $$
+% \forall x, x' \in \mathcal{X}, \quad K(x,x') = \langle \phi(x), \phi(x') \rangle,
+% $$
+% para algum mapeamento $\phi: \mathcal{X} \to \mathcal{H}$. O espaço $\mathcal{H}$ é chamado de
+% feature space.
+
+% Sob essa perspectiva, o kernel pode ser interpretado como uma medida de similaridade entre elementos
+% de $\mathcal{X}$, uma vez que o produto interno mensura a similaridade entre dois vetores.
+
+% Uma vantagem fundamental dessa abordagem é computacional. Isto é, muitas vezes é significativamente mais eficiente
+% calcular diretamente $K(x,x')$ do que computar explicitamente $\phi(x)$ e $\phi(x')$ e então avaliar
+% seu produto interno.
+
+% \subsection{Kernels positivos definidos}
+
+% Para que uma função $K$ possa ser utilizada como kernel, é necessário que sejam satisfeitas duas condições, que
+% a função seja simétrica e positiva definida. Satisfazendo essas condições, o kernel é capaz de induzir uma geometria
+% em um espaço de Hilbert.
+
+% Formalmente, um kernel $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ é dito simétrico e positivo
+% definido se, para qualquer conjunto finito $\{x_1, \ldots, x_n\} \subset \mathcal{X}$, a matriz de Gram
+% $$
+% \mathbf{K} = [K(x_i,x_j)]_{i,j=1}^n \in \mathbb{R}^{n \times n}
+% $$
+% for positiva semidefinida. Isto é, para qualquer vetor $\mathbf{c}=(c_1,\ldots,c_n)^\top \in \mathbb{R}^n$,
+% $$
+% \mathbf{c}^\top \mathbf{K}\mathbf{c}
+% =
+% \sum_{i=1}^n \sum_{j=1}^n c_i c_j K(x_i,x_j)
+% \geq 0.
+% $$
+
+% Equivalentemente, todos os autovalores de $\mathbf{K}$ são não negativos. Essa propriedade é essencial,
+% pois garante a existência de uma representação geométrica consistente do kernel.
+
+% \subsection{Espaços de Hilbert}
+
+% A noção de espaço de Hilbert fornece a estrutura matemática necessária para a teoria de kernels.
+
+% Por definição, um espaço de Hilbert $\mathcal{H}$ é um espaço vetorial munido de um produto interno
+% $\langle \cdot, \cdot \rangle_{\mathcal{H}}$ e que é completo com relação à norma induzida por esse produto interno. A norma em $\mathcal{H}$ é definida por
+% $$
+% \forall h \in \mathcal{H}, \quad \|h\|_{\mathcal{H}} = \sqrt{\langle h,h\rangle}.
+% $$
+
+% A completude implica que toda sequência de Cauchy em $\mathcal{H}$ converge para um elemento do próprio
+% espaço, garantindo estabilidade analítica para problemas de otimização e aproximação.
+
+% No contexto de kernels, o espaço de Hilbert atua como o espaço onde os dados são representados via o
+% mapeamento $\phi$.
+
+% \subsection{Reproducing Kernel Hilbert Spaces}
+
+% A relação entre kernels positivos definidos e espaços de Hilbert é formalizada pelo teorema.
+
+% Seja $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ um kernel simétrico e positivo definido. Então existe um espaço de Hilbert $\mathcal{H}$ e um mapeamento $\phi: \mathcal{X} \to \mathcal{H}$ tais que
+
+% $$
+% \forall x,x' \in \mathcal{X}, \quad K(x,x') = \langle \phi(x), \phi(x') \rangle_{\mathcal{H}}.
+% $$
+
+% Além disso, esse espaço satisfaz a chamada propriedade de reprodução:
+
+% $$
+% \forall h \in \mathcal{H}, \forall x \in \mathcal{X}, \quad h(x) = \langle h, K(x,\cdot)\rangle_{\mathcal{H}}.
+% $$
+
+% Essa propriedade estabelece que a avaliação funcional é contínua e pode ser representada por meio do próprio
+%  kernel.
+
+% O espaço $\mathcal{H}$ associado a $K$ é chamado de Reproducing Kernel Hilbert Space (RKHS), desempenhando
+% papel central em métodos de aprendizado estatístico, particularmente em problemas de regularização,
+% estimação não paramétrica e aprendizado supervisionado.
+
+% \subsection{Teorema do Representante}
+
+% O resultado mais interessante para a definição do modelo GG-KM é o Teorema do Representante. Sua principal
+% importância reside no fato de garantir que, embora a otimização ocorra em um espaço potencialmente infinito
+% -dimensional, a solução ótima pode ser expressa em termos de uma combinação finita de kernels avaliados nas
+% observações da amostra.
+
+% Formalmente, seja $K \text{ : } \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ um kernel positivo definido e
+% $\mathcal{H}$ seu correspondente RKHS. Assim, para qualquer função $G \text{ : } \mathbb{R} \to \mathbb{R}$ não
+% decrescente e qualquer função perda $L \text{ : } \mathbb{R}^n \to \mathbb{R} \cup \{+\infty\}$, o problema de otimização
+% $$
+% {\arg\min}_{h\in\mathcal{H}} F\left(h\right) = {\arg\min}_{h\in\mathcal{H}} G\left(\|h\|_{\mathcal{H}}\right) + L\left(h\left(x_1\right), \ldots, h\left(x_n\right)\right)
+% $$
+% admite uma solução na forma $h^{*} = \sum_{i=1}^{n}\alpha_i K\left(x_i, \cdot\right)$. Se $G$ é assumido como sendo crescente,
+% então qualquer solução tem esta forma.
+
+
+% Esse resultado é particularmente relevante porque reduz um problema de otimização funcional em dimensão
+% infinita para um problema de otimização em dimensão finita, dependente apenas dos coeficientes
+% $\boldsymbol{\alpha} = (\alpha_1, \ldots, \alpha_n)$. Na prática, isso torna viável o uso de métodos
+% baseados em kernel, além de evidenciar que toda a informação necessária para a estimação está contida na
+% matriz kernel $K$, sem necessidade de explicitar o mapeamento $\phi(\cdot)$.
+
+% \subsection{Principais funções kernel}
+
+% Uma vez estabelecido pelo Teorema do Representante que a solução ótima pode ser escrita
+% como uma combinação linear de kernels avaliados nos dados observados, a escolha da função
+% kernel passa a desempenhar papel central na modelagem. Diferentes kernels induzem distintas
+% geometrias no espaço de características, o que afeta diretamente a flexibilidade e a capacidade
+% de generalização do modelo.
+
+% Entre os kernels mais utilizados, destacam-se:
+
+% \begin{itemize}
+
+%     \item \textbf{Kernel linear}
+%     \[
+%     K(x_i,x_j)=x_i^\top x_j
+%     \]
+
+%     \item \textbf{Kernel polinomial}
+%     \[
+%     K(x_i,x_j)=\left(x_i^\top x_j + c\right)^d
+%     \]
+
+%     \item \textbf{Kernel Gaussiano (RBF)}
+%     \[
+%     K(x_i,x_j)=\exp\left(-\gamma \|x_i-x_j\|^2\right)
+%     \]
+
+%     \item \textbf{Kernel Laplaciano}
+%     \[
+%     K(x_i,x_j)=\exp\left(-\gamma \|x_i-x_j\|\right)
+%     \]
+
+%     \item \textbf{Kernel Sigmoidal}
+%     \[
+%     K(x_i,x_j)=\tanh\left(\gamma x_i^\top x_j + c\right)
+%     \]
+
+%     \item \textbf{Kernel Cauchy}
+%     \[
+%     K(x_i,x_j)=\left(1+\frac{\|x_i-x_j\|^2}{\sigma^2}\right)^{-1}
+%     \]
+
+%     \item \textbf{Kernel exponencial}
+%     \[
+%     K(x_i,x_j)=\exp\left(-\gamma \|x_i-x_j\|\right)
+%     \]
+% \end{itemize}
+
+% A escolha do kernel determina implicitamente a classe de funções admissíveis no espaço RKHS e,
+% consequentemente, o grau de complexidade que o modelo pode representar. Neste contexto, os kernels podem ser
+% visto como um hiperparâmetro de complexidade do modelo, bem como as variáveis que os compõe, $\gamma\text{, } d\text{ e } \sigma$.

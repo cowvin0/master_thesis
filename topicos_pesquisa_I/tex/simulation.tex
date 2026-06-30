@@ -1,10 +1,9 @@
 \section{Aplicação a Dados Simulados}
 
-Nesta seção, avaliamos o desempenho do modelo proposto GG-KM em cenários controlados de simulação, com o
-objetivo de investigar sua capacidade de adaptação sob diferentes estruturas funcionais do componente de
-cura. Para isso, foram considerados distintos tamanhos amostrais ($n=300$ e $n=600$) e três mecanismos
-geradores de dados, representando diferentes graus de complexidade na relação entre covariáveis e fração
-de cura.
+Nesta seção, avalia-se o desempenho do modelo proposto GG-KM em diferentes cenários de simulação, com o
+objetivo de investigar sua capacidade de adaptação sob diferentes estruturas do componente de
+cura. Para isso, foram considerados dois tamanhos de amostra ($n=300$ e $n=600$) e três métodos
+para geração de dados, representando diferentes relações entre covariáveis e fração de cura.
 
 A Figura~\ref{fig:simul_optuna} apresenta a distribuição do IBS para
 cada kernel, obtida ao longo das replicações da validação cruzada. Como medida global de desempenho
@@ -18,18 +17,17 @@ que apresentam menores valores centrais de IBS e menor variabilidade.
 Nos métodos 2 e 3, por outro lado, o padrão é mais consistente: kernels não lineares, em especial
 rbf, cauchy, exponential e polynomial, tendem a apresentar melhor
 desempenho e maior estabilidade quando comparados ao kernel linear. Esse comportamento sugere que tais
-cenários envolvem estruturas funcionais mais complexas, cuja modelagem é favorecida por espaços de maior
+cenários envolvem estruturas mais complexas, cuja modelagem é favorecida por espaços de maior
 flexibilidade induzidos por esses kernels.
 
-Além disso, o aumento do tamanho amostral de $n=300$ para $n=600$ produz uma redução sistemática tanto
-nos níveis quanto na dispersão do IBS, indicando maior estabilidade do processo de estimação e menor erro
-de generalização. Esse resultado reforça a consistência do modelo e evidencia o ganho de eficiência
-associado ao aumento da informação amostral.
+% Além disso, o aumento do tamanho amostral de $n=300$ para $n=600$ produz uma redução sistemática tanto
+% nos níveis quanto na dispersão do IBS, indicando maior estabilidade do processo de estimação e menor erro
+% de generalização. Esse resultado reforça a consistência do modelo e evidencia o ganho de eficiência
+% associado ao aumento da informação amostral.
 
-Em síntese, os resultados mostram que o desempenho do GG-KM é fortemente dependente da especificação do
+Dessa forma, os resultados mostram que o desempenho do GG-KM é fortemente dependente da especificação do
 kernel, sendo os kernels não lineares particularmente mais adequados em cenários com maior complexidade
-estrutural. Adicionalmente, o aumento amostral contribui para estimativas mais robustas e menos sensíveis
-à escolha do kernel.
+nos dados.
 
 \begin{figure}[htb]
     \centering
@@ -43,8 +41,8 @@ foi realizada também uma comparação entre o estimador de Kaplan-Meier e a cur
 pelo modelo GG-KM. Essa comparação pode ser observada na Figura~\ref{fig:km_curv_comparison_ggkm}. De modo
 geral, observa-se que o modelo GG-KM apresenta boa aderência ao comportamento do estimador de Kaplan-Meier,
 sugerindo que o componente de cura está sendo adequadamente modelado. Contudo, no cenário em que $n=600$
-para o método 3, nota-se um afastamento mais pronunciado entre as curvas, indicando um ajuste relativamente
-inferior nesse caso específico.
+para o método 3, nota-se um afastamento maior entre as curvas, indicando um ajuste inferior nesse caso
+específico.
 
 \begin{figure}[htb]
     \centering
@@ -60,14 +58,12 @@ simuladas.
 
 Observa-se que o kernel cauchy foi selecionado nos cenários com $n=300$ para os métodos 1 e 2,
 enquanto os kernels exponential, rbf, sigmoid e polynomial também se
-destacaram em diferentes configurações, evidenciando que não há um kernel universalmente ótimo, mas sim
-dependente da estrutura subjacente dos dados.
+destacaram em diferentes configurações.
 
 Além disso, nota-se que o aumento do tamanho amostral resultou, em geral, em redução do IBS médio e do viés
 absoluto, especialmente nos métodos 2 e 3, indicando ganhos em precisão e estabilidade na estimação da
-fração de cura. Em particular, o cenário com $n=600$ e método 3 apresentou o melhor desempenho global, com
-menor IBS e menor EQM, sugerindo que, nesse contexto, o modelo GG-KM foi capaz de capturar de forma mais
-eficiente a dinâmica do processo de sobrevivência.
+fração de cura. Em particular, o cenário com $n=600$ e método 3 apresentou o melhor desempenho, com
+menor IBS e menor EQM.
 
 \begin{table}[ht]
 \centering
@@ -99,7 +95,7 @@ Odense, na Dinamarca, entre os anos de 1962 e 1977.
 Os pacientes foram acompanhados até o final de 1977, período no qual 134 indivíduos permaneceram vivos,
 enquanto 71 evoluíram para óbito, sendo 57 mortes atribuídas diretamente ao melanoma e 14 decorrentes de
 outras causas. Este conjunto de dados, especificiamente, é utilizado em textos de modelos com fração de cura,
-pois há o conhecimento de existe de fato uma fração de cura no conjunto de dados.
+pois há o conhecimento de que existe de fato uma fração de cura no conjunto de dados.
 
 A base é composta por sete variáveis: tempo de acompanhamento em dias (time), status do paciente ao final do estudo (status), sexo
 (sex), idade no momento da cirurgia (age), ano da cirurgia (year), espessura do tumor em milímetros
@@ -157,12 +153,12 @@ cauchy      & 0.1663 & 0.0439 \\
 \end{tabular}
 \end{table}
 
-A Tabela~\ref{tab:melanoma_kernels} sintetiza esses resultados ao apresentar o IBS médio e seu respectivo
+A Tabela~\ref{tab:melanoma_kernels} resume esses resultados ao apresentar o IBS médio e seu respectivo
 desvio padrão para cada kernel. Observa-se que o kernel linear apresentou o menor IBS médio, indicando o
 melhor desempenho preditivo global nesse conjunto de dados, seguido de perto pelos kernels exponential e polynomial.
 
-Embora o kernel cauchy tenha apresentado alguns valores individuais competitivos, seu IBS médio mais elevado
-e maior variabilidade indicam menor estabilidade no processo de estimação. Em contrapartida, o kernel
+Embora o kernel cauchy tenha apresentado alguns bons resultados, seu IBS médio mais elevado
+e maior variabilidade indicam menor estabilidade no processo de estimação. Por outro lado, o kernel
 exponential se destaca por combinar desempenho preditivo próximo ao melhor observado com a menor dispersão
 entre todos os kernels avaliados, sugerindo maior robustez. De modo geral, os resultados indicam que, para o
 conjunto de dados Melanoma, estruturas mais simples ou moderadamente flexíveis parecem ser suficientes para

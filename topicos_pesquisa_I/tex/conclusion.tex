@@ -1,7 +1,18 @@
-Este trabalho investigou o desempenho de modelos de regressão para dados de sobrevivência com censura, com ênfase em abordagens baseadas em máquinas de vetores de suporte, em particular o Support Vector Censored Regression (SVCR) e suas extensões com diferentes funções kernel. A análise foi conduzida de forma sistemática, combinando experimentos em dados simulados, nos quais a estrutura geradora é conhecida, e aplicações em bases reais amplamente utilizadas na literatura.
+Este trabalho apresentou uma extensão do modelo de tempo de promoção para a modelagem da componente de cura
+por meio da incorporação de funções kernel, resultando no modelo GG-KM. Essa abordagem permite maior flexibilidade
+na estimação, tornando possível capturar relações complexas e não lineares entre as covariáveis e a fração
+de cura.
 
-Nos cenários simulados, caracterizados por relações não lineares entre covariáveis e o tempo de sobrevivência, observou-se de forma consistente a superioridade dos métodos baseados em kernels não lineares, com destaque para os kernels Laplaciano, Cauchy e Polinomial. Esses resultados corroboram a hipótese de que a flexibilidade funcional proporcionada por tais kernels é crucial para capturar estruturas complexas, nas quais modelos lineares ou semiparamétricos, como o modelo de Cox, tendem a apresentar limitações.
+Nos experimentos com dados simulados, os resultados evidenciaram que kernels não lineares apresentaram
+desempenho superior em cenários com maior complexidade, particularmente nos métodos 2 e 3, nos
+quais alcançaram os menores valores de IBS. Em contrapartida, o kernel linear apresentou desempenho inferior
+nesses cenários, reforçando a importância da flexibilidade introduzida pelos kernels.
 
-Por outro lado, na análise com dados reais, os resultados indicaram um comportamento distinto. Modelos mais simples, como o linear e o modelo de Cox, apresentaram desempenho competitivo e, em alguns casos, superior aos métodos mais flexíveis. Esse achado evidencia o papel fundamental do equilíbrio entre viés e variância, sugerindo que a maior capacidade de ajuste dos kernels não lineares nem sempre se traduz em ganhos empíricos quando a estrutura dos dados é mais regular ou quando o tamanho amostral é limitado.
+Além disso, tanto nos dados simulados quanto na aplicação ao conjunto de dados reais, observou-se bom ajuste
+entre a curva de sobrevivência estimada pelo modelo GG-KM e o estimador de Kaplan-Meier. Esse comportamento
+fornece evidências de que o modelo proposto é capaz de representar adequadamente a fração de cura presente
+nos dados.
 
-De maneira geral, os resultados obtidos reforçam a importância de alinhar a escolha do modelo às características intrínsecas dos dados, particularmente no que diz respeito à presença de não linearidades, tamanho da amostra e proporção de censura. Além disso, evidenciam que métodos baseados em SVCR constituem uma alternativa promissora no contexto de análise de sobrevivência, especialmente em cenários mais complexos, embora demandem cuidadosa calibração de hiperparâmetros.
+De forma geral, os resultados obtidos indicam que o GG-KM constitui uma alternativa promissora para modelagem
+de sobrevivência com fração de cura, especialmente em contextos onde a estrutura da relação entre covariáveis
+e sobrevivência apresenta maior complexidade.

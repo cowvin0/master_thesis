@@ -139,6 +139,8 @@ Em conjunto, essas funções e suas inter-relações fornecem um arcabouço mate
 para a modelagem de dados de sobrevivência, permitindo diferentes formas de especificação
 de modelos conforme as características do problema e dos dados disponíveis.
 
+% \section{Estimador de Kaplan-Meier}
+
 \section{Modelo de Riscos Proporcionais de Cox}
 
 O modelo de riscos proporcionais de Cox, proposto por \cite{cox1972regression}, constitui
@@ -224,14 +226,14 @@ há uma probabilidade positiva de o evento nunca ocorrer. Assim, a função de s
 \]
 em que $p_0$ representa a fração de indivíduos curados.
 
-Equivalentemente, pode-se escrever a função de sobrevivência populacional como
-\[
-S_{pop}(t)=p_0+(1-p_0)S_0(t),
-\]
-em que $S_0(t)$ representa a função de sobrevivência dos indivíduos suscetíveis ao evento. Nessa formulação,
-a população é vista como uma mistura entre indivíduos curados e suscetíveis.
+% Equivalentemente, pode-se escrever a função de sobrevivência populacional como
+% \[
+% S_{pop}(t)=p_0+(1-p_0)S_0(t),
+% \]
+% em que $S_0(t)$ representa a função de sobrevivência dos indivíduos suscetíveis ao evento. Nessa formulação,
+% a população é vista como uma mistura entre indivíduos curados e suscetíveis.
 
-Os modelos de fração de cura podem ser classificados em duas abordagens principais: os modelos de mistura e os modelos de não mistura. Nos modelos de mistura,
+Os modelos de fração de cura podem ser classificados em duas abordagens principais. Isto é, os modelos de mistura e os modelos de não mistura. Nos modelos de mistura,
 a fração de cura é modelada explicitamente como uma combinação entre curados e suscetíveis. Já nos modelos de não mistura,
 a estrutura da função de sobrevivência incorpora a fração de cura de forma implícita.
 
@@ -240,98 +242,208 @@ também conhecido como modelo de risco acumulado limitado.
 
 \subsection{Modelo de Tempo de Promoção}
 
-O modelo de tempo de promoção possui motivação biológica e foi proposto para situações em que o evento de interesse
-é desencadeado por múltiplos fatores latentes. Considere que cada indivíduo esteja exposto a $N$ riscos latentes,
-por exemplo, células cancerígenas residuais após um tratamento.
+De uma forma geral a ideia básica do modelo unificado de fração de cura está baseada na noção de ocorrência do evento de interesse em um processo em dois estágios:
 
-Assume-se que o número de riscos latentes segue uma distribuição de Poisson com média $\theta(\mathbf{x})>0$, isto é,
-\[
-N \sim \text{Poisson}(\theta(\mathbf{x})),
-\]
-em que $\mathbf{x}$ representa o vetor de covariáveis.
+Estágio de iniciação. Seja $N$ uma variável aleatória representando o número de causas ou riscos competitivos da ocorrência do evento de interesse. A causa de ocorrência do evento é desconhecida, e a variável $N$ não é observada, com distribuição de probabilidade $p_n$ e sua cauda dadas, respectivamente, por
+\begin{eqnarray}
+p_n=P[N=n] \quad \text{e} \quad q_n=P[N>n],
+\end{eqnarray}
+com $n=0,1,2,...$.
 
-Seja $T_j$ o tempo necessário para que o $j$-ésimo risco latente produza o evento clínico, com função de distribuição
-acumulada $F(t)$. O tempo observado até a ocorrência do evento é definido pelo mínimo entre os tempos latentes:
-\[
-T=\min(T_1,\ldots,T_N).
-\]
-Dessa forma, a função de sobrevivência populacional corresponde à probabilidade de que nenhum dos riscos latentes
-tenha promovido o evento até o tempo $t$, dada por
-\[
-S_{pop}(t|\mathbf{x})=P(N=0)+P(N>0,T_1>t,\ldots,T_N>t).
-\]
+Estágio de maturação. Dado $N=n$, sejam $Z_k$, $k=1,...,n$, variáveis aleatórias contínuas (não-negativas) independentes com função distribuição acumulada $F(z)=1-S(z)$ e independentes de $N$, que representam o tempo de ocorrência do evento de interesse devido à $k$-ésima causa.
+Afim de incluir os indivíduos que não são suscetíveis ao evento de interesse, seu tempo de ocorrência é definido como
+\begin{eqnarray}
+T = \min(Z_0,Z_1,Z_2, ...,Z_N)
+\end{eqnarray}
+em que $P[Z_0 = \infty] = 1$, admitindo a possibilidade que uma proporção $p_0$ da população não apresenta a ocorrência do evento de interesse, $T$ é uma variável aleatória observável ou censurada e $Z_j$ e $N$ são variáveis latentes.
 
-Sob as hipóteses de independência entre os riscos latentes, obtém-se
-\[
-S_{pop}(t|\mathbf{x})=\exp\{-\theta(\mathbf{x})F(t)\}.
-\]
+Seja $\{a_n\}$ uma sequência de números reais. Se $s$ pertence ao intervalo $[0, 1]$
+\begin{eqnarray}
+A(s) = a_0 + a_1s + a_2s^2 + \cdots
+\end{eqnarray}
+converge, então $A(s)$ é definida como a função geradora da sequência $\{a_n\}$.
 
-Observa-se que, quando $t \to \infty$, tem-se $F(t)\to 1$, de modo que
-\[
-\lim_{t\to\infty}S_{pop}(t|\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
-\]
+%Se $a = a_n = p_n = p$, temos que $A_p(s) = E[s^N]$. Observe que a função geradora de probabilidades é a funçãao geradora de momentos da variável aleatória $N$ calculada no ponto $\log(s)$, isto é, $A_p(s) = E[\exp{\log(s)N}]$.
 
-Portanto, a fração de cura é dada por
-\[
-p_0(\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
-\]
+A função de sobrevivência da variável aleatória $T$ (função de sobrevivência da população) será indicada por
+\begin{eqnarray}
+S_{pop}(t) &=& P[N = 0] + P[Z_1 > t,Z_2 > t, ...,Z_N > t,N \geq 1] \nonumber \\
+&=& P[N = 0] + \sum_{n=1}^{\infty} P[N = n]P[Z_1 > t,Z_2 > t, ...,Z_N > t] \nonumber \\
+&=& p_0 + \sum_{n=1}^{\infty} p_n{S(t)}^n \nonumber \\
+&=& A(S(t)),
+\end{eqnarray}
+sendo que $A(\cdot)$ é a função geradora da sequência $p_n$. Ou seja, a função de sobrevivência da variável aleatória $T$, correspondente a um modelo de longa duração em dois estágios, é uma composição da função geradora de probabilidades e a função de sobrevivência. A função de sobrevivência de longa duração em dois estágios $S_{pop}(t)$ não é uma função de sobrevivência própria.
 
-Uma característica importante desse modelo é que a probabilidade de cura está diretamente associada ao número esperado
-de riscos latentes. Quanto maior $\theta(\mathbf{x})$, menor a probabilidade de cura. Essa formulação torna o modelo
-particularmente atrativo por fornecer interpretação biológica clara e permitir a incorporação de covariáveis na modelagem
-da fração de cura.
+Observe que, para a função de sobrevivência própria, $\lim_{t\rightarrow 0}S(t) = 1$ e $\lim_{t\rightarrow \infty}S(t) = 0$. Já para a função de sobrevivência imprópria, $\lim_{t\rightarrow 0}S(t) = 1$ e $\lim_{t\rightarrow \infty}S_{pop}(t) = P[N = 0] = p_0$. Dessa forma, $p_0$ é a proporção de não ocorrências do evento de interesse na população, ou seja, a fração de cura.
 
-\section{GG-KM}
+A função de sobrevivência populacional possui as seguintes propriedades:
+\vspace{0.5cm}
 
-O modelo proposto GG-KM, nada mais é que uma proposta de modelar a componente de cura do modelo de tempo de promoção
-a partir de kernels, de forma que funcione como uma extensão não paramétrica. Esta seção terá como objetivo
-descrever o processo de estimação e fundamentação do modelo.
+$\bullet$ Se $p_0=1$, então $S_{pop}(t) = S(t)$;
 
-\subsection{Extensão não paramétrica via kernel}
+$\bullet$ $S_{pop}(0) = 1$;
 
-Embora o modelo de tempo de promoção clássico permita incorporar covariáveis por meio de funções paramétricas
-para $\theta(\mathbf{x})$, essa abordagem pode ser restritiva em cenários onde a relação entre as covariáveis
-e a fração de cura apresenta estruturas complexas ou altamente não lineares.
+$\bullet$ $S_{pop}(t)$ é não crescente;
 
-Com o objetivo de contornar essa limitação, propõe-se modelar a intensidade média dos riscos latentes por
-meio de uma função não paramétrica. Para isso, define-se
-\[
-f(\mathbf{x})=\log(\theta(\mathbf{x})).
-\]
+$\bullet$ $\lim_{t \rightarrow \infty}S_{pop}(t) = p_0$
 
-A utilização da função de ligação logarítmica garante que
+\vspace{0.5cm}
 
-\[
-\theta(\mathbf{x})=\exp(f(\mathbf{x}))>0,
-\]
-preservando a interpretação probabilística da intensidade dos riscos latentes.
+As funções de densidade e de risco associadas à função de sobrevivência de longa duração são dadas, respectivamente, por
+\begin{eqnarray}
+f_{pop}(t) = f(t)\frac{dA(s)}{ds}|_{s=S(t)}
+\end{eqnarray}
+e
+\begin{eqnarray}
+h_{pop}(t) = \frac{f_{pop}(t)}{S_{pop}(t)}=f(t)\frac{\frac{dA(s)}{ds}|_{s=S(t)}}{S_{pop}(t)}.
+\end{eqnarray}
 
-Assume-se que a função $f$ pertence a um Reproducing Kernel Hilbert Space (RKHS) $\mathcal{H}_K$, associado a um kernel positivo definido $K(\cdot,\cdot)$. Dessa forma, pelo Teorema do Representante, a solução do problema de otimização penalizado pode ser expressa como uma combinação linear das funções kernel centradas nas observações:
-\[
-f(\mathbf{x})=\sum_{j=1}^{n}\alpha_jK(\mathbf{x},\mathbf{x}_j),
-\]
-em que $\alpha_1,\ldots,\alpha_n \in \mathbb{R}$ são coeficientes a serem estimados.
+Algumas distribuições são muito utilizadas para as funções geradoras de probabilidade, tais como Bernoulli, Binomial, Poisson, Binomial Negativa e Geométrica e contemplam diferentes modalidades de dispersão. Falaremos de cada uma delas a seguir.
+%\clearpage
 
-Consequentemente, a intensidade média dos riscos latentes para o indivíduo $i$ pode ser escrita como
-\[
-\theta(\mathbf{x}_i)=\exp\left(\sum_{j=1}^{n}\alpha_jK(\mathbf{x}_i,\mathbf{x}_j)\right).
-\]
+\textbf{Bernoulli}
 
-Neste trabalho, serão consideradas diferentes funções kernel para verificar o comportamento do modelo. Essa formulação amplia significativamente a flexibilidade do modelo, permitindo capturar relações complexas e interações entre covariáveis sem impor, a priori, uma estrutura funcional específica para a componente de cura.
+Seja $N$ uma variável aleatória que representa o número de causas competitivas latentes necessárias para a ocorrência de um determinado evento de interesse, que segue uma distribuição Bernoulli, com parâmetro $\theta$. Sua função de probabilidade de massa dada por
+\begin{eqnarray}
+P[N=n]=\theta^n(1-\theta)^{1-n},\text{ }n=0,1,..., \text{ e }0<\theta<1.
+\end{eqnarray}
 
-\subsection{Modelagem da sobrevivência dos suscetíveis}
+A função geradora de probabilidade de $N$ é dada por
+\begin{eqnarray}
+A(s) = 1 - \theta + \theta s, \text{ }0 \leq s \leq 1.
+\end{eqnarray}
 
-Além da modelagem flexível da fração de cura, é necessário especificar a distribuição dos tempos de falha dos indivíduos suscetíveis. Para isso, propõe-se o uso da distribuição Gama Generalizada (GG), devido à sua elevada flexibilidade e capacidade de acomodar diferentes formatos da função de risco.
+E a função de função de sobrevivência de longa duração é dada por
+\begin{eqnarray}
+S_{pop}(t) = A(S(t)) = 1 - \theta + \theta S(t),
+\end{eqnarray}
+obtendo, assim, o modelo conhecido como modelo de mistura padrão \cite{berkson1952survival}, que é um dos mais utilizados na análise de sobrevivência para ajustar dados de longa duração. Ele recebe esse nome, pois consiste de uma mistura de distribuições paramétricas, sendo uma função de sobrevivência própria para a parte da população formada pelos não curados e uma função para os curados, em que a proporção de curados é
+\begin{align}\label{p0}
+	 p_{0} = \lim_{t\rightarrow \infty}{S_{pop}(t)} = 1-\theta.
+\end{align}
+
+A função de densidade e de risco são dadas respectivamente por
+\begin{eqnarray}
+f_{pop}(t) = \theta f(t)
+\end{eqnarray}
+e
+\begin{eqnarray}
+h_{pop}(t) = \frac{\theta f(t)}{1 - \theta + \theta S(t)}.
+\end{eqnarray}
+
+
+$\bullet$ \textbf{Binomial}
+
+Seja o número $N$ de riscos latentes com distribuição binomial. Uma motivação biológica é, supondo-se que existe um número $K$ de potenciais lugares para a mutação de tumores focalizados numa região do corpo de um indivíduo afetada por uma doença, tem-se que $N$ lugares chegam a sofrer mutações.
+
+Adotamos uma reparametrização do modelo binomial: ${\theta^{*}} = \theta/(1+\theta)$. Assim, seja $N$ uma variável aleatória que representa o número de causas competitivas latentes necessárias para a ocorrência de um determinado evento de interesse com distribuição binomial, sua função de probabilidade de massa é dada por
+\begin{align}\label{distbn}
+P[ N = n^{*}] = {K \choose n^{*}}{\theta^{*}}^{n^{*}}(1-{\theta^{*}})^{K-n^{*}},\ \ n^{*} = 0,1,\ldots,K, \ \ \ 0<\theta^{*}<1,
+\end{align}
+com  $\mbox{E}[N]=K\theta^{*}$ e $\mbox{Var}[N]= K\theta(1-\theta^{*}) $, em que $K$ é um número inteiro positivo. A função geradora de probabilidade de $N$ é dada por
+\begin{align}
+	A(s) = (1 - \theta^{*} + \theta^{*} s)^K, \ \ \ 0\leq s\leq1.
+\end{align}
+
+A função de função de sobrevivência de longa duração é dada por
+\begin{align}\label{Spop_Bi}
+S_{pop}(t) = A(S(t))	=	S_{pop}(t) = \left[1-\theta^{*}	+ \theta^{*} S(t) \right]^{K} ,
+\end{align}
+sendo que a fração de cura $p_{0}$ é dada por
+\begin{align}\label{p0}
+	 p_{0} = \lim_{t\rightarrow \infty}{S_{pop}(t)} = (1-\theta^{*})^{K}>0.
+\end{align}
+
+As funções de densidade e de risco associadas à função de sobrevivência de longa duração binomial  são dadas respectivamente por
+\begin{align}
+f_{pop}(t)	=	K\theta^{*} f(t)(1-\theta^{*}	+ \theta^{*} S(t))^{(K-1)} \  \  \mbox{e} \  \  h_{pop}(t)	=		\frac{K\theta^{*} f(t)}{\left\{1-\theta^{*}	+ \theta^{*} S(t)\right\}},
+\end{align}
+em que $f(t) = -S'(t)$ é uma função de densidade própria.% do tempo $Z$, sendo que $Z \sim\mbox{We}i(\alpha,\lambda)$.
+
+Observa-se que, no caso em que $K$ cresce a fração de cura $p_{0}$ decresce.
+
+\clearpage
+$\bullet$ \textbf{Poisson}
+
+Seja o número $N$ de causas do evento de interesse com distribuição de probabilidade de Poisson. Assim, considerando a função geradora de probabilidade da distribuição de Poisson $A(s) = \exp[\theta(1-s)]$, obtemos as funções de sobrevivência, densidade e de risco da população, dadas respectivamente por
+\begin{align}\label{Spop_Poi}
+S_{pop}(t)=	A(S(t))=\exp\left[-\theta F(t)\right],
+\end{align}
+
+\begin{align}
+f_{pop}(t) = -\frac{dS_{pop}(t)}{dt} = \theta f(t)\exp\left[-\theta F(t)\right] \label{fpop_Poi}
+\end{align}
+e
+\begin{align}
+h_{pop}(t)= \theta f(t). \label{hpop_Poi}
+\end{align}
+
+Dessa forma, de (\ref{Spop_Poi}) tem-se a fração de cura dada por $p_{0}=\displaystyle \lim_{t\rightarrow \infty}{S_{pop}(t)} = \exp(-\theta)$.
+
+%As funções de sobrevivência, densidade e de risco para a população em risco são dadas respectivamente, por
+%\begin{align}
+%	S^{*}(t) = \frac{\exp(-\theta F(t)) - \exp(-\theta)}{1- \exp(-\theta) }, \label{c5}
+%\end{align}
+%\[
+%	f^{*}(t) =  \frac{\exp(-\theta F(t))}{1- \exp(-\theta)}\theta f(t)\label{c6}
+%\]
+%e
+%\[
+%	h^{*}(t) = \frac{\exp(-\theta F(t)) }{  \exp(-\theta F(t))- \exp(\theta) }h_{pop}(t). \label{c7}
+%\]
+
+
+
+% O modelo de tempo de promoção possui motivação biológica e foi proposto para situações em que o evento de interesse
+% é desencadeado por múltiplos fatores latentes. Considere que cada indivíduo esteja exposto a $N$ riscos latentes,
+% por exemplo, células cancerígenas residuais após um tratamento.
+
+% Assume-se que o número de riscos latentes segue uma distribuição de Poisson com média $\theta(\mathbf{x})>0$, isto é,
+% \[
+% N \sim \text{Poisson}(\theta(\mathbf{x})),
+% \]
+% em que $\mathbf{x}$ representa o vetor de covariáveis.
+
+% Seja $T_j$ o tempo necessário para que o $j$-ésimo risco latente produza o evento clínico, com função de distribuição
+% acumulada $F(t)$. O tempo observado até a ocorrência do evento é definido pelo mínimo entre os tempos latentes:
+% \[
+% T=\min(T_1,\ldots,T_N).
+% \]
+% Dessa forma, a função de sobrevivência populacional corresponde à probabilidade de que nenhum dos riscos latentes
+% tenha promovido o evento até o tempo $t$, dada por
+% \[
+% S_{pop}(t|\mathbf{x})=P(N=0)+P(N>0,T_1>t,\ldots,T_N>t) = \exp\{-\theta(\mathbf{x})F(t)\}.
+% \]
+
+% Observa-se que, quando $t \to \infty$, tem-se $F(t)\to 1$, de modo que
+% \[
+% \lim_{t\to\infty}S_{pop}(t|\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
+% \]
+
+% Portanto, a fração de cura é dada por
+% \[
+% p_0(\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
+% \]
+
+% Uma característica importante desse modelo é que a probabilidade de cura está diretamente associada ao número esperado
+% de riscos latentes. Quanto maior $\theta(\mathbf{x})$, menor a probabilidade de cura. Essa formulação torna o modelo
+% particularmente atrativo por fornecer interpretação biológica clara e permitir a incorporação de covariáveis na modelagem
+% da fração de cura.
+
+
+\subsection{Distribuição Gama Generalizada}
+
+Em relação a distribuição dos tempos de falha dos indíviduos suscetíveis, propõe-se o uso da distribuição
+Gama Generalizada (GG), devido à sua elevada flexibilidade e capacidade de acomodar diferentes formatos da
+função de risco.
 
 A função densidade de probabilidade da distribuição GG é dada por
-
 \[
 f_{GG}(t;a,d,p)=
 \frac{pt^{d-1}\exp\left(-(t/a)^p\right)}
 {a^d\Gamma(d/p)},
 \]
 e sua função de distribuição acumulada é definida como
-
 \[
 F_{GG}(t;a,d,p)=
 \frac{\gamma\left(d/p,(t/a)^p\right)}
@@ -345,7 +457,6 @@ distribuição Weibull, Gama ou converge para uma Log-Normal
 \subsection{Estimação e verossimilhança penalizada}
 
 Considere uma amostra observada composta por $n$ indivíduos,
-
 \[
 \mathcal{D}=\{(\mathbf{x}_i,t_i,\delta_i)\}_{i=1}^{n},
 \]
@@ -360,32 +471,19 @@ No modelo de tempo de promoção, a contribuição individual para a log-verossi
 \]
 
 No modelo GG-KM, a função de sobrevivência populacional é definida por
-
 \[
 S_{pop}(t|\mathbf{x})=
 \exp\left\{-\theta(\mathbf{x})F_{GG}(t)\right\},
 \]
 enquanto a função de risco populacional é dada por
-
 \[
 h_{pop}(t|\mathbf{x})=
 \theta(\mathbf{x})f_{GG}(t).
 \]
 
-Substituindo essas expressões na log-verossimilhança e considerando a parametrização
-
-\[
-\theta(\mathbf{x})=\exp(f(\mathbf{x})),
-\]
-
-com
-
-\[
-f(\mathbf{x})=
-\sum_{j=1}^{n}\alpha_jK(\mathbf{x},\mathbf{x}_j),
-\]
+Substituindo essas expressões na log-verossimilhança e considerando a parametrização $\theta(\mathbf{x})=\exp(f(\mathbf{x}))$,
+com $f(\mathbf{x})=\sum_{j=1}^{n}\alpha_jK(\mathbf{x},\mathbf{x}_j)$,
 obtém-se a função objetivo penalizada
-
 \[
 J(\Theta)=
 -
@@ -563,3 +661,553 @@ O processo de estimação do modelo GG-KM pode ser resumido pelo Algoritmo~\ref{
 \State \textbf{Saída:} $\hat{\alpha},\hat{a},\hat{d},\hat{p}$
 \end{algorithmic}
 \end{algorithm}
+
+
+% \noindent Em diversos contextos aplicados, não é suficiente determinar se um evento de
+% interesse ocorrerá; torna-se igualmente, e frequentemente mais relevante, modelar o
+% tempo até a sua ocorrência. Considere, por exemplo, um paciente acometido por uma
+% doença crônica. Nesse caso, profissionais da saúde estão interessados não apenas em
+% avaliar a eficácia de diferentes intervenções terapêuticas, mas também em estimar o
+% tempo de sobrevivência associado a cada estratégia. De maneira análoga, no setor
+% financeiro, instituições buscam modelar o tempo até a ocorrência de inadimplência de
+% um cliente, com o objetivo de aprimorar mecanismos de controle e gestão de risco.
+% De forma semelhante, em aplicações de marketing e negócios, o fenômeno de churn
+% refere-se ao tempo até que um cliente deixe de utilizar um serviço, sendo sua antecipação
+% fundamental para a implementação de políticas eficazes de retenção.
+
+% Esses exemplos evidenciam a ampla gama de aplicações em que o tempo até a ocorrência
+% de um evento constitui a principal variável de interesse. Nesse contexto, a análise de
+% sobrevivência emerge como um arcabouço estatístico voltado à modelagem de tempos até
+% evento, caracterizando-se, em particular, pela presença de observações incompletas,
+% decorrentes de mecanismos de censura. A incorporação adequada dessas informações
+% parciais é um dos aspectos centrais que distinguem a análise de sobrevivência de
+% abordagens tradicionais de modelagem estatística.
+
+
+% \section{Censura}
+
+% A principal característica que distingue a análise de sobrevivência de outras áreas da
+% estatística é a presença de censura. De forma geral, diz-se que uma observação é censurada
+% quando o tempo exato de ocorrência do evento de interesse não é completamente observado.
+% Assim, enquanto para alguns indivíduos o tempo até o evento é conhecido, para outros apenas
+% se dispõe de informação parcial, o que caracteriza a presença de dados censurados
+% \cite{clark2003survival}.
+
+% No contexto da análise de sobrevivência, a censura pode ser classificada em três categorias
+% principais: à direita, à esquerda e intervalar. A censura à direita ocorre quando o evento
+% de interesse não é observado durante o período de acompanhamento, seja em razão da saída
+% do indivíduo do estudo antes de sua conclusão, seja pelo término do estudo sem a ocorrência
+% do evento. A censura à esquerda, por sua vez, ocorre quando o evento já aconteceu antes do
+% início do período de observação, embora o instante exato de sua ocorrência seja desconhecido.
+% Por fim, a censura intervalar caracteriza-se pelo fato de que o evento é conhecido apenas
+% como tendo ocorrido em algum instante dentro de um intervalo de tempo, delimitado por duas
+% observações sucessivas.
+
+% Neste trabalho, o foco será direcionado aos casos de censura à esquerda e à direita, que
+% são os mais frequentemente encontrados em aplicações práticas. Formalmente, uma observação
+% censurada pode ser representada por um triplo $\left(\mathbf{x}_i, l_i, u_i\right)$,
+% para $i = 1, \ldots, m$, em que $\mathbf{x}_i \in \mathbb{R}^d$ denota o vetor de covariáveis,
+% $l_i \in \mathbb{R} \cup \{-\infty\}$ representa o limite inferior e $u_i \in \mathbb{R} \cup \{+\infty\}$
+% o limite superior do intervalo no qual o tempo de ocorrência do evento está contido.
+
+% Nesse formalismo, a censura à direita é representada por observações da forma $\left(\mathbf{x}_i, l_i, +\infty\right)$,
+% indicando que o evento ocorreu após o tempo $l_i$, mas seu instante exato é desconhecido.
+% Analogamente, a censura à esquerda é representada por $\left(\mathbf{x}_i, -\infty, u_i\right)$,
+% indicando que o evento ocorreu antes de $u_i$. Quando ambos os limites são finitos, isto é,
+% $l_i < u_i < +\infty$, tem-se o caso de censura intervalar.
+
+% No caso particular de observações não censuradas, o tempo de ocorrência do evento é conhecido
+% exatamente, de modo que $l_i = u_i = y_i$. Nesse caso, a observação pode ser representada
+% simplesmente por $\left(\mathbf{x}_i, y_i\right)$, em que $y_i$ corresponde ao tempo de
+% sobrevivência observado.
+
+% Essa representação unificada permite tratar, de forma coerente, diferentes mecanismos de
+% censura dentro de um mesmo arcabouço matemático, sendo particularmente útil na formulação
+% de métodos de aprendizado que incorporam explicitamente a informação parcial disponível
+% nos dados.
+
+% \section{Funções importantes para análise de sobrevivência e suas relações}
+
+% Os métodos de análise de sobrevivência são fundamentados na caracterização da distribuição
+% do tempo até a ocorrência de um evento aleatório. As principais formas de descrever essa
+% distribuição são por meio da função de sobrevivência e da função de risco, que oferecem
+% interpretações complementares e desempenham papel central tanto na formulação teórica
+% quanto na modelagem estatística.
+
+% A função de sobrevivência descreve a probabilidade de o evento de interesse não ter ocorrido
+% até um instante \( t \), sendo definida por:
+% \begin{equation}
+% \mathit{S}\left(\mathit{t}\right) = \mathit{P}\left(\mathit{T} > \mathit{t}\right), \quad 0 < \mathit{t} < \infty\text{.}
+% \label{eq:survival_function}
+% \end{equation}
+
+% Sob condições usuais, tem-se que \( \mathit{S}(0) = 1 \) e \( \lim_{t \to \infty} \mathit{S}(t) = 0 \). Além disso, a função de sobrevivência é não crescente e contínua à direita, propriedades que decorrem diretamente de sua definição probabilística.
+
+% Outra quantidade fundamental é a função de risco, que descreve a taxa instantânea de
+% ocorrência do evento no tempo \( t \), condicionada à sobrevivência até esse instante.
+% Formalmente, a função de risco é definida por:
+% \begin{equation}
+% \mathit{h}\left(\mathit{t}\right) = \lim_{\delta \to 0} \frac{\mathit{P}\left(\mathit{t} < \mathit{T} \leq \mathit{t} + \delta \mid \mathit{T} > \mathit{t}\right)}{\delta}\text{.}
+% \end{equation}
+
+% Essa definição evidencia que \( \mathit{h}(t) \) não é uma probabilidade, mas sim uma taxa,
+% podendo assumir valores maiores que 1. Intuitivamente, ela quantifica a propensão instantânea
+% de ocorrência do evento em torno de \( t \), dado que o indivíduo sobreviveu até esse
+% momento.
+
+% A partir dessas definições, podem ser estabelecidas diversas relações que caracterizam completamente
+% a distribuição de \( T \). Em particular, a função de distribuição acumulada é dada por:
+% \begin{equation}
+% \mathit{F}\left(\mathit{t}\right) = \mathit{P}\left(\mathit{T} \leq \mathit{t}\right) = 1 - \mathit{S}\left(\mathit{t}\right), \quad 0 < \mathit{t} < \infty\text{.}
+% \end{equation}
+
+% Assim como \( \mathit{S}(t) \), a função \( \mathit{F}(t) \) é contínua à direita e não
+% decrescente. No contexto da análise de sobrevivência, \( \mathit{F}(t) \) pode ser
+% interpretada como a probabilidade acumulada de ocorrência do evento até o tempo \( t \),
+% não devendo ser confundida com a função de risco acumulado definida adiante.
+
+% Quando a distribuição de \( T \) admite densidade, a função densidade de probabilidade é
+% obtida como:
+% \begin{equation}
+% \mathit{f}(t) = \frac{d}{dt}\mathit{F}(t) = -\frac{d}{dt}\mathit{S}(t)\text{.}
+% \end{equation}
+
+% A função de risco pode então ser expressa em termos da densidade e da função de sobrevivência
+% como:
+% \begin{equation}
+% \mathit{h}(t) = \frac{\mathit{f}(t)}{\mathit{S}(t)}\text{,}
+% \end{equation}
+% o que explicita sua interpretação como uma taxa condicional: trata-se da densidade de
+% ocorrência do evento em \( t \), ponderada pela probabilidade de sobrevivência até esse
+% instante.
+
+% A integral da função de risco ao longo do tempo define a função de risco acumulado:
+% \begin{equation}
+% \mathit{H}(t) = \int_{0}^{t} \mathit{h}(u)\,du\text{.}
+% \end{equation}
+
+% Essa função é não decrescente e desempenha papel central na teoria da sobrevivência, uma
+% vez que estabelece uma relação direta e particularmente conveniente com a função de
+% sobrevivência. De fato, pode-se demonstrar que:
+% \begin{equation}
+% \mathit{S}(t) = \exp\left(- \int_{0}^{t} \mathit{h}(u)\,du \right) = \exp\left(-\mathit{H}(t)\right)\text{.}
+% \end{equation}
+
+% Essa expressão evidencia que a função de sobrevivência é completamente determinada pela
+% função de risco, e vice-versa. Do ponto de vista prático, essa relação é de grande
+% relevância, pois muitos modelos em análise de sobrevivência são especificados diretamente
+% em termos da função de risco, como é o caso do modelo de riscos proporcionais de Cox. Além
+% disso, a representação exponencial garante que \( \mathit{S}(t) \) permaneça no intervalo
+% unitário e preserve suas propriedades fundamentais.
+
+% Em conjunto, essas funções e suas inter-relações fornecem um arcabouço matemático consistente
+% para a modelagem de dados de sobrevivência, permitindo diferentes formas de especificação
+% de modelos conforme as características do problema e dos dados disponíveis.
+
+% % \section{Estimador de Kaplan-Meier}
+
+% \section{Modelo de Riscos Proporcionais de Cox}
+
+% O modelo de riscos proporcionais de Cox, proposto por \cite{cox1972regression}, constitui
+% uma das abordagens mais influentes e amplamente empregadas na análise de sobrevivência.
+% Sua principal característica reside na natureza semiparamétrica da modelagem, na qual a
+% função de risco é decomposta em um componente basal arbitrário e um componente paramétrico
+% associado às covariáveis, sem a necessidade de especificação explícita da forma funcional
+% do risco basal ao longo do tempo.
+
+% Formalmente, seja $\mathbf{x}_i \in \mathbb{R}^p$ o vetor de covariáveis associado ao
+% $i$-ésimo indivíduo. O modelo de Cox é definido por:
+% \begin{equation}
+% h(t \mid \mathbf{x}_i) = h_0(t)\exp\left(\mathbf{x}_i^\top \bm{\beta}\right),
+% \end{equation}
+% em que $h_0(t)$ é a função de risco basal, comum a todos os indivíduos, e
+% $\bm{\beta} \in \mathbb{R}^p$ é o vetor de parâmetros que quantifica o efeito das
+% covariáveis sobre o risco.
+
+% A hipótese central do modelo é a de riscos proporcionais, segundo a qual a razão entre as
+% funções de risco de quaisquer dois indivíduos permanece constante ao longo do tempo. Mais
+% precisamente, para dois indivíduos com vetores de covariáveis $\mathbf{x}_i$ e $\mathbf{x}_j$,
+% tem-se:
+% \begin{equation}
+% \frac{h(t \mid \mathbf{x}_i)}{h(t \mid \mathbf{x}_j)} = \exp\left((\mathbf{x}_i - \mathbf{x}_j)^\top \bm{\beta}\right),
+% \end{equation}
+% o que evidencia que essa razão independe do tempo $t$. Essa propriedade confere ao modelo
+% uma interpretação particularmente conveniente, pois o termo $\exp(\beta_k)$ pode ser
+% interpretado como o efeito multiplicativo associado a um aumento unitário na $k$-ésima
+% covariável sobre o risco instantâneo, mantendo as demais fixas.
+
+% Uma das principais vantagens do modelo de Cox é que a estimação do vetor de parâmetros
+% $\bm{\beta}$ pode ser realizada sem a necessidade de especificar a função de risco basal
+% $h_0(t)$. Esse resultado é obtido por meio da verossimilhança parcial, que explora apenas
+% a informação contida na ordenação dos tempos de falha observados. Seja
+% $t_{(1)} < \cdots < t_{(D)}$ a sequência dos tempos de falha distintos e
+% $\mathcal{R}(t_{(d)})$ o conjunto de risco imediatamente antes de $t_{(d)}$.
+% A verossimilhança parcial é definida por:
+% \begin{equation}
+% L(\bm{\beta}) = \prod_{d=1}^{D} \frac{\exp\left(\mathbf{x}_{(d)}^\top \bm{\beta}\right)}{\sum_{j \in \mathcal{R}(t_{(d)})} \exp\left(\mathbf{x}_j^\top \bm{\beta}\right)}.
+% \end{equation}
+
+% Sob condições de regularidade, a maximização dessa função conduz a estimativas consistentes
+% e assintoticamente normais para $\bm{\beta}$, mesmo na presença de censura à direita.
+% Uma vez obtidas as estimativas dos parâmetros, é possível recuperar a função de risco basal,
+% tipicamente por meio do estimador de Breslow, e, consequentemente, a função de sobrevivência.
+
+% A função de sobrevivência condicional associada ao indivíduo $i$ pode ser expressa como:
+% \begin{equation}
+% S(t \mid \mathbf{x}_i) = S_0(t)^{\exp\left(\mathbf{x}_i^\top \bm{\beta}\right)},
+% \end{equation}
+% em que $S_0(t)$ denota a função de sobrevivência basal correspondente a $h_0(t)$. Essa
+% expressão evidencia que o efeito das covariáveis atua de forma multiplicativa sobre o risco
+% e, de maneira equivalente, exponencial sobre a função de sobrevivência.
+
+% Apesar de sua ampla aplicabilidade e interpretabilidade, o modelo de Cox depende
+% criticamente da validade da hipótese de riscos proporcionais. Violações dessa suposição
+% podem resultar em estimativas viesadas e comprometer a interpretação dos coeficientes.
+% Nesse contexto, diversas extensões têm sido propostas na literatura, incluindo modelos
+% com coeficientes dependentes do tempo, abordagens estratificadas e métodos baseados em
+% aprendizado de máquina, que buscam maior flexibilidade na modelagem de relações complexas
+% entre covariáveis e o risco de ocorrência do evento, especialmente em cenários de alta
+% dimensionalidade.
+
+% \section{Modelos de Longa Duração}
+
+% Existem dados de sobrevivência em que uma porcentagem dos indivíduos não apresentará a ocorrência de um evento,
+% mesmo se acompanhados por um longo período de tempo. Neste caso, diz-se que os indivíduos são imunes, ou curados,
+% ao evento de interesse. Tem-se assim a análise de sobrevivência com dados de longa duração.
+
+% Diferentemente dos modelos tradicionais de sobrevivência, em que se assume que todos os indivíduos eventualmente
+% experimentarão o evento de interesse, nos modelos de longa duração admite-se a existência de uma fração da população
+% para a qual o evento nunca ocorrerá. Essa característica é usualmente denominada fração de cura.
+
+% Seja $T$ uma variável aleatória representando o tempo até a ocorrência do evento. Em modelos clássicos de sobrevivência,
+% a função de sobrevivência é definida por
+% \[
+% S(t)=P(T>t), \quad t\geq 0,
+% \]
+% satisfazendo $\lim_{t\to\infty}S(t)=0$. Entretanto, em modelos com fração de cura, essa condição deixa de valer, pois
+% há uma probabilidade positiva de o evento nunca ocorrer. Assim, a função de sobrevivência torna-se imprópria, isto é,
+% \[
+% \lim_{t\to\infty}S(t)=p_0 > 0,
+% \]
+% em que $p_0$ representa a fração de indivíduos curados.
+
+% Equivalentemente, pode-se escrever a função de sobrevivência populacional como
+% \[
+% S_{pop}(t)=p_0+(1-p_0)S_0(t),
+% \]
+% em que $S_0(t)$ representa a função de sobrevivência dos indivíduos suscetíveis ao evento. Nessa formulação,
+% a população é vista como uma mistura entre indivíduos curados e suscetíveis.
+
+% Os modelos de fração de cura podem ser classificados em duas abordagens principais. Isto é, os modelos de mistura e os modelos de não mistura. Nos modelos de mistura,
+% a fração de cura é modelada explicitamente como uma combinação entre curados e suscetíveis. Já nos modelos de não mistura,
+% a estrutura da função de sobrevivência incorpora a fração de cura de forma implícita.
+
+% Entre os modelos de não mistura, destaca-se o modelo de tempo de promoção,
+% também conhecido como modelo de risco acumulado limitado.
+
+% \subsection{Modelo de Tempo de Promoção}
+
+% O modelo de tempo de promoção possui motivação biológica e foi proposto para situações em que o evento de interesse
+% é desencadeado por múltiplos fatores latentes. Considere que cada indivíduo esteja exposto a $N$ riscos latentes,
+% por exemplo, células cancerígenas residuais após um tratamento.
+
+% Assume-se que o número de riscos latentes segue uma distribuição de Poisson com média $\theta(\mathbf{x})>0$, isto é,
+% \[
+% N \sim \text{Poisson}(\theta(\mathbf{x})),
+% \]
+% em que $\mathbf{x}$ representa o vetor de covariáveis.
+
+% Seja $T_j$ o tempo necessário para que o $j$-ésimo risco latente produza o evento clínico, com função de distribuição
+% acumulada $F(t)$. O tempo observado até a ocorrência do evento é definido pelo mínimo entre os tempos latentes:
+% \[
+% T=\min(T_1,\ldots,T_N).
+% \]
+% Dessa forma, a função de sobrevivência populacional corresponde à probabilidade de que nenhum dos riscos latentes
+% tenha promovido o evento até o tempo $t$, dada por
+% \[
+% S_{pop}(t|\mathbf{x})=P(N=0)+P(N>0,T_1>t,\ldots,T_N>t) = \exp\{-\theta(\mathbf{x})F(t)\}.
+% \]
+
+% Observa-se que, quando $t \to \infty$, tem-se $F(t)\to 1$, de modo que
+% \[
+% \lim_{t\to\infty}S_{pop}(t|\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
+% \]
+
+% Portanto, a fração de cura é dada por
+% \[
+% p_0(\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
+% \]
+
+% Uma característica importante desse modelo é que a probabilidade de cura está diretamente associada ao número esperado
+% de riscos latentes. Quanto maior $\theta(\mathbf{x})$, menor a probabilidade de cura. Essa formulação torna o modelo
+% particularmente atrativo por fornecer interpretação biológica clara e permitir a incorporação de covariáveis na modelagem
+% da fração de cura.
+
+% \section{GG-KM}
+
+% O modelo proposto GG-KM, nada mais é que uma proposta de modelar a componente de cura do modelo de tempo de promoção
+% a partir de kernels, de forma que seja uma extensão semi-paramétrico. Esta seção terá como objetivo
+% descrever o processo de estimação e fundamentação do modelo.
+
+% \subsection{Extensão não paramétrica via kernel}
+
+% Embora o modelo de tempo de promoção clássico permita incorporar covariáveis por meio de funções paramétricas
+% para $\theta(\mathbf{x})$, essa abordagem pode ser restritiva em cenários onde a relação entre as covariáveis
+% e a fração de cura apresenta estruturas complexas ou altamente não lineares.
+
+% Com o objetivo de contornar essa limitação, propõe-se modelar a intensidade média dos riscos latentes por
+% meio de uma função não paramétrica. Para isso, define-se
+% \[
+% f(\mathbf{x})=\log(\theta(\mathbf{x})).
+% \]
+
+% A utilização da função de ligação logarítmica garante que
+
+% \[
+% \theta(\mathbf{x})=\exp(f(\mathbf{x}))>0,
+% \]
+% preservando a interpretação probabilística da intensidade dos riscos latentes.
+
+% Assume-se que a função $f$ pertence a um Reproducing Kernel Hilbert Space (RKHS) $\mathcal{H}_K$, associado a um kernel positivo definido $K(\cdot,\cdot)$. Dessa forma, pelo Teorema do Representante, a solução do problema de otimização penalizado pode ser expressa como uma combinação linear das funções kernel centradas nas observações:
+% \[
+% f(\mathbf{x})=\sum_{j=1}^{n}\alpha_jK(\mathbf{x},\mathbf{x}_j),
+% \]
+% em que $\alpha_1,\ldots,\alpha_n \in \mathbb{R}$ são coeficientes a serem estimados.
+
+% Consequentemente, a intensidade média dos riscos latentes para o indivíduo $i$ pode ser escrita como
+% \[
+% \theta(\mathbf{x}_i)=\exp\left(\sum_{j=1}^{n}\alpha_jK(\mathbf{x}_i,\mathbf{x}_j)\right).
+% \]
+
+% Neste trabalho, serão consideradas diferentes funções kernel para verificar o comportamento do modelo. Essa formulação amplia significativamente a flexibilidade do modelo, permitindo capturar relações complexas e interações entre covariáveis sem impor, a priori, uma estrutura funcional específica para a componente de cura.
+
+% \subsection{Gama Generalizada}
+
+% Em relação a distribuição dos tempos de falha dos indíviduos suscetíveis, propõe-se o uso da distribuição
+% Gama Generalizada (GG), devido à sua elevada flexibilidade e capacidade de acomodar diferentes formatos da
+% função de risco.
+
+% A função densidade de probabilidade da distribuição GG é dada por
+% \[
+% f_{GG}(t;a,d,p)=
+% \frac{pt^{d-1}\exp\left(-(t/a)^p\right)}
+% {a^d\Gamma(d/p)},
+% \]
+% e sua função de distribuição acumulada é definida como
+% \[
+% F_{GG}(t;a,d,p)=
+% \frac{\gamma\left(d/p,(t/a)^p\right)}
+% {\Gamma(d/p)},
+% \]
+% onde $a>0$ é o parâmetro de escala, $d>0$ e $p>0$ são parâmetros de forma, $\Gamma(\cdot)$ é a função gama e $\gamma(\cdot,\cdot)$ denota a função gama incompleta inferior.
+
+% A escolha dessa distribuição se justifica pelo fato de incluir importantes modelos clássicos como casos particulares. Por exemplo, quando $d=p$, $p=1$ ou $d/p \to \infty$, tem-se uma
+% distribuição Weibull, Gama ou converge para uma Log-Normal
+
+% \subsection{Estimação e verossimilhança penalizada}
+
+% Considere uma amostra observada composta por $n$ indivíduos,
+% \[
+% \mathcal{D}=\{(\mathbf{x}_i,t_i,\delta_i)\}_{i=1}^{n},
+% \]
+% em que $\mathbf{x}_i$ representa o vetor de covariáveis, $t_i$ o tempo observado e $\delta_i$ o indicador de falha, tal que $\delta_i=1$ indica ocorrência do evento e $\delta_i=0$ indica censura.
+
+% No modelo de tempo de promoção, a contribuição individual para a log-verossimilhança é dada por
+% \[
+% \ell_i=
+% \delta_i\log\left(h_{pop}(t_i|\mathbf{x}_i)\right)
+% +
+% \log\left(S_{pop}(t_i|\mathbf{x}_i)\right).
+% \]
+
+% No modelo GG-KM, a função de sobrevivência populacional é definida por
+% \[
+% S_{pop}(t|\mathbf{x})=
+% \exp\left\{-\theta(\mathbf{x})F_{GG}(t)\right\},
+% \]
+% enquanto a função de risco populacional é dada por
+% \[
+% h_{pop}(t|\mathbf{x})=
+% \theta(\mathbf{x})f_{GG}(t).
+% \]
+
+% Substituindo essas expressões na log-verossimilhança e considerando a parametrização $\theta(\mathbf{x})=\exp(f(\mathbf{x}))$,
+% com $f(\mathbf{x})=\sum_{j=1}^{n}\alpha_jK(\mathbf{x},\mathbf{x}_j)$,
+% obtém-se a função objetivo penalizada
+% \[
+% J(\Theta)=
+% -
+% \left[
+% \delta^\top(K\alpha+\log f_{GG})
+% -
+% w^\top F_{GG}
+% \right]
+% +
+% \frac{\lambda_{reg}}{2}\alpha^\top K\alpha,
+% \]
+% em que:
+
+% \begin{itemize}
+%     \item $\delta=(\delta_1,\ldots,\delta_n)^\top$ é o vetor de indicadores de censura;
+%     \item $K$ é a matriz de Gram associada ao kernel escolhido;
+%     \item $w=\exp(K\alpha)$ representa o vetor das intensidades latentes, com a exponencial aplicada elemento a elemento;
+%     \item $\log f_{GG}=(\log f_{GG}(t_1),\ldots,\log f_{GG}(t_n))^\top$;
+%     \item $F_{GG}=(F_{GG}(t_1),\ldots,F_{GG}(t_n))^\top$.
+% \end{itemize}
+
+% A expressão matricial acima pode ser expandida na forma escalar equivalente:
+
+% \[
+% J(\Theta)=
+% -
+% \sum_{i=1}^{n}
+% \left\{
+% \delta_i
+% \left[
+% f(\mathbf{x}_i)+\log f_{GG}(t_i)
+% \right]
+% -
+% \exp(f(\mathbf{x}_i))F_{GG}(t_i)
+% \right\}
+% +
+% \frac{\lambda_{reg}}{2}\alpha^\top K\alpha.
+% \]
+
+% Substituindo as expressões explícitas da distribuição Gama Generalizada, obtém-se:
+
+% \[
+% J(\Theta)=
+% -
+% \sum_{i=1}^{n}
+% \left\{
+% \delta_i
+% \left[
+% f_i+\log p +(d-1)\log t_i-\left(\frac{t_i}{a}\right)^p-d\log a-\log\Gamma\left(\frac{d}{p}\right)
+% \right]
+% \right\}
+% \]
+
+% \[
+% +
+% \sum_{i=1}^{n}
+% \left[
+% \exp(f_i)
+% \frac{\gamma\left(\frac{d}{p},\left(\frac{t_i}{a}\right)^p\right)}
+% {\Gamma\left(\frac{d}{p}\right)}
+% \right]
+% +
+% \frac{\lambda_{reg}}{2}\alpha^\top K\alpha,
+% \]
+% em que $f_i=f(\mathbf{x}_i)$.
+
+% A estimação dos parâmetros $\Theta=(\alpha,a,d,p)$ é realizada por minimização numérica da função objetivo $J(\Theta)$. Como não existe solução analítica fechada, utiliza-se o algoritmo L-BFGS \cite{liu1989limited}, que apresenta boa eficiência computacional e estabilidade numérica em problemas de otimização de alta dimensão.
+
+% \subsection{Gradientes analíticos}
+
+% A otimização da função objetivo penalizada $J(\Theta)$ requer o cálculo de seus gradientes em relação a todos os parâmetros do modelo. A obtenção dessas expressões em forma analítica é fundamental para aumentar a eficiência computacional do algoritmo, além de melhorar sua estabilidade numérica durante o processo iterativo.
+
+% Seja
+% \[
+% w_i=\exp(f(\mathbf{x}_i))
+% \]
+% a intensidade estimada de riscos latentes para o indivíduo $i$. O gradiente em relação ao vetor de coeficientes do kernel $\alpha \in \mathbb{R}^n$ é dado por
+% \[
+% \nabla_{\alpha}J
+% =
+% -K(\delta-w\odot F_{GG})
+% +
+% \lambda_{reg}K\alpha,
+% \]
+% em que $\odot$ representa o produto de Hadamard.
+
+% Para os parâmetros da distribuição Gama Generalizada, definem-se as quantidades auxiliares
+% \[
+% u_i=\left(\frac{t_i}{a}\right)^p
+% \quad\text{e}\quad
+% s=\frac{d}{p}.
+% \]
+
+% Os gradientes em relação aos parâmetros $a$, $d$ e $p$ são dados, respectivamente, por
+% \[
+% \frac{\partial J}{\partial a}
+% =
+% -
+% \sum_{i=1}^{n}
+% \left[
+% \delta_i
+% \left(
+% \frac{pu_i-d}{a}
+% \right)
+% +
+% w_i
+% \left(
+% \frac{p e^{-u_i}u_i^s}{a\Gamma(s)}
+% \right)
+% \right],
+% \]
+
+% \[
+% \frac{\partial J}{\partial d}
+% =
+% -
+% \sum_{i=1}^{n}
+% \left[
+% \delta_i\left(\log\left(\frac{t_i}{a}\right)
+% -
+% \frac{\psi(s)}{p}\right)
+% -
+% \frac{w_i}{p}G(s,u_i)
+% \right],
+% \]
+
+% \[
+% \frac{\partial J}{\partial p}
+% =
+% -
+% \sum_{i=1}^{n}
+% \left[
+% \delta_i
+% \left(
+% \frac{1}{p}
+% -
+% u_i\log\left(\frac{t_i}{a}\right)
+% +
+% \frac{s\psi(s)}{p}
+% \right)
+% -
+% w_i
+% \left(
+% \frac{dG(s,u_i)}{p^2}
+% +
+% \frac{u_i^s e^{-u_i}\log(t_i/a)}{\Gamma(s)}
+% \right)
+% \right].
+% \]
+
+% Nessas expressões:
+
+% \begin{itemize}
+%     \item $\Gamma(s)$ é a função Gama;
+%     \item $\psi(s)=\frac{d}{ds}\log\Gamma(s)$ é a função digama;
+%     \item $G(s,u)=\frac{\partial P(s,u)}{\partial s}$ é a derivada parcial da função gama incompleta regularizada em relação ao seu primeiro argumento.
+% \end{itemize}
+
+% O processo de estimação do modelo GG-KM pode ser resumido pelo Algoritmo~\ref{alg:ggkm}.
+
+% \begin{algorithm}[H]
+% \caption{Processo de estimação do modelo GG-KM}
+% \label{alg:ggkm}
+% \begin{algorithmic}[1]
+% \State \textbf{Entrada:} Dados $(X,t,\delta)$, hiperparâmetros $(\lambda_{reg},\gamma)$
+% \State Inicializar $\alpha \leftarrow 0$ e $\theta_{GG} \leftarrow \{a=1,d=1,p=1\}$
+% \State Construir a matriz de Gram $K$, com $K_{ij}=K(\mathbf{x}_i,\mathbf{x}_j)$
+% \While{critério de convergência não satisfeito}
+%     \State Calcular $w_i=\exp\left(\sum_j\alpha_jK_{ij}\right)$
+%     \State Calcular $f_{GG}(t_i)$ e $F_{GG}(t_i)$ para os parâmetros atuais
+%     \State Avaliar a função objetivo $J(\alpha,\theta_{GG})$
+%     \State Calcular os gradientes $\nabla_{\alpha}J$ e $\nabla_{\theta_{GG}}J$
+%     \State Atualizar $\Theta=\{\alpha,a,d,p\}$ utilizando L-BFGS
+% \EndWhile
+% \State \textbf{Saída:} $\hat{\alpha},\hat{a},\hat{d},\hat{p}$
+% \end{algorithmic}
+% \end{algorithm}
