@@ -1,5 +1,45 @@
-\section{Aplicação em Dados Simulados}
+\section{Aplicação a Dados Simulados}
 
 
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/simul_results_violin.png}
+    \caption{Distribuição do IBS em relação a cada kernel, para diferentes cenários de simulação.}
+    \label{fig:simul_optuna}
+\end{figure}
 
-\section{Aplicação em Dados Reais}
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/km_curv_comparison_ggkm.png}
+    \caption{Distribuição do IBS em relação a cada kernel, para diferentes cenários de simulação.}
+    \label{fig:simul_optuna}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{Resultados dos melhores kernels para cada tamanho amostral e método.}
+\label{tab:resultados_melhores}
+\begin{tabular}{ccccccccc}
+\toprule
+n & Método & $\mathbf{K}$ & Média IBS & $\text{Viés}\left(\hat{\pi}\left(\mathbf{x}\right)\right)$ & $\text{EQM}\left(\hat{\pi}\left(\mathbf{x}\right)\right)$ \\
+\midrule
+300 & 1 & cauchy      & 0.1198 & -0.0229 & 0.0264 \\
+300 & 2 & cauchy      & 0.1564 &  0.0574 & 0.0710 \\
+300 & 3 & exponential & 0.1295 & -0.0103 & 0.0220 \\
+ \\
+600 & 1 & sigmoid     & 0.1027 &  0.0210 & 0.0363 \\
+600 & 2 & rbf         & 0.1456 & -0.0043 & 0.0307 \\
+600 & 3 & polynomial  & 0.0863 & -0.0043 & 0.0192 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\section{Aplicação a Dados Reais}
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/melanoma_km_ggkm.png}
+    \caption{Curva de Kaplan Meier para o conjunto de dados de melanoma, comparando o modelo GG-KM.}
+    \label{fig:melanoma_km_ggkm}
+\end{figure}
