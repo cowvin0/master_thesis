@@ -86,3 +86,26 @@ Essa propriedade estabelece que a avaliação funcional é contínua e pode ser 
 O espaço $\mathcal{H}$ associado a $K$ é chamado de Reproducing Kernel Hilbert Space (RKHS), desempenhando
 papel central em métodos de aprendizado estatístico, particularmente em problemas de regularização,
 estimação não paramétrica e aprendizado supervisionado.
+
+\subsection{Teorema do Representante}
+
+O resultado mais interessante para a definição do modelo GG-KM é o Teorema do Representante. Sua principal
+importância reside no fato de garantir que, embora a otimização ocorra em um espaço potencialmente infinito
+-dimensional, a solução ótima pode ser expressa em termos de uma combinação finita de kernels avaliados nas
+observações da amostra.
+
+Formalmente, seja $K \text{ : } \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ um kernel positivo definido e
+$\mathcal{H}$ seu correspondente RKHS. Assim, para qualquer função $G \text{ : } \mathbb{R} \to \mathbb{R}$ não
+decrescente e qualquer função perda $L \text{ : } \mathbb{R}^n \to \mathbb{R} \cup \{+\infty\}$, o problema de otimização
+$$
+{\arg\min}_{h\in\mathcal{H}} F\left(h\right) = {\arg\min}_{h\in\mathcal{H}} G\left(\|h\|_{\mathcal{H}}\right) + L\left(h\left(x_1\right), \ldots, h\left(x_n\right)\right)
+$$
+admite uma solução na forma $h^{*} = \sum_{i=1}^{n}\alpha_i K\left(x_i, \cdot\right)$. Se $G$ é assumido como sendo crescente,
+então qualquer solução tem esta forma.
+
+
+Esse resultado é particularmente relevante porque reduz um problema de otimização funcional em dimensão
+infinita para um problema de otimização em dimensão finita, dependente apenas dos coeficientes
+$\boldsymbol{\alpha} = (\alpha_1, \ldots, \alpha_n)$. Na prática, isso torna viável o uso de métodos
+baseados em kernel, além de evidenciar que toda a informação necessária para a estimação está contida na
+matriz kernel $K$, sem necessidade de explicitar o mapeamento $\phi(\cdot)$.

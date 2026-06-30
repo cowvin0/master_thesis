@@ -281,12 +281,16 @@ de riscos latentes. Quanto maior $\theta(\mathbf{x})$, menor a probabilidade de 
 particularmente atrativo por fornecer interpretação biológica clara e permitir a incorporação de covariáveis na modelagem
 da fração de cura.
 
-\subsection{Extensão não paramétrica via máquinas de kernel}
+\section{GG-KM}
 
-Embora o modelo de tempo de promoção clássico permita incorporar covariáveis por meio de funções paramétricas para $\theta(\mathbf{x})$, essa abordagem pode ser restritiva em cenários onde a relação entre as covariáveis e a fração de cura apresenta estruturas complexas ou altamente não lineares.
+\subsection{Extensão não paramétrica via kernel}
 
-Com o objetivo de contornar essa limitação, propõe-se modelar a intensidade média dos riscos latentes por meio de uma função não paramétrica. Para isso, define-se
+Embora o modelo de tempo de promoção clássico permita incorporar covariáveis por meio de funções paramétricas
+para $\theta(\mathbf{x})$, essa abordagem pode ser restritiva em cenários onde a relação entre as covariáveis
+e a fração de cura apresenta estruturas complexas ou altamente não lineares.
 
+Com o objetivo de contornar essa limitação, propõe-se modelar a intensidade média dos riscos latentes por
+meio de uma função não paramétrica. Para isso, define-se
 \[
 f(\mathbf{x})=\log(\theta(\mathbf{x})).
 \]
@@ -300,28 +304,17 @@ A utilização da função de ligação logarítmica garante que
 preservando a interpretação probabilística da intensidade dos riscos latentes.
 
 Assume-se que a função $f$ pertence a um Reproducing Kernel Hilbert Space (RKHS) $\mathcal{H}_K$, associado a um kernel positivo definido $K(\cdot,\cdot)$. Dessa forma, pelo Teorema do Representante, a solução do problema de otimização penalizado pode ser expressa como uma combinação linear das funções kernel centradas nas observações:
-
 \[
 f(\mathbf{x})=\sum_{j=1}^{n}\alpha_jK(\mathbf{x},\mathbf{x}_j),
 \]
-
 em que $\alpha_1,\ldots,\alpha_n \in \mathbb{R}$ são coeficientes a serem estimados.
 
 Consequentemente, a intensidade média dos riscos latentes para o indivíduo $i$ pode ser escrita como
-
 \[
 \theta(\mathbf{x}_i)=\exp\left(\sum_{j=1}^{n}\alpha_jK(\mathbf{x}_i,\mathbf{x}_j)\right).
 \]
 
-Neste trabalho, adota-se principalmente o kernel Gaussiano (RBF), definido por
-
-\[
-K(\mathbf{x}_i,\mathbf{x}_j)=\exp\left(-\gamma\|\mathbf{x}_i-\mathbf{x}_j\|^2\right),
-\]
-
-onde $\gamma>0$ é um hiperparâmetro que controla a influência local de cada observação.
-
-Essa formulação amplia significativamente a flexibilidade do modelo, permitindo capturar relações complexas e interações entre covariáveis sem impor, a priori, uma estrutura funcional específica para a componente de cura.
+Neste trabalho, serão consideradas diferentes funções kernel para verificar o comportamento do modelo. Essa formulação amplia significativamente a flexibilidade do modelo, permitindo capturar relações complexas e interações entre covariáveis sem impor, a priori, uma estrutura funcional específica para a componente de cura.
 
 \subsection{Modelagem da sobrevivência dos suscetíveis}
 
@@ -345,16 +338,8 @@ F_{GG}(t;a,d,p)=
 
 onde $a>0$ é o parâmetro de escala, $d>0$ e $p>0$ são parâmetros de forma, $\Gamma(\cdot)$ é a função gama e $\gamma(\cdot,\cdot)$ denota a função gama incompleta inferior.
 
-A escolha dessa distribuição se justifica pelo fato de incluir importantes modelos clássicos como casos particulares:
-
-\begin{itemize}
-    \item Weibull, quando $d=p$;
-    \item Gama, quando $p=1$;
-    \item Log-normal, como caso limite quando $d/p \to \infty$.
-\end{itemize}
-
-Essa generalidade permite ao modelo adaptar-se a diferentes comportamentos da taxa de risco, incluindo funções monotônicas crescentes, decrescentes, unimodais e em formato de banheira.
-
+A escolha dessa distribuição se justifica pelo fato de incluir importantes modelos clássicos como casos particulares. Por exemplo, quando $d=p$, $p=1$ ou $d/p \to \infty$, tem-se uma
+distribuição Weibull, Gama ou converge para uma Log-Normal
 
 \subsection{Estimação e verossimilhança penalizada}
 
@@ -366,102 +351,45 @@ Considere uma amostra observada composta por $n$ indivíduos,
 
 em que $\mathbf{x}_i$ representa o vetor de covariáveis, $t_i$ o tempo observado e $\delta_i$ o indicador de falha, tal que $\delta_i=1$ indica ocorrência do evento e $\delta_i=0$ indica censura.
 
-No modelo de tempo de promoção, a contribuição individual para a função de verossimilhança é dada por
-
-\[
-L_i=h_{pop}(t_i|\mathbf{x}_i)^{\delta_i}S_{pop}(t_i|\mathbf{x}_i),
-\]
-
-de modo que a log-verossimilhança individual é
-
-\[
-\ell_i=\delta_i\log\left(h_{pop}(t_i|\mathbf{x}_i)\right)+\log\left(S_{pop}(t_i|\mathbf{x}_i)\right).
-\]
-
-No modelo GG-KM, a função de sobrevivência populacional é dada por
-
-\[
-S_{pop}(t|\mathbf{x})=\exp\left\{-\theta(\mathbf{x})F_{GG}(t)\right\},
-\]
-
-enquanto a função de risco populacional pode ser escrita como
-
-\[
-h_{pop}(t|\mathbf{x})=\theta(\mathbf{x})f_{GG}(t).
-\]
-
-Substituindo essas expressões na log-verossimilhança, obtém-se
-
+No modelo de tempo de promoção, a contribuição individual para a log-verossimilhança é dada por
 \[
 \ell_i=
-\delta_i
-\left[
-\log(\theta(\mathbf{x}_i))
+\delta_i\log\left(h_{pop}(t_i|\mathbf{x}_i)\right)
 +
-\log(f_{GG}(t_i))
-\right]
--
-\theta(\mathbf{x}_i)F_{GG}(t_i).
+\log\left(S_{pop}(t_i|\mathbf{x}_i)\right).
 \]
 
-Como $\theta(\mathbf{x})=\exp(f(\mathbf{x}))$ e
+No modelo GG-KM, a função de sobrevivência populacional é definida por
 
 \[
-f(\mathbf{x})=\sum_{j=1}^{n}\alpha_jK(\mathbf{x},\mathbf{x}_j),
+S_{pop}(t|\mathbf{x})=
+\exp\left\{-\theta(\mathbf{x})F_{GG}(t)\right\},
 \]
 
-a log-verossimilhança conjunta torna-se
+enquanto a função de risco populacional é dada por
 
 \[
-\ell(\Theta)
-=
-\sum_{i=1}^{n}
-\left\{
-\delta_i
-\left[
-f(\mathbf{x}_i)+\log(f_{GG}(t_i))
-\right]
--
-\exp(f(\mathbf{x}_i))F_{GG}(t_i)
-\right\},
+h_{pop}(t|\mathbf{x})=
+\theta(\mathbf{x})f_{GG}(t).
 \]
 
-onde $\Theta=(\alpha,a,d,p)$ representa o conjunto completo de parâmetros.
-
-Para controlar a complexidade da função estimada no RKHS e evitar sobreajuste, adiciona-se um termo de penalização quadrática baseado na norma induzida pelo kernel. Assim, define-se a função objetivo penalizada:
+Substituindo essas expressões na log-verossimilhança e considerando a parametrização
 
 \[
-J(\Theta)
-=
--\ell(\Theta)
-+
-\frac{\lambda_{reg}}{2}\alpha^\top K\alpha.
+\theta(\mathbf{x})=\exp(f(\mathbf{x})),
 \]
 
-Equivalentemente,
+com
 
 \[
-J(\Theta)
-=
--
-\sum_{i=1}^{n}
-\left\{
-\delta_i
-\left[
-f(\mathbf{x}_i)+\log(f_{GG}(t_i))
-\right]
--
-\exp(f(\mathbf{x}_i))F_{GG}(t_i)
-\right\}
-+
-\frac{\lambda_{reg}}{2}\alpha^\top K\alpha.
+f(\mathbf{x})=
+\sum_{j=1}^{n}\alpha_jK(\mathbf{x},\mathbf{x}_j),
 \]
 
-Em notação matricial, essa expressão pode ser escrita como
+obtém-se a função objetivo penalizada
 
 \[
-J(\Theta)
-=
+J(\Theta)=
 -
 \left[
 \delta^\top(K\alpha+\log f_{GG})
@@ -477,13 +405,58 @@ em que:
 \begin{itemize}
     \item $\delta=(\delta_1,\ldots,\delta_n)^\top$ é o vetor de indicadores de censura;
     \item $K$ é a matriz de Gram associada ao kernel escolhido;
-    \item $w=\exp(K\alpha)$ representa o vetor das intensidades latentes;
+    \item $w=\exp(K\alpha)$ representa o vetor das intensidades latentes, com a exponencial aplicada elemento a elemento;
     \item $\log f_{GG}=(\log f_{GG}(t_1),\ldots,\log f_{GG}(t_n))^\top$;
     \item $F_{GG}=(F_{GG}(t_1),\ldots,F_{GG}(t_n))^\top$.
 \end{itemize}
 
-A estimação dos parâmetros é realizada por minimização numérica da função objetivo $J(\Theta)$.
-Como não existe solução analítica fechada, utiliza-se um algoritmo iterativo baseado em gradientes, especificamente o método L-BFGS, devido à sua eficiência em problemas de alta dimensão e sua boa estabilidade numérica.
+A expressão matricial acima pode ser expandida na forma escalar equivalente:
+
+\[
+J(\Theta)=
+-
+\sum_{i=1}^{n}
+\left\{
+\delta_i
+\left[
+f(\mathbf{x}_i)+\log f_{GG}(t_i)
+\right]
+-
+\exp(f(\mathbf{x}_i))F_{GG}(t_i)
+\right\}
++
+\frac{\lambda_{reg}}{2}\alpha^\top K\alpha.
+\]
+
+Substituindo as expressões explícitas da distribuição Gama Generalizada, obtém-se:
+
+\[
+J(\Theta)=
+-
+\sum_{i=1}^{n}
+\left\{
+\delta_i
+\left[
+f_i+\log p +(d-1)\log t_i-\left(\frac{t_i}{a}\right)^p-d\log a-\log\Gamma\left(\frac{d}{p}\right)
+\right]
+\right\}
+\]
+
+\[
++
+\sum_{i=1}^{n}
+\left[
+\exp(f_i)
+\frac{\gamma\left(\frac{d}{p},\left(\frac{t_i}{a}\right)^p\right)}
+{\Gamma\left(\frac{d}{p}\right)}
+\right]
++
+\frac{\lambda_{reg}}{2}\alpha^\top K\alpha,
+\]
+
+em que $f_i=f(\mathbf{x}_i)$.
+
+A estimação dos parâmetros $\Theta=(\alpha,a,d,p)$ é realizada por minimização numérica da função objetivo $J(\Theta)$. Como não existe solução analítica fechada, utiliza-se o algoritmo L-BFGS \cite{liu1989limited}, que apresenta boa eficiência computacional e estabilidade numérica em problemas de otimização de alta dimensão.
 
 \subsection{Gradientes analíticos}
 
