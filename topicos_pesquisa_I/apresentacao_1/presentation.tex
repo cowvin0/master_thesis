@@ -1,4 +1,6 @@
 \documentclass[aspectratio=169,t,xcolor=table]{beamer}
+% \usepackage[backend=bibtex,style=authoryear]{biblatex}
+% \addbibresource{references.bib}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{multirow}
@@ -81,41 +83,41 @@ Kernel Machines}
 \setLayout{mainpoint}
 
 %========================================================
-\section{Funções de Kernel}
+\section{Métodos Baseados em Kernel}
 \setLayout{mainpoint}
-\begin{frame}{Funções de Kernel}
+\begin{frame}{Métodos Baseados em Kernel}
 \end{frame}
 
 %--------------------------------------------------------
 \setLayout{vertical}
-\begin{frame}{Funções de Kernel}
+% \begin{frame}{Métodos Baseados em Kernel}
 
-\begin{itemize}
-\item Técnicas flexíveis para modelagem de relações não lineares;
+% \begin{itemize}
+% \item Técnicas flexíveis para modelagem de relações não lineares;
 
-\vspace{0.3cm}
+% \vspace{0.3cm}
 
-\item Permitem estender algoritmos lineares para espaços de maior dimensão;
+% \item Permitem estender algoritmos lineares para espaços de maior dimensão;
 
-\vspace{0.3cm}
+% \vspace{0.3cm}
 
-\item Fundamentados em funções de kernel e espaços de Hilbert;
+% \item Fundamentados em Métodos Baseados em Kernel e espaços de Hilbert;
 
-\vspace{0.3cm}
+% \vspace{0.3cm}
 
-\item Amplamente utilizados em:
-\begin{itemize}
-    \item Support Vector Machines (SVM);
-    \item Kernel Ridge Regression;
-    \item Gaussian Processes.
-\end{itemize}
+% \item Amplamente utilizados em:
+% \begin{itemize}
+%     \item Support Vector Machines (SVM);
+%     \item Kernel Ridge Regression;
+%     \item Gaussian Processes.
+% \end{itemize}
 
-\end{itemize}
+% \end{itemize}
 
-\end{frame}
+% \end{frame}
 
 %--------------------------------------------------------
-\begin{frame}{Funções de Kernel}
+\begin{frame}{Métodos Baseados em Kernel}
 
 \begin{itemize}
 \item Uma função kernel é definida por:
@@ -201,6 +203,47 @@ admite uma solução na forma
 h^*(x)=\sum_{i=1}^{n}\alpha_i K(x_i,x)\text{.}
 \]
 
+\end{frame}
+
+\begin{frame}{Kernels conhecidos}
+\scriptsize
+\begin{itemize}
+
+    \item \textbf{Kernel linear}
+    \[
+    K(x_i,x_j)=x_i^\top x_j
+    \]
+
+    \item \textbf{Kernel polinomial}
+    \[
+    K(x_i,x_j)=\left(x_i^\top x_j + c\right)^d
+    \]
+
+    \item \textbf{Kernel Gaussiano (RBF)}
+    \[
+    K(x_i,x_j)=\exp\left(-\gamma \|x_i-x_j\|^2\right)
+    \]
+
+    \item \textbf{Kernel Laplaciano}
+    \[
+    K(x_i,x_j)=\exp\left(-\gamma \|x_i-x_j\|\right)
+    \]
+
+    \item \textbf{Kernel Sigmoidal}
+    \[
+    K(x_i,x_j)=\tanh\left(\gamma x_i^\top x_j + c\right)
+    \]
+
+    \item \textbf{Kernel Cauchy}
+    \[
+    K(x_i,x_j)=\left(1+\frac{\|x_i-x_j\|^2}{\sigma^2}\right)^{-1}
+    \]
+
+    \item \textbf{Kernel exponencial}
+    \[
+    K(x_i,x_j)=\exp\left(-\gamma \|x_i-x_j\|\right)
+    \]
+\end{itemize}
 \end{frame}
 
 \setLayout{mainpoint}
@@ -301,84 +344,92 @@ $$
 
 \end{frame}
 
-%========================================================
 \section{Modelo de Tempo de Promoção}
 
 %--------------------------------------------------------
 \begin{frame}{Modelo de Tempo de Promoção}
 
 \begin{itemize}
-\item Também conhecido como:
-\begin{itemize}
-\item \textit{Promotion Time Cure Model};
-\item \textit{Bounded Cumulative Hazard Model}.
-\end{itemize}
-
-\vspace{0.4cm}
-
-\item Baseado na ideia de riscos latentes;
+\item O modelo de tempo de promoção, também conhecido como \textit{Promotion Time Cure Model}, é uma classe de modelos de longa duração baseada em riscos latentes;
 
 \vspace{0.3cm}
 
-\item Exemplo: células cancerígenas que podem promover a recorrência da doença.
+\item Assume-se que cada indivíduo está exposto a um número aleatório de causas latentes capazes de produzir o evento de interesse;
+
+\vspace{0.3cm}
+
+\item Essas causas podem ser interpretadas, por exemplo, como células cancerígenas capazes de promover a recorrência de uma doença.
 
 \end{itemize}
 
 \end{frame}
 
 %--------------------------------------------------------
-\begin{frame}{Formulação do Modelo}
+\begin{frame}{Estrutura Probabilística}
 
 \begin{itemize}
 \item Seja $N$ o número de riscos latentes:
 \end{itemize}
 
-$$
-N \sim Poisson(\theta(x))
-$$
+\[
+N \sim Poisson(\theta(x)), \quad \theta(x)>0
+\]
+
+\vspace{0.4cm}
+
+% \begin{itemize}
+% \item Cada risco latente possui tempo de ativação:
+% \end{itemize}
+
+% \[
+% T_1,T_2,\ldots,T_N \sim F(t)
+% \]
 
 \vspace{0.4cm}
 
 \begin{itemize}
-\item Cada risco possui tempo de promoção:
+\item O tempo observado é definido como:
 \end{itemize}
 
-$$
-T_1,T_2,\ldots,T_N \sim F(t)
-$$
-
-\vspace{0.4cm}
-
-\begin{itemize}
-\item O tempo observado é dado pelo mínimo:
-\end{itemize}
-
-$$
+\[
 T=\min(T_1,\ldots,T_N)
-$$
+\]
 
 \end{frame}
 
-% %--------------------------------------------------------
-\begin{frame}{Sobrevivência Populacional}
+%--------------------------------------------------------
+\begin{frame}{Função de Sobrevivência Populacional}
 
 \begin{itemize}
-\item A função de sobrevivência populacional é:
+\item A sobrevivência populacional corresponde à probabilidade de nenhum risco latente produzir o evento até o tempo $t$:
 \end{itemize}
 
-$$
-S_{pop}(t|x)=P(T>t)
-$$
+\[
+S_{pop}(t|x)=P(N=0)+P(N>0,T_1>t,\ldots,T_N>t)
+\]
 
-\vspace{0.3cm}
+\vspace{0.4cm}
 
 \begin{itemize}
-\item Sob independência:
+\item Sob independência entre os riscos latentes:
 \end{itemize}
 
-$$
+\[
 S_{pop}(t|x)=\exp\{-\theta(x)F(t)\}
-$$
+\]
+
+\end{frame}
+
+%--------------------------------------------------------
+\begin{frame}{Fração de Cura}
+
+\begin{itemize}
+\item Como:
+\end{itemize}
+
+\[
+F(t)\to 1, \quad t\to\infty
+\]
 
 \vspace{0.4cm}
 
@@ -386,12 +437,114 @@ $$
 \item A fração de cura é obtida por:
 \end{itemize}
 
-$$
-p_0(x)=\lim_{t\to\infty}S_{pop}(t|x)=\exp(-\theta(x))
-$$
+\[
+p_0(x)=\lim_{t\to\infty}S_{pop}(t|x)
+\]
+
+\[
+p_0(x)=\exp(-\theta(x))
+\]
+
+\vspace{0.4cm}
+
+\begin{itemize}
+\item Assim, a probabilidade de cura está diretamente ligada à intensidade média dos riscos latentes.
+\end{itemize}
 
 \end{frame}
+
+
 %========================================================
+% \section{Modelo de Tempo de Promoção}
+
+% %--------------------------------------------------------
+% \begin{frame}{Modelo de Tempo de Promoção}
+
+% \begin{itemize}
+% \item Também conhecido como:
+% \begin{itemize}
+% \item \textit{Promotion Time Cure Model};
+% \item \textit{Bounded Cumulative Hazard Model}.
+% \end{itemize}
+
+% \vspace{0.4cm}
+
+% \item Baseado na ideia de riscos latentes;
+
+% \vspace{0.3cm}
+
+% \item Exemplo: células cancerígenas que podem promover a recorrência da doença.
+
+% \end{itemize}
+
+% \end{frame}
+
+% %--------------------------------------------------------
+% \begin{frame}{Formulação do Modelo}
+
+% \begin{itemize}
+% \item Seja $N$ o número de riscos latentes:
+% \end{itemize}
+
+% $$
+% N \sim Poisson(\theta(x))
+% $$
+
+% \vspace{0.4cm}
+
+% % \begin{itemize}
+% % \item Cada risco possui tempo de promoção:
+% % \end{itemize}
+
+% % $$
+% % T_1,T_2,\ldots,T_N \sim F(t)
+% % $$
+
+% \vspace{0.4cm}
+
+% \begin{itemize}
+% \item O tempo observado é dado pelo mínimo:
+% \end{itemize}
+
+% $$
+% T=\min(T_1,\ldots,T_N)
+% $$
+
+% \end{frame}
+
+% % %--------------------------------------------------------
+% \begin{frame}{Sobrevivência Populacional}
+
+% \begin{itemize}
+% \item A função de sobrevivência populacional é:
+% \end{itemize}
+
+% $$
+% S_{pop}(t|x)=P(T>t)=S_{pop}(t|x)=\exp\{-\theta(x)F(t)\}
+% $$
+
+% % \vspace{0.3cm}
+
+% % \begin{itemize}
+% % \item Sob independência:
+% % \end{itemize}
+
+% % $$
+% % S_{pop}(t|x)=\exp\{-\theta(x)F(t)\}
+% % $$
+
+% \vspace{0.4cm}
+
+% \begin{itemize}
+% \item A fração de cura é obtida por:
+% \end{itemize}
+
+% $$
+% p_0(x)=\lim_{t\to\infty}S_{pop}(t|x)=\exp(-\theta(x))
+% $$
+
+% \end{frame}
+% %========================================================
 
 \setLayout{mainpoint}
 \section{GG-KM}
@@ -444,6 +597,23 @@ $$
 w=\exp(K\alpha)
 $$
 
+\end{frame}
+
+\begin{frame}{Verossimilhança Penalizada}
+$GG$ é uma Gama Generalizada com função de densidade de probabilidade dada por:
+\[
+f_{GG}(t;a,d,p)=
+\frac{pt^{d-1}\exp\left(-(t/a)^p\right)}
+{a^d\Gamma(d/p)},
+\]
+e sua função de distribuição acumulada é definida como
+\[
+F_{GG}(t;a,d,p)=
+\frac{\gamma\left(d/p,(t/a)^p\right)}
+{\Gamma(d/p)}.
+\]
+
+$\gamma$ é a função incompleta inferior, $a, d, p > 0$ parâmetro de escala e forma, respectivamente.
 \end{frame}
 
 % %--------------------------------------------------------
@@ -699,21 +869,11 @@ x_1,x_2 \sim N(0,1)
 \vspace{0.4cm}
 
 \begin{itemize}
-\item A estrutura de cura foi construída a partir de três cenários:
-
-\begin{itemize}
-    \item linear;
-    \item quadrático;
-    \item não linear periódico.
-\end{itemize}
+\item A estrutura de cura foi construída a partir de três cenários.
 
 \vspace{0.3cm}
 
-\item Objetivo:
-\begin{itemize}
-    % \item avaliar robustez;
-    \item avaliar flexibilidade do GG-KM.
-\end{itemize}
+\item O objetivo é avaliar flexibilidade do GG-KM.
 
 \end{itemize}
 
@@ -722,7 +882,7 @@ x_1,x_2 \sim N(0,1)
 %--------------------------------------------------------
 \begin{frame}{Cenários para Fração de Cura}
 
-\textbf{Cenário 1: Linear}
+\textbf{Cenário 1:}
 
 \[
 \pi(x)=
@@ -732,7 +892,7 @@ x_1,x_2 \sim N(0,1)
 
 \vspace{0.3cm}
 
-\textbf{Cenário 2: Quadrático}
+\textbf{Cenário 2:}
 
 \[
 \pi(x)=
@@ -742,7 +902,7 @@ x_1,x_2 \sim N(0,1)
 
 \vspace{0.3cm}
 
-\textbf{Cenário 3: Não linear periódico}
+\textbf{Cenário 3:}
 
 \[
 \pi(x)=
@@ -812,6 +972,48 @@ t_i=C_i
 \end{frame}
 
 %--------------------------------------------------------
+\begin{frame}{Componente de Latência}
+
+\begin{itemize}
+\item Para indivíduos suscetíveis, os tempos latentes são gerados a partir de uma Weibull;
+
+\vspace{0.3cm}
+
+\item A função de risco condicional é dada por:
+
+\end{itemize}
+\[
+h(t|x)=h_0(t)\exp(\beta_1x_1+\beta_2x_2)
+\]
+
+\vspace{0.4cm}
+
+\begin{itemize}
+\item Com risco basal:
+\end{itemize}
+\[
+h_0(t)=\alpha t^{\alpha-1}, \quad \alpha>0
+\]
+
+\vspace{0.4cm}
+\begin{itemize}
+\item Isso implica:
+\end{itemize}
+\[
+Y_i \sim Weibull(\alpha,\lambda(x_i))\text{, } \lambda(x_i) = \exp(\beta_1x_1+\beta_2x_2)^{-1/\alpha}
+\]
+\[
+\left(\alpha, \beta_{1}, \beta_{2}\right) = \left(2, 1, 0.5\right)
+\]
+
+% \[
+% \lambda(x_i)=\left{\exp(\beta_{1}x_{1}+\beta_{2}x_{2})\right}^{-1/\alpha}
+% \]
+
+\end{frame}
+
+
+%--------------------------------------------------------
 \begin{frame}{Geração dos Dados Simulados: Passo 3}
 
 \begin{itemize}
@@ -874,6 +1076,15 @@ t_i=\min(Y_i,C_i)
 Por fim,  obtém-se $(x_i,t_i,\delta_i)$ para cada indivíduo.
 \end{frame}
 
+\begin{frame}{Dados Gerados para Cada Cenário}
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=1\textwidth]{../images/plot_metodos123.png}
+    \caption{Simulação de curados e não curados sobre os três métodos descritos. Respectivamente, pode-se observar o método 1, 2 e 3.}
+    \label{fig:exemplo_metodo}
+\end{figure}
+\end{frame}
+
 \begin{frame}{Métricas para avaliação do desempenho do modelo}
 
 Integrated Brier Score com ajuste IPCW:
@@ -918,9 +1129,133 @@ $$
 
 \setLayout{mainpoint}
 \section{Resultados}
+\begin{frame}{Resultados em Dados Simulados}
+\end{frame}
 
-\begin{frame}
-\frametitle{Resultados}
+\setLayout{vertical}
+
+\begin{frame}{Resultados em Dados Simulados}
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../images/km_curv_comparison_ggkm.png}
+    \caption{Comparação da curva de sobrevivência estimada pelo GG-KM e KME.}
+    \label{fig:km_curv_comparison_ggkm}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Resultados em Dados Simulados}
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../images/simul_results_violin.png}
+    \caption{Distribuição do IBS em relação a cada kernel, para diferentes cenários de simulação.}
+    \label{fig:simul_optuna}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Resultados em Dados Simulados}
+\begin{table}[ht]
+\centering
+\caption{Resultados dos melhores kernels para cada tamanho amostral e método.}
+\label{tab:resultados_melhores}
+\begin{tabular}{ccccccccc}
+\toprule
+n & Método & $\mathbf{K}$ & Média IBS & $\text{Viés}\left(\hat{\pi}\left(\mathbf{x}\right)\right)$ & $\text{EQM}\left(\hat{\pi}\left(\mathbf{x}\right)\right)$ \\
+\midrule
+300 & 1 & cauchy      & 0.1198 & -0.0229 & 0.0264 \\
+300 & 2 & cauchy      & 0.1564 &  0.0574 & 0.0710 \\
+300 & 3 & exponential & 0.1295 & -0.0103 & 0.0220 \\
+ \\
+600 & 1 & sigmoid     & 0.1027 &  0.0210 & 0.0363 \\
+600 & 2 & rbf         & 0.1456 & -0.0043 & 0.0307 \\
+600 & 3 & polynomial  & 0.0863 & -0.0043 & 0.0192 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\end{frame}
+
+\setLayout{mainpoint}
+\begin{frame}{Resultados em Dados Reais}
+\end{frame}
+
+\setLayout{vertical}
+\begin{frame}{Resultados em Dados Reais}
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.5\textwidth]{../images/melanoma_km_ggkm.png}
+    \caption{Curva de Kaplan Meier para o conjunto de dados de melanoma, comparando o modelo GG-KM.}
+    \label{fig:melanoma_km_ggkm}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Resultados em Dados Reais}
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.6\textwidth]{../images/melanoma_violin_ibs.png}
+    \caption{Distribuição do IBS em relação a cada kernel.}
+    \label{fig:melanoma_violin_ibs}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Resultados em Dados Reais}
+\begin{table}[ht]
+\centering
+\caption{Resultados do IBS médio e desvio padrão para cada kernel no conjunto de dados Melanoma.}
+\label{tab:melanoma_kernels}
+\begin{tabular}{lcc}
+\toprule
+Kernel & Média IBS & DP IBS \\
+\midrule
+linear      & 0.1517 & 0.0295 \\
+exponential & 0.1536 & 0.0170 \\
+polynomial  & 0.1539 & 0.0295 \\
+rbf         & 0.1562 & 0.0312 \\
+laplacian   & 0.1584 & 0.0192 \\
+sigmoid     & 0.1586 & 0.0231 \\
+cauchy      & 0.1663 & 0.0439 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\end{frame}
+
+\setLayout{mainpoint}
+\section{Conclusão}
+\begin{frame}{Conclusão}
+\end{frame}
+
+\setLayout{vertical}
+\begin{frame}{Conclusão}
+\begin{itemize}
+\item Foi proposta uma extensão do modelo de tempo de promoção baseada em funções kernel (GG-KM);
+\vspace{0.3cm}
+\item A abordagem permite maior flexibilidade na modelagem da fração de cura;
+\vspace{0.3cm}
+\item Kernels não lineares apresentaram melhor desempenho em cenários complexos;
+\vspace{0.3cm}
+\item O modelo apresentou bom ajuste às curvas de Kaplan-Meier em dados simulados e reais;
+\vspace{0.3cm}
+\item Os resultados indicam que o GG-KM é uma alternativa promissora para análise de sobrevivência com fração de cura.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Referências}
+
+\footnotesize
+
+MOHRI, Mehryar; ROSTAMIZADEH, Afshin; TALWALKAR, Ameet.
+\textit{Foundations of Machine Learning}.
+2. ed. Cambridge: MIT Press, 2018.
+
+\vspace{0.4cm}
+
+WAHBA, Grace; WANG, Yuedong. Representer theorem.
+\textit{Wiley StatsRef: Statistics Reference Online}, v. 1155, p. 1178, 2019.
+
+\vspace{0.4cm}
+
+PAL, Suvra; ASELISEWINE, Wisdom. A semiparametric promotion time cure model with support vector machine.
+\textit{The Annals of Applied Statistics}, v. 17, n. 3, p. 2680--2699, 2023.
+
 \end{frame}
 
 
