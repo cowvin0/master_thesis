@@ -41,12 +41,15 @@
 
 
 % -------------------------------------- Title Slide Information
-\title[Inf PIPGES]{Representer Theorem}
+\title[Inf PIPGES]{GG-KM: Flexible Semiparametric
+Promotion Time Cure Modeling Based on
+The Generalized Gamma Distribution and
+Kernel Machines}
 
 % \author[Discente, Docente]{Gabriel de Jesus Pereira\inst{1} \and Vera Lucia Damasceno Tomazella}
 \author[Discente, Docente]{Gabriel de Jesus Pereira\inst{1} \and Vera Lucia Damasceno Tomazella}
 
-\institute[UFSCar] % (optional)
+\institute[UFSCar]
 {
   \inst{1}%
   Mestrado - PIPGEs\\
@@ -65,339 +68,680 @@
 %------------------------------------------------Slide 1
 \setLayout{vertical} % This command define the layout. 'vertical' can be replace with 'horizontal', 'blank, 'mainpoint', 'titlepage'
 
-\section{Nome da seção}
+\begin{frame}{Sumário}
+\tableofcontents
+\end{frame}
 
+% \section{Nome da seção}
+
+% ---------------- Sumário ----------------
 \setLayout{mainpoint}
 
-\begin{frame}
-% \includegraphics[width = .25\linewidth]{Images/evaluate.png} %Adiciona imagem
-\frametitle{\Huge Representer Theorem}
+%========================================================
+\section{Funções de Kernel}
+\setLayout{mainpoint}
+\begin{frame}{Funções de Kernel}
 \end{frame}
 
-%------------------------------------------------Slide 2
+%--------------------------------------------------------
 \setLayout{vertical}
-\begin{frame}{Por que é importante?}
+\begin{frame}{Funções de Kernel}
 
 \begin{itemize}
-    \item Muitos problemas minimizam:
+\item Técnicas flexíveis para modelagem de relações não lineares;
 
-    \vfill
+\vspace{0.3cm}
 
-    \[
-    \mathcal{L}(h(x_1), \dots, h(x_n)) + \lambda \|h\|_{\mathcal{H}}^2
-    \]
+\item Permitem estender algoritmos lineares para espaços de maior dimensão;
 
-    \vfill
+\vspace{0.3cm}
 
-    \item Mas $\mathcal{H}$ pode ser infinito-dimensional
+\item Fundamentados em funções de kernel e espaços de Hilbert;
 
-    \vfill
-    % \vspace{0.3cm}
+\vspace{0.3cm}
 
-    \item Como otimizar sobre infinitas funções?
+\item Amplamente utilizados em:
+\begin{itemize}
+    \item Support Vector Machines (SVM);
+    \item Kernel Ridge Regression;
+    \item Gaussian Processes.
+\end{itemize}
 
-    \vfill
-    % \vspace{0.3cm}
-
-    \item O Teorema do Representante fornece a resposta.
 \end{itemize}
 
 \end{frame}
 
-%------------------------------------------------Slide 3
-\begin{frame}{Intuição}
+%--------------------------------------------------------
+\begin{frame}{Funções de Kernel}
 
 \begin{itemize}
-    \item A perda depende apenas de:
+\item Uma função kernel é definida por:
+\end{itemize}
 
-    \vfill
+$$
+K: \mathcal{X}\times\mathcal{X}\to\mathbb{R}
+$$
 
-    \[
-    h(x_1), \dots, h(x_n)
-    \]
+\vspace{0.3cm}
 
-    \vfill
+\begin{itemize}
+\item Interpreta similaridade entre observações;
 
-    \item Portanto, apenas o comportamento no conjunto de treino importa
+\vspace{0.2cm}
 
-    \vfill
+\item Equivale a um produto interno em um espaço de características:
 
-    \item Qualquer componente extra fora dessas observações apenas aumenta a complexidade
+\end{itemize}
 
-    \vfill
+$$
+K(x,x')=\langle \phi(x),\phi(x')\rangle
+$$
 
-    \item A melhor solução pertence a um subespaço de dimensão finita
+\vspace{0.3cm}
+
+\begin{itemize}
+\item Evita calcular explicitamente $\phi(x)$.
 \end{itemize}
 
 \end{frame}
 
+%--------------------------------------------------------
+\begin{frame}{RKHS}
 
-\begin{frame}{Intuição}
+\begin{itemize}
+\item Kernels positivos definidos induzem um espaço de Hilbert;
 
-\centering
+\vspace{0.3cm}
 
-\begin{tikzpicture}[scale=1.1]
+\item A matriz de Gram deve satisfazer:
 
-% Eixos
-\draw[->] (0,0,0) -- (5,0,0) node[right] {$x_1$};
-\draw[->] (0,0,0) -- (0,4,0) node[above] {$x_2$};
-\draw[->] (0,0,0) -- (0,0,4) node[left] {$x_3$};
+\end{itemize}
 
-% Plano x3 = 0
-\filldraw[fill=blue!10,opacity=0.5]
-(0,0,0) -- (4,0,0) -- (4,3,0) -- (0,3,0) -- cycle;
+$$
+K=[K(x_i,x_j)]_{i,j=1}^n \succeq 0
+$$
 
-\node at (4.4,2.8,0) {$x_3=0$};
+\vspace{0.3cm}
 
-% Classe +
-\filldraw[red] (1,1,0) circle (2pt);
-\filldraw[red] (1.4,1.8,0) circle (2pt);
-\filldraw[red] (2,1.2,0) circle (2pt);
+\begin{itemize}
+\item O espaço associado a K é chamado de Reproducing Kernel Hilbert Space (RKHS);
+\end{itemize}
 
-% Classe -
-\filldraw[black] (3,2.2,0) circle (2pt);
-\filldraw[black] (3.3,1.3,0) circle (2pt);
-\filldraw[black] (2.8,0.8,0) circle (2pt);
 
-% Hiperplano vertical
-\filldraw[fill=green!20,opacity=0.4]
-(2.4,0,0) --
-(2.4,3,0) --
-(2.4,3,3) --
-(2.4,0,3) -- cycle;
+\end{frame}
 
-\node at (2.7,3.2,2) {$\mathbf{w}^\top x + b = 0$};
+% %--------------------------------------------------------
+\begin{frame}{Teorema do Representante}
 
-% Vetor normal no plano x1-x2
-\draw[->, thick, red] (2.4,1.5,0) -- (3.3,1.5,0);
-\node[above] at (3.3,1.5,0) {$\mathbf{w}$};
+\begin{itemize}
+\item Fundamental para problemas de estimação com kernels;
 
-\end{tikzpicture}
+\vspace{0.3cm}
+
+\item Garante que a solução ótima possui representação finita:
+
+\end{itemize}
+
+$$
+h^*(x)=\sum_{i=1}^n \alpha_i K(x_i,x)
+$$
 
 \vspace{0.4cm}
 
 \begin{itemize}
-    \item Os dados vivem no plano \(x_3=0\)
-    \item Logo, a direção \(x_3\) não influencia a separação
-    \item Portanto, \(w_3 = 0\)
+\item Reduz um problema infinito-dimensional para um problema finito;
+
+\vspace{0.3cm}
+
+\item Toda a informação necessária está contida na matriz kernel.
+
 \end{itemize}
 
 \end{frame}
 
+\setLayout{mainpoint}
+\begin{frame}{Modelos de Longa Duração}
+\end{frame}
 
-%------------------------------------------------Slide 5
-\begin{frame}{Representer theorem}
+%========================================================
+\section{Modelos de Longa Duração}
+\setLayout{vertical}
 
-\vfill
+%--------------------------------------------------------
+\begin{frame}{Modelos de Longa Duração}
 
-% \begin{teo}
+\begin{itemize}
+\item Em alguns estudos, parte dos indivíduos nunca experimenta o evento de interesse;
 
-Seja $K\text{ : } \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ um kernel PDS e $\mathcal{H}$
-seu RHKS correspondente. Então, para qualquer função não-descrescente $G\text{ : } \mathbb{R} \to \mathbb{R}$
-e qualquer função de perda $\mathcal{L}\text{ : } \mathbb{R}^n \to \mathbb{R} \cup \{+\infty\}$, a solução do problema
+\vspace{0.3cm}
 
-\[
-\arg\min_{h\in \mathcal{H}} \left\{ \mathcal{L}(h(x_1), \dots, h(x_n)) + G(\|h\|_{\mathcal{H}}) \right\}
-% {\arg\min}_{h \in \mathcal{H}} \left\{ \mathcal{L}(h(x_1), \dots, h(x_n)) + \lambda \|h\|_{\mathcal{H}}^2 \right\}
-\]
+\item Esses indivíduos são chamados de:
+\begin{itemize}
+    \item imunes;
+    \item curados.
+\end{itemize}
+
+\vspace{0.3cm}
+
+\item Exemplos:
+\begin{itemize}
+    \item recorrência de câncer;
+    \item falha de dispositivos;
+    \item inadimplência.
+\end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+%--------------------------------------------------------
+\begin{frame}{Fração de Cura}
+
+\begin{itemize}
+\item Modelos clássicos assumem:
+\end{itemize}
+
+$$
+\lim_{t\to\infty} S(t)=0
+$$
+
+\vspace{0.4cm}
+
+\begin{itemize}
+\item Em modelos de longa duração:
+\end{itemize}
+
+$$
+\lim_{t\to\infty} S(t)=p_0>0
+$$
+
+\vspace{0.4cm}
+
+\begin{itemize}
+\item $p_0$ representa a fração de cura da população.
+\end{itemize}
+
+\end{frame}
+
+%--------------------------------------------------------
+\begin{frame}{Função de Sobrevivência Imprópria}
+
+\begin{itemize}
+\item A função de sobrevivência continua definida como:
+\end{itemize}
+
+$$
+S(t)=P(T>t)
+$$
+
+\vspace{0.4cm}
+
+\begin{itemize}
+\item Mas agora admite:
+\end{itemize}
+
+$$
+P(T=\infty)=p_0
+$$
+
+\vspace{0.4cm}
+
+\begin{itemize}
+\item Isso gera uma sobrevivência imprópria;
+
+\vspace{0.2cm}
+
+\item A curva estabiliza em um patamar positivo.
+
+\end{itemize}
+
+\end{frame}
+
+%========================================================
+\section{Modelo de Tempo de Promoção}
+
+%--------------------------------------------------------
+\begin{frame}{Modelo de Tempo de Promoção}
+
+\begin{itemize}
+\item Também conhecido como:
+\begin{itemize}
+\item \textit{Promotion Time Cure Model};
+\item \textit{Bounded Cumulative Hazard Model}.
+\end{itemize}
+
+\vspace{0.4cm}
+
+\item Baseado na ideia de riscos latentes;
+
+\vspace{0.3cm}
+
+\item Exemplo: células cancerígenas que podem promover a recorrência da doença.
+
+\end{itemize}
+
+\end{frame}
+
+%--------------------------------------------------------
+\begin{frame}{Formulação do Modelo}
+
+\begin{itemize}
+\item Seja $N$ o número de riscos latentes:
+\end{itemize}
+
+$$
+N \sim Poisson(\theta(x))
+$$
+
+\vspace{0.4cm}
+
+\begin{itemize}
+\item Cada risco possui tempo de promoção:
+\end{itemize}
+
+$$
+T_1,T_2,\ldots,T_N \sim F(t)
+$$
+
+\vspace{0.4cm}
+
+\begin{itemize}
+\item O tempo observado é dado pelo mínimo:
+\end{itemize}
+
+$$
+T=\min(T_1,\ldots,T_N)
+$$
+
+\end{frame}
+
+% %--------------------------------------------------------
+\begin{frame}{Sobrevivência Populacional}
+
+\begin{itemize}
+\item A função de sobrevivência populacional é:
+\end{itemize}
+
+$$
+S_{pop}(t|x)=P(T>t)
+$$
+
+\vspace{0.3cm}
+
+\begin{itemize}
+\item Sob independência:
+\end{itemize}
+
+$$
+S_{pop}(t|x)=\exp\{-\theta(x)F(t)\}
+$$
+
+\vspace{0.4cm}
+
+\begin{itemize}
+\item A fração de cura é obtida por:
+\end{itemize}
+
+$$
+p_0(x)=\lim_{t\to\infty}S_{pop}(t|x)=\exp(-\theta(x))
+$$
+
+\end{frame}
+%========================================================
+
+
+
+% \section{Modelo de Tempo de Promoção}
+
+% \begin{frame}
+% \frametitle{Modelo de Tempo de Promoção}
+% \end{frame}
+
+\setLayout{mainpoint}
+\section{Avaliação Experimental}
+
+\begin{frame}
+\frametitle{Avaliação Experimental}
+\end{frame}
+
+\setLayout{mainpoint}
+\section{Resultados}
+
+\begin{frame}
+\frametitle{Resultados}
+\end{frame}
+
+
+
+% \setLayout{mainpoint}
+
+% \begin{frame}
+% % \includegraphics[width = .25\linewidth]{Images/evaluate.png} %Adiciona imagem
+% \frametitle{\Huge Sumário}
+% \end{frame}
+
+%------------------------------------------------Slide 2
+% \setLayout{vertical}
+% \begin{frame}{Por que é importante?}
+
+% \begin{itemize}
+%     \item Muitos problemas minimizam:
+
+%     \vfill
+
+%     \[
+%     \mathcal{L}(h(x_1), \dots, h(x_n)) + \lambda \|h\|_{\mathcal{H}}^2
+%     \]
+
+%     \vfill
+
+%     \item Mas $\mathcal{H}$ pode ser infinito-dimensional
+
+%     \vfill
+%     % \vspace{0.3cm}
+
+%     \item Como otimizar sobre infinitas funções?
+
+%     \vfill
+%     % \vspace{0.3cm}
+
+%     \item O Teorema do Representante fornece a resposta.
+% \end{itemize}
+
+% \end{frame}
+
+% %------------------------------------------------Slide 3
+% \begin{frame}{Intuição}
+
+% \begin{itemize}
+%     \item A perda depende apenas de:
+
+%     \vfill
+
+%     \[
+%     h(x_1), \dots, h(x_n)
+%     \]
+
+%     \vfill
+
+%     \item Portanto, apenas o comportamento no conjunto de treino importa
+
+%     \vfill
+
+%     \item Qualquer componente extra fora dessas observações apenas aumenta a complexidade
+
+%     \vfill
+
+%     \item A melhor solução pertence a um subespaço de dimensão finita
+% \end{itemize}
+
+% \end{frame}
+
+
+% \begin{frame}{Intuição}
+
+% \centering
+
+% \begin{tikzpicture}[scale=1.1]
+
+% % Eixos
+% \draw[->] (0,0,0) -- (5,0,0) node[right] {$x_1$};
+% \draw[->] (0,0,0) -- (0,4,0) node[above] {$x_2$};
+% \draw[->] (0,0,0) -- (0,0,4) node[left] {$x_3$};
+
+% % Plano x3 = 0
+% \filldraw[fill=blue!10,opacity=0.5]
+% (0,0,0) -- (4,0,0) -- (4,3,0) -- (0,3,0) -- cycle;
+
+% \node at (4.4,2.8,0) {$x_3=0$};
+
+% % Classe +
+% \filldraw[red] (1,1,0) circle (2pt);
+% \filldraw[red] (1.4,1.8,0) circle (2pt);
+% \filldraw[red] (2,1.2,0) circle (2pt);
+
+% % Classe -
+% \filldraw[black] (3,2.2,0) circle (2pt);
+% \filldraw[black] (3.3,1.3,0) circle (2pt);
+% \filldraw[black] (2.8,0.8,0) circle (2pt);
+
+% % Hiperplano vertical
+% \filldraw[fill=green!20,opacity=0.4]
+% (2.4,0,0) --
+% (2.4,3,0) --
+% (2.4,3,3) --
+% (2.4,0,3) -- cycle;
+
+% \node at (2.7,3.2,2) {$\mathbf{w}^\top x + b = 0$};
+
+% % Vetor normal no plano x1-x2
+% \draw[->, thick, red] (2.4,1.5,0) -- (3.3,1.5,0);
+% \node[above] at (3.3,1.5,0) {$\mathbf{w}$};
+
+% \end{tikzpicture}
+
+% \vspace{0.4cm}
+
+% \begin{itemize}
+%     \item Os dados vivem no plano \(x_3=0\)
+%     \item Logo, a direção \(x_3\) não influencia a separação
+%     \item Portanto, \(w_3 = 0\)
+% \end{itemize}
+
+% \end{frame}
+
+
+% %------------------------------------------------Slide 5
+% \begin{frame}{Representer theorem}
+
+% \vfill
+
+% Seja $K\text{ : } \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ um kernel PDS e $\mathcal{H}$
+% seu RHKS correspondente. Então, para qualquer função não-descrescente $G\text{ : } \mathbb{R} \to \mathbb{R}$
+% e qualquer função de perda $\mathcal{L}\text{ : } \mathbb{R}^n \to \mathbb{R} \cup \{+\infty\}$, a solução do problema
 
 % \[
-% \min_{f \in \mathcal{H}}
-% \left\{
-% \mathcal{L}(f(x_1), \dots, f(x_n))
-% +
-% \lambda \|f\|_{\mathcal{H}}^2
-% \right\}
+% \arg\min_{h\in \mathcal{H}} \left\{ \mathcal{L}(h(x_1), \dots, h(x_n)) + G(\|h\|_{\mathcal{H}}) \right\}
+% % {\arg\min}_{h \in \mathcal{H}} \left\{ \mathcal{L}(h(x_1), \dots, h(x_n)) + \lambda \|h\|_{\mathcal{H}}^2 \right\}
 % \]
 
-admite uma solução na forma
+% % \[
+% % \min_{f \in \mathcal{H}}
+% % \left\{
+% % \mathcal{L}(f(x_1), \dots, f(x_n))
+% % +
+% % \lambda \|f\|_{\mathcal{H}}^2
+% % \right\}
+% % \]
 
-\[
-h^*(x)=\sum_{i=1}^{n}\alpha_i K(x_i,x)\text{.}
-\]
+% admite uma solução na forma
 
-% \end{teo}
+% \[
+% h^*(x)=\sum_{i=1}^{n}\alpha_i K(x_i,x)\text{.}
+% \]
 
-\end{frame}
+% % \end{teo}
 
-%------------------------------------------------Slide 6
-\begin{frame}{O que isso significa?}
+% \end{frame}
 
-\begin{itemize}
-    \item Problema de dimensão infinita
+% %------------------------------------------------Slide 6
+% \begin{frame}{O que isso significa?}
 
-    % [
-    % \Downarrow
-    % \]
-    \vfill
+% \begin{itemize}
+%     \item Problema de dimensão infinita
 
-    \item Otimização em dimensão finita
+%     % [
+%     % \Downarrow
+%     % \]
+%     \vfill
 
-    % \[
-    % \Downarrow
-    % \]
-    \vfill
+%     \item Otimização em dimensão finita
 
-    \item Apenas os coeficientes $\alpha_1,\dots,\alpha_n$ são necessários
+%     % \[
+%     % \Downarrow
+%     % \]
+%     \vfill
 
-    \vfill
+%     \item Apenas os coeficientes $\alpha_1,\dots,\alpha_n$ são necessários
 
-    \item Métodos de kernel tornam-se computacionalmente viáveis
-\end{itemize}
+%     \vfill
 
-\end{frame}
+%     \item Métodos de kernel tornam-se computacionalmente viáveis
+% \end{itemize}
 
-\setLayout{mainpoint}
+% \end{frame}
 
-\begin{frame}
-% \includegraphics[width = .25\linewidth]{Images/evaluate.png} %Adiciona imagem
-\frametitle{\Huge Exemplo de aplicação do Representer Theorem}
-\end{frame}
+% \setLayout{mainpoint}
 
-%------------------------------------------------Slide 7
-\setLayout{vertical}
+% \begin{frame}
+% % \includegraphics[width = .25\linewidth]{Images/evaluate.png} %Adiciona imagem
+% \frametitle{\Huge Exemplo de aplicação do Representer Theorem}
+% \end{frame}
 
-\begin{frame}{Kernel Ridge Regression}
-
-No Kernel Ridge Regression, resolvemos:
-
-\[
-\begin{aligned}
-\min_{\mathbf{w}} \quad &
-\sum_{i=1}^n
-\left(
-\mathbf{w}\cdot\Phi(x_i)-y_i
-\right)^2
-+
-\lambda \|\mathbf{w}\|^2
-\end{aligned}
-\]
-
-Pelo Teorema do Representante, a solução ótima deve pertencer ao subespaço gerado por:
-
-\[
-\mathbf{w}
-=
-\sum_{i=1}^n
-\alpha_i \Phi(x_i)
-\]
-
-Substituindo essa representação no modelo:
-
-\[
-h(x)
-=
-\mathbf{w}\cdot\Phi(x)
-=
-\sum_{i=1}^n
-\alpha_i K(x_i,x)
-\]
-
-
-\end{frame}
-
-
-\begin{frame}{Support Vector Machine}
-
-No Support Vector Machine (sem intercepto), resolvemos:
-
-\[
-\begin{aligned}
-\min_{f \in \mathcal{H}} \quad &
-\frac{1}{n}\sum_{i=1}^{n}\max\left(0,1-y_if(x_i)\right)
-+ \frac{\lambda}{2}\|f\|_{\mathcal H}^2
-\end{aligned}
-\]
-
-Pelo Teorema do Representante, a solução ótima tem a forma:
-
-\[
-f(x)=\sum_{i=1}^{n}\alpha_iK(x_i,x)
-\]
-
-Substituindo na otimização:
-
-\[
-\begin{aligned}
-\min_{\alpha}\quad &
--\sum_{i=1}^{n}\alpha_i
-+
-\frac12\sum_{i=1}^{n}\sum_{j=1}^{n}
-y_iy_j\alpha_i\alpha_jK(x_i,x_j)\quad &
-\text{sujeito a}\quad &
-0\leq \alpha_i \leq \frac{1}{n\lambda}
-\end{aligned}
-\]
-
-\end{frame}
-
-%------------------------------------------------Conclusão
-\section{Conclusão}
-
-\setLayout{mainpoint}
-
-\begin{frame}
-\frametitle{\Huge Conclusão}
-\end{frame}
-
-%------------------------------------------------Slide conclusão
-\setLayout{vertical}
-
-\begin{frame}{Conclusões}
-
-\begin{itemize}
-    \item O Teorema do Representante reduz problemas de dimensão infinita para dimensão finita
-
-    \vspace{0.4cm}
-
-    \item A solução ótima pertence ao subespaço gerado pelos dados:
-
-    \[
-    f^*(x)=\sum_{i=1}^n \alpha_i K(x_i,x)
-    \]
-
-    \vspace{0.4cm}
-
-    \item Isso torna métodos de kernel computacionalmente viáveis
-
-    \vspace{0.4cm}
-
-    \item Kernel Ridge Regression e SVM são aplicações diretas desse resultado
-
-\end{itemize}
-
-\end{frame}
-
-%------------------------------------------------Referências
-\section{Referências}
-
-\setLayout{mainpoint}
-
+% %------------------------------------------------Slide 7
 % \setLayout{vertical}
+
+% \begin{frame}{Kernel Ridge Regression}
+
+% No Kernel Ridge Regression, resolvemos:
+
+% \[
+% \begin{aligned}
+% \min_{\mathbf{w}} \quad &
+% \sum_{i=1}^n
+% \left(
+% \mathbf{w}\cdot\Phi(x_i)-y_i
+% \right)^2
+% +
+% \lambda \|\mathbf{w}\|^2
+% \end{aligned}
+% \]
+
+% Pelo Teorema do Representante, a solução ótima deve pertencer ao subespaço gerado por:
+
+% \[
+% \mathbf{w}
+% =
+% \sum_{i=1}^n
+% \alpha_i \Phi(x_i)
+% \]
+
+% Substituindo essa representação no modelo:
+
+% \[
+% h(x)
+% =
+% \mathbf{w}\cdot\Phi(x)
+% =
+% \sum_{i=1}^n
+% \alpha_i K(x_i,x)
+% \]
+
+
+% \end{frame}
+
+
+% \begin{frame}{Support Vector Machine}
+
+% No Support Vector Machine (sem intercepto), resolvemos:
+
+% \[
+% \begin{aligned}
+% \min_{f \in \mathcal{H}} \quad &
+% \frac{1}{n}\sum_{i=1}^{n}\max\left(0,1-y_if(x_i)\right)
+% + \frac{\lambda}{2}\|f\|_{\mathcal H}^2
+% \end{aligned}
+% \]
+
+% Pelo Teorema do Representante, a solução ótima tem a forma:
+
+% \[
+% f(x)=\sum_{i=1}^{n}\alpha_iK(x_i,x)
+% \]
+
+% Substituindo na otimização:
+
+% \[
+% \begin{aligned}
+% \min_{\alpha}\quad &
+% -\sum_{i=1}^{n}\alpha_i
+% +
+% \frac12\sum_{i=1}^{n}\sum_{j=1}^{n}
+% y_iy_j\alpha_i\alpha_jK(x_i,x_j)\quad &
+% \text{sujeito a}\quad &
+% 0\leq \alpha_i \leq \frac{1}{n\lambda}
+% \end{aligned}
+% \]
+
+% \end{frame}
+
+% %------------------------------------------------Conclusão
+% \section{Conclusão}
+
+% \setLayout{mainpoint}
+
+% \begin{frame}
+% \frametitle{\Huge Conclusão}
+% \end{frame}
+
+% %------------------------------------------------Slide conclusão
+% \setLayout{vertical}
+
+% \begin{frame}{Conclusões}
+
+% \begin{itemize}
+%     \item O Teorema do Representante reduz problemas de dimensão infinita para dimensão finita
+
+%     \vspace{0.4cm}
+
+%     \item A solução ótima pertence ao subespaço gerado pelos dados:
+
+%     \[
+%     f^*(x)=\sum_{i=1}^n \alpha_i K(x_i,x)
+%     \]
+
+%     \vspace{0.4cm}
+
+%     \item Isso torna métodos de kernel computacionalmente viáveis
+
+%     \vspace{0.4cm}
+
+%     \item Kernel Ridge Regression e SVM são aplicações diretas desse resultado
+
+% \end{itemize}
+
+% \end{frame}
+
+% %------------------------------------------------Referências
+% \section{Referências}
+
+% \setLayout{mainpoint}
+
+% % \setLayout{vertical}
+% % \begin{frame}[allowframebreaks]{Referências}
+% % \bibliographystyle{plain}
+% % \bibliography{references}
+
+% % \cite{mohri2018foundations}
+% % \end{frame}
+
+% \begin{frame}
+% \frametitle{\Huge Referências}
+% \end{frame}
+
+% %------------------------------------------------Slide referências
+% \setLayout{vertical}
+
 % \begin{frame}[allowframebreaks]{Referências}
+
+% \footnotesize
 % \bibliographystyle{plain}
 % \bibliography{references}
 
 % \cite{mohri2018foundations}
+
+% \cite{wahba2019representer}
+
 % \end{frame}
-
-\begin{frame}
-\frametitle{\Huge Referências}
-\end{frame}
-
-%------------------------------------------------Slide referências
-\setLayout{vertical}
-
-\begin{frame}[allowframebreaks]{Referências}
-
-\footnotesize
-\bibliographystyle{plain}
-\bibliography{references}
-
-\cite{mohri2018foundations}
-
-\cite{wahba2019representer}
-
-\end{frame}
 
 \end{document}
