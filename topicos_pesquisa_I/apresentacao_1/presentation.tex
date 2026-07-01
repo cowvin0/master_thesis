@@ -904,69 +904,17 @@ em que
 
 \end{frame}
 
-% \begin{frame}[fragile]{Algoritmo de Geração}
+\begin{frame}{Métricas para avaliação do desempenho do modelo}
+$$
+\text{Viés}\left(\widehat{\pi}\left(\mathbf{x}\right)\right) =
+\frac{1}{N_1} \sum_{r=1}^{N_1} \left[\frac{1}{n}\sum_{i=1}^{n}\{\hat{\pi^{\left(r\right)}}\left(\mathbf{x}_i\right) -
+\pi^{\left(r\right)}\left(\mathbf{x}_i\right)\}\right]\text{,}
+$$
 
-% \begin{algorithm}[H]
-% \caption{Geração de dados com fração de cura}
-% \begin{algorithmic}[1]
-
-% \For{$i=1,\ldots,n$}
-% \State Gerar $U_i \sim Uniform(0,1)$
-% \State Gerar $C_i \sim Exp(0.2)$
-
-% \If{$U_i \leq 1-\pi(x_i)$}
-%     \State $t_i \leftarrow C_i,\quad \delta_i \leftarrow 0$
-% \Else
-%     \State Gerar $U_i^* \sim Uniform(1-\pi(x_i),1)$
-%     \State Calcular:
-%     \[
-%     Y_i=
-%     F^{-1}
-%     \left(
-%     \frac{\log(U_i^*)}
-%     {\log(1-\pi(x_i))}
-%     \right)
-%     \]
-%     \State $t_i \leftarrow \min(Y_i,C_i)$
-%     \State $\delta_i \leftarrow I(t_i=Y_i)$
-% \EndIf
-
-% \EndFor
-
-% \end{algorithmic}
-% \end{algorithm}
-
-% \end{frame}
-
-
-% \setLayout{vertical}
-% \begin{frame}
-% \frametitle{Diferentes cenários para fração de cura}
-
-% $$
-% x_1, x_2 \sim N(0,1)
-% $$
-
-% \[
-% \pi(\mathbf{x})
-% =
-% \frac{\exp(0.3-5x_1-3x_2)}
-% {1+\exp(0.3-5x_1-3x_2)}.
-% \]
-
-% \[
-% \pi(\mathbf{x})
-% =
-% \frac{\exp(0.3+5x_1^2-3x_2^2)}
-% {1+\exp(0.3+5x_1^2-3x_2^2)}.
-% \]
-
-% \[
-% \pi(\mathbf{x})
-% =
-% \exp\left\{-\exp(0.3-5\cos(x_1)-3\sin(x_2))\right\}.
-% \]
-% \end{frame}
+$$
+\text{EQM}\left(\widehat{\pi}\left(\mathbf{x}\right)\right) = \frac{1}{N_1} \sum_{r=1}^{N_1} \left[\frac{1}{n}\sum_{i=1}^{n}\left\{\hat{\pi^{\left(r\right)}}\left(\mathbf{x}_i\right) - \pi^{\left(r\right)}\left(\mathbf{x}_i\right)\right\}^2\right]\text{.}
+$$
+\end{frame}
 
 \setLayout{mainpoint}
 \section{Resultados}
