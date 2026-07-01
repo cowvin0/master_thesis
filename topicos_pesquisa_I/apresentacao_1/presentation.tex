@@ -1,4 +1,6 @@
 \documentclass[aspectratio=169,t,xcolor=table]{beamer}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 \usepackage{multirow}
 \usepackage[portuges]{babel}
 \usepackage[utf8x]{inputenc}
@@ -16,6 +18,7 @@
 \usepackage[makeroom]{cancel}
 \renewcommand{\CancelColor}{\color{red}}
 \usetheme{Ufg}
+
 
 %-------------------------------------theorems--------------
 \newtheorem{conj}{Conjetura}
@@ -173,29 +176,30 @@ $$
 % %--------------------------------------------------------
 \begin{frame}{Teorema do Representante}
 
-\begin{itemize}
-\item Fundamental para problemas de estimação com kernels;
 
-\vspace{0.3cm}
+Seja $K\text{ : } \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ um kernel PDS e $\mathcal{H}$
+seu RHKS correspondente. Então, para qualquer função não-descrescente $G\text{ : } \mathbb{R} \to \mathbb{R}$
+e qualquer função de perda $\mathcal{L}\text{ : } \mathbb{R}^n \to \mathbb{R} \cup \{+\infty\}$, a solução do problema
 
-\item Garante que a solução ótima possui representação finita:
+\[
+\arg\min_{h\in \mathcal{H}} \left\{ \mathcal{L}(h(x_1), \dots, h(x_n)) + G(\|h\|_{\mathcal{H}}) \right\}
+% {\arg\min}_{h \in \mathcal{H}} \left\{ \mathcal{L}(h(x_1), \dots, h(x_n)) + \lambda \|h\|_{\mathcal{H}}^2 \right\}
+\]
 
-\end{itemize}
+% \[
+% \min_{f \in \mathcal{H}}
+% \left\{
+% \mathcal{L}(f(x_1), \dots, f(x_n))
+% +
+% \lambda \|f\|_{\mathcal{H}}^2
+% \right\}
+% \]
 
-$$
-h^*(x)=\sum_{i=1}^n \alpha_i K(x_i,x)
-$$
+admite uma solução na forma
 
-\vspace{0.4cm}
-
-\begin{itemize}
-\item Reduz um problema infinito-dimensional para um problema finito;
-
-\vspace{0.3cm}
-
-\item Toda a informação necessária está contida na matriz kernel.
-
-\end{itemize}
+\[
+h^*(x)=\sum_{i=1}^{n}\alpha_i K(x_i,x)\text{.}
+\]
 
 \end{frame}
 
@@ -389,20 +393,580 @@ $$
 \end{frame}
 %========================================================
 
-
-
-% \section{Modelo de Tempo de Promoção}
-
-% \begin{frame}
-% \frametitle{Modelo de Tempo de Promoção}
-% \end{frame}
-
 \setLayout{mainpoint}
-\section{Avaliação Experimental}
+\section{GG-KM}
 
 \begin{frame}
-\frametitle{Avaliação Experimental}
+\frametitle{Extensão Não Paramétrica via Kernel}
 \end{frame}
+
+\setLayout{vertical}
+
+%--------------------------------------------------------
+\begin{frame}{Verossimilhança Penalizada}
+
+\begin{itemize}
+\item Seja $(x_i,t_i,\delta_i)$ o conjunto de dados observados;
+
+\vspace{0.3cm}
+
+\item Considerando:
+
+\end{itemize}
+
+$$
+\theta(x)=\exp(f(x))
+$$
+
+\vspace{0.3cm}
+
+\begin{itemize}
+\item A função objetivo penalizada é dada por:
+\end{itemize}
+
+$$
+J(\Theta)=
+\left[
+\delta^\top (K\alpha+\log f_{GG})
+w^\top F_{GG}
+\right]
++
+\frac{\lambda}{2}\alpha^\top K\alpha
+$$
+
+\vspace{0.3cm}
+
+\begin{itemize}
+\item onde:
+\end{itemize}
+
+$$
+w=\exp(K\alpha)
+$$
+
+\end{frame}
+
+% %--------------------------------------------------------
+\begin{frame}{Justificativa via Teorema do Representante}
+
+\begin{itemize}
+\item Supondo que $f(x)$ pertença a um RKHS;
+
+\vspace{0.3cm}
+
+\item Pelo Teorema do Representante, a solução ótima admite:
+
+\end{itemize}
+
+$$
+f(x)=\sum_{j=1}^{n}\alpha_jK(x,x_j)
+$$
+
+\vspace{0.4cm}
+
+\begin{itemize}
+\item Isso reduz um problema infinito-dimensional para dimensão finita;
+
+\vspace{0.3cm}
+
+\item Assim, toda a estimação depende apenas da matriz kernel.
+
+\end{itemize}
+
+\end{frame}
+
+
+
+%--------------------------------------------------------
+% \begin{frame}{Gradientes do Modelo}
+% Os gradientes em relação aos parâmetros $a$, $d$ e $p$ são dados, respectivamente, por
+% \[
+% \frac{\partial J}{\partial a}
+% =
+% -
+% \sum_{i=1}^{n}
+% \left[
+% \delta_i
+% \left(
+% \frac{pu_i-d}{a}
+% \right)
+% +
+% w_i
+% \left(
+% \frac{p e^{-u_i}u_i^s}{a\Gamma(s)}
+% \right)
+% \right],
+% \]
+
+% \[
+% \frac{\partial J}{\partial d}
+% =
+% -
+% \sum_{i=1}^{n}
+% \left[
+% \delta_i\left(\log\left(\frac{t_i}{a}\right)
+% -
+% \frac{\psi(s)}{p}\right)
+% -
+% \frac{w_i}{p}G(s,u_i)
+% \right],
+% \]
+
+% \[
+% \frac{\partial J}{\partial p}
+% =
+% -
+% \sum_{i=1}^{n}
+% \left[
+% \delta_i
+% \left(
+% \frac{1}{p}
+% -
+% u_i\log\left(\frac{t_i}{a}\right)
+% +
+% \frac{s\psi(s)}{p}
+% \right)
+% -
+% w_i
+% \left(
+% \frac{dG(s,u_i)}{p^2}
+% +
+% \frac{u_i^s e^{-u_i}\log(t_i/a)}{\Gamma(s)}
+% \right)
+% \right],
+% \]
+
+% \[
+% u_i = \left(\frac{t_i}{a}\right)^p\text{, } s = \frac{d}{p}
+% \]
+
+% \end{frame}
+
+%--------------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{Algoritmo de Estimação do GG-KM}
+
+\begin{algorithm}[H]
+\caption{Processo de estimação do modelo GG-KM}
+\begin{algorithmic}[1]
+\State \textbf{Entrada:} Dados $(X,t,\delta)$, hiperparâmetros $(\lambda_{reg},\gamma)$
+\State Inicializar $\alpha \leftarrow 0$ e $\theta_{GG} \leftarrow {a=1,d=1,p=1}$
+\State Construir a matriz de Gram $K$, com $K_{ij}=K(\mathbf{x}_i,\mathbf{x}_j)$
+
+\While{critério de convergência não satisfeito}
+\State Calcular $w_i=\exp\left(\sum_j\alpha_jK_{ij}\right)$
+\State Calcular $f_{GG}(t_i)$ e $F_{GG}(t_i)$
+\State Avaliar $J(\alpha,\theta_{GG})$
+\State Calcular $\nabla_{\alpha}J$ e $\nabla_{\theta_{GG}}J$
+\State Atualizar $\Theta={\alpha,a,d,p}$ via L-BFGS
+\EndWhile
+
+\State \textbf{Saída:} $\hat{\alpha},\hat{a},\hat{d},\hat{p}$
+\end{algorithmic}
+\end{algorithm}
+
+\end{frame}
+
+
+%--------------------------------------------------------
+% \begin{frame}{Procedimento de Otimização}
+
+% \begin{enumerate}
+% \item Inicializar $(\alpha,a,d,p)$;
+
+% ```
+% \vspace{0.3cm}
+
+% \item Construir a matriz kernel $K$;
+
+% \vspace{0.3cm}
+
+% \item Avaliar $J(\Theta)$;
+
+% \vspace{0.3cm}
+
+% \item Calcular gradientes;
+
+% \vspace{0.3cm}
+
+% \item Atualizar parâmetros iterativamente;
+
+% \vspace{0.3cm}
+
+% \item Repetir até convergência.
+% ```
+
+% \end{enumerate}
+
+% \vspace{0.3cm}
+
+% [
+% \Theta^{(m+1)}
+% ==============
+
+% \Theta^{(m)}-\eta \nabla J(\Theta^{(m)})
+% ]
+
+% \end{frame}
+
+
+% \begin{frame}
+% \frametitle{Estimação do Modelo GG-KM}
+% Os gradientes em relação aos parâmetros $a$, $d$ e $p$ são dados, respectivamente, por
+% \[
+% \frac{\partial J}{\partial a}
+% =
+% -
+% \sum_{i=1}^{n}
+% \left[
+% \delta_i
+% \left(
+% \frac{pu_i-d}{a}
+% \right)
+% +
+% w_i
+% \left(
+% \frac{p e^{-u_i}u_i^s}{a\Gamma(s)}
+% \right)
+% \right],
+% \]
+
+% \[
+% \frac{\partial J}{\partial d}
+% =
+% -
+% \sum_{i=1}^{n}
+% \left[
+% \delta_i\left(\log\left(\frac{t_i}{a}\right)
+% -
+% \frac{\psi(s)}{p}\right)
+% -
+% \frac{w_i}{p}G(s,u_i)
+% \right],
+% \]
+
+% \[
+% \frac{\partial J}{\partial p}
+% =
+% -
+% \sum_{i=1}^{n}
+% \left[
+% \delta_i
+% \left(
+% \frac{1}{p}
+% -
+% u_i\log\left(\frac{t_i}{a}\right)
+% +
+% \frac{s\psi(s)}{p}
+% \right)
+% -
+% w_i
+% \left(
+% \frac{dG(s,u_i)}{p^2}
+% +
+% \frac{u_i^s e^{-u_i}\log(t_i/a)}{\Gamma(s)}
+% \right)
+% \right].
+% \]
+% \end{frame}
+
+
+% Para estimar o modelo de tempo de promoção, resolvemos o seguinte problema de otimização:
+
+
+\setLayout{mainpoint}
+\section{Avaliação de Experimento}
+
+\begin{frame}
+\frametitle{Avaliação de Experimento}
+\end{frame}
+
+%========================================================
+\section{Geração dos Dados Simulados}
+
+%--------------------------------------------------------
+\setLayout{vertical}
+\begin{frame}{Estrutura dos Dados Simulados}
+
+\begin{itemize}
+\item Foram geradas duas covariáveis independentes:
+\end{itemize}
+
+\[
+x_1,x_2 \sim N(0,1)
+\]
+
+\vspace{0.4cm}
+
+\begin{itemize}
+\item A estrutura de cura foi construída a partir de três cenários:
+
+\begin{itemize}
+    \item linear;
+    \item quadrático;
+    \item não linear periódico.
+\end{itemize}
+
+\vspace{0.3cm}
+
+\item Objetivo:
+\begin{itemize}
+    % \item avaliar robustez;
+    \item avaliar flexibilidade do GG-KM.
+\end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+%--------------------------------------------------------
+\begin{frame}{Cenários para Fração de Cura}
+
+\textbf{Cenário 1: Linear}
+
+\[
+\pi(x)=
+\frac{\exp(0.3-5x_1-3x_2)}
+{1+\exp(0.3-5x_1-3x_2)}
+\]
+
+\vspace{0.3cm}
+
+\textbf{Cenário 2: Quadrático}
+
+\[
+\pi(x)=
+\frac{\exp(0.3+5x_1^2-3x_2^2)}
+{1+\exp(0.3+5x_1^2-3x_2^2)}
+\]
+
+\vspace{0.3cm}
+
+\textbf{Cenário 3: Não linear periódico}
+
+\[
+\pi(x)=
+\exp\{-\exp(0.3-5\cos(x_1)-3\sin(x_2))\}
+\]
+
+\end{frame}
+
+%--------------------------------------------------------
+\begin{frame}{Geração dos Dados Simulados: Passo 1}
+
+\begin{itemize}
+\item Para cada indivíduo $i=1,\ldots,n$:
+
+\vspace{0.4cm}
+
+\item Gerar:
+
+\end{itemize}
+
+\[
+U_i \sim Uniform(0,1)
+\]
+
+\[
+C_i \sim Exp(0.2)
+\]
+
+\vspace{0.4cm}
+
+\begin{itemize}
+\item $U_i$: determina se o indivíduo será suscetível ou curado;
+
+\vspace{0.2cm}
+
+\item $C_i$: tempo de censura.
+
+\end{itemize}
+
+\end{frame}
+
+%--------------------------------------------------------
+\begin{frame}{Geração dos Dados Simulados: Passo 2}
+
+\begin{itemize}
+\item Verificar:
+\end{itemize}
+
+\[
+U_i \leq 1-\pi(x_i)
+\]
+
+\vspace{0.5cm}
+
+Se verdadeiro, indivíduo pertence ao grupo curado, e portanto:
+
+\vspace{0.3cm}
+
+\[
+t_i=C_i
+\]
+
+\[
+\delta_i=0
+\]
+
+\end{frame}
+
+%--------------------------------------------------------
+\begin{frame}{Geração dos Dados Simulados: Passo 3}
+
+\begin{itemize}
+\item Caso contrário, o indivíduo é suscetível;
+
+\vspace{0.3cm}
+
+\item Gerar:
+
+\end{itemize}
+
+\[
+U_i^* \sim Uniform(1-\pi(x_i),1)
+\]
+
+\vspace{0.4cm}
+
+\begin{itemize}
+\item Obter o tempo latente:
+\end{itemize}
+
+\[
+Y_i=
+F^{-1}
+\left(
+\frac{\log(U_i^*)}
+{\log(1-\pi(x_i))}
+\right)
+\]
+
+\end{frame}
+
+%--------------------------------------------------------
+\begin{frame}{Geração dos Dados Simulados: Passo 4}
+
+\begin{itemize}
+\item Comparar tempo latente e censura:
+\end{itemize}
+
+\[
+t_i=\min(Y_i,C_i)
+\]
+
+\vspace{0.4cm}
+
+\begin{itemize}
+\item Indicador do evento:
+\end{itemize}
+
+\[
+\delta_i=
+\begin{cases}
+1, & t_i=Y_i \\
+0, & t_i=C_i
+\end{cases}
+\]
+
+\vspace{0.4cm}
+
+Por fim,  obtém-se $(x_i,t_i,\delta_i)$ para cada indivíduo.
+\end{frame}
+
+\begin{frame}{Métricas para avaliação do desempenho do modelo}
+
+Integrated Brier Score com ajuste IPCW:
+
+\[
+IBS=
+\frac{1}{\tau}
+\int_0^\tau BS_{IPCW}(t)\,dt,
+\]
+
+\[
+BS_{IPCW}(t)
+=
+\frac{1}{\tilde{n}(t)}
+\sum_{i=1}^{n}
+\left[
+\hat{S}_i(t)^2
+\frac{\mathbb{I}(T_i^*\leq t,\delta_i=1)}{\hat{G}(T_i^*)}
++
+(1-\hat{S}_i(t))^2
+\frac{\mathbb{I}(T_i^*>t)}{\hat{G}(t)}
+\right],
+\]
+em que
+\[
+\tilde{n}(t)=\sum_{i=1}^{n}\omega_i(t)\text{,  } \omega_i(t)= \frac{\mathbb{I}(T_i^*\leq t,\delta_i=1)}{\hat{G}(T_i^*)} + \frac{\mathbb{I}(T_i^*>t)}{\hat{G}(t)}.
+\]
+
+\end{frame}
+
+% \begin{frame}[fragile]{Algoritmo de Geração}
+
+% \begin{algorithm}[H]
+% \caption{Geração de dados com fração de cura}
+% \begin{algorithmic}[1]
+
+% \For{$i=1,\ldots,n$}
+% \State Gerar $U_i \sim Uniform(0,1)$
+% \State Gerar $C_i \sim Exp(0.2)$
+
+% \If{$U_i \leq 1-\pi(x_i)$}
+%     \State $t_i \leftarrow C_i,\quad \delta_i \leftarrow 0$
+% \Else
+%     \State Gerar $U_i^* \sim Uniform(1-\pi(x_i),1)$
+%     \State Calcular:
+%     \[
+%     Y_i=
+%     F^{-1}
+%     \left(
+%     \frac{\log(U_i^*)}
+%     {\log(1-\pi(x_i))}
+%     \right)
+%     \]
+%     \State $t_i \leftarrow \min(Y_i,C_i)$
+%     \State $\delta_i \leftarrow I(t_i=Y_i)$
+% \EndIf
+
+% \EndFor
+
+% \end{algorithmic}
+% \end{algorithm}
+
+% \end{frame}
+
+
+% \setLayout{vertical}
+% \begin{frame}
+% \frametitle{Diferentes cenários para fração de cura}
+
+% $$
+% x_1, x_2 \sim N(0,1)
+% $$
+
+% \[
+% \pi(\mathbf{x})
+% =
+% \frac{\exp(0.3-5x_1-3x_2)}
+% {1+\exp(0.3-5x_1-3x_2)}.
+% \]
+
+% \[
+% \pi(\mathbf{x})
+% =
+% \frac{\exp(0.3+5x_1^2-3x_2^2)}
+% {1+\exp(0.3+5x_1^2-3x_2^2)}.
+% \]
+
+% \[
+% \pi(\mathbf{x})
+% =
+% \exp\left\{-\exp(0.3-5\cos(x_1)-3\sin(x_2))\right\}.
+% \]
+% \end{frame}
 
 \setLayout{mainpoint}
 \section{Resultados}
@@ -411,337 +975,5 @@ $$
 \frametitle{Resultados}
 \end{frame}
 
-
-
-% \setLayout{mainpoint}
-
-% \begin{frame}
-% % \includegraphics[width = .25\linewidth]{Images/evaluate.png} %Adiciona imagem
-% \frametitle{\Huge Sumário}
-% \end{frame}
-
-%------------------------------------------------Slide 2
-% \setLayout{vertical}
-% \begin{frame}{Por que é importante?}
-
-% \begin{itemize}
-%     \item Muitos problemas minimizam:
-
-%     \vfill
-
-%     \[
-%     \mathcal{L}(h(x_1), \dots, h(x_n)) + \lambda \|h\|_{\mathcal{H}}^2
-%     \]
-
-%     \vfill
-
-%     \item Mas $\mathcal{H}$ pode ser infinito-dimensional
-
-%     \vfill
-%     % \vspace{0.3cm}
-
-%     \item Como otimizar sobre infinitas funções?
-
-%     \vfill
-%     % \vspace{0.3cm}
-
-%     \item O Teorema do Representante fornece a resposta.
-% \end{itemize}
-
-% \end{frame}
-
-% %------------------------------------------------Slide 3
-% \begin{frame}{Intuição}
-
-% \begin{itemize}
-%     \item A perda depende apenas de:
-
-%     \vfill
-
-%     \[
-%     h(x_1), \dots, h(x_n)
-%     \]
-
-%     \vfill
-
-%     \item Portanto, apenas o comportamento no conjunto de treino importa
-
-%     \vfill
-
-%     \item Qualquer componente extra fora dessas observações apenas aumenta a complexidade
-
-%     \vfill
-
-%     \item A melhor solução pertence a um subespaço de dimensão finita
-% \end{itemize}
-
-% \end{frame}
-
-
-% \begin{frame}{Intuição}
-
-% \centering
-
-% \begin{tikzpicture}[scale=1.1]
-
-% % Eixos
-% \draw[->] (0,0,0) -- (5,0,0) node[right] {$x_1$};
-% \draw[->] (0,0,0) -- (0,4,0) node[above] {$x_2$};
-% \draw[->] (0,0,0) -- (0,0,4) node[left] {$x_3$};
-
-% % Plano x3 = 0
-% \filldraw[fill=blue!10,opacity=0.5]
-% (0,0,0) -- (4,0,0) -- (4,3,0) -- (0,3,0) -- cycle;
-
-% \node at (4.4,2.8,0) {$x_3=0$};
-
-% % Classe +
-% \filldraw[red] (1,1,0) circle (2pt);
-% \filldraw[red] (1.4,1.8,0) circle (2pt);
-% \filldraw[red] (2,1.2,0) circle (2pt);
-
-% % Classe -
-% \filldraw[black] (3,2.2,0) circle (2pt);
-% \filldraw[black] (3.3,1.3,0) circle (2pt);
-% \filldraw[black] (2.8,0.8,0) circle (2pt);
-
-% % Hiperplano vertical
-% \filldraw[fill=green!20,opacity=0.4]
-% (2.4,0,0) --
-% (2.4,3,0) --
-% (2.4,3,3) --
-% (2.4,0,3) -- cycle;
-
-% \node at (2.7,3.2,2) {$\mathbf{w}^\top x + b = 0$};
-
-% % Vetor normal no plano x1-x2
-% \draw[->, thick, red] (2.4,1.5,0) -- (3.3,1.5,0);
-% \node[above] at (3.3,1.5,0) {$\mathbf{w}$};
-
-% \end{tikzpicture}
-
-% \vspace{0.4cm}
-
-% \begin{itemize}
-%     \item Os dados vivem no plano \(x_3=0\)
-%     \item Logo, a direção \(x_3\) não influencia a separação
-%     \item Portanto, \(w_3 = 0\)
-% \end{itemize}
-
-% \end{frame}
-
-
-% %------------------------------------------------Slide 5
-% \begin{frame}{Representer theorem}
-
-% \vfill
-
-% Seja $K\text{ : } \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ um kernel PDS e $\mathcal{H}$
-% seu RHKS correspondente. Então, para qualquer função não-descrescente $G\text{ : } \mathbb{R} \to \mathbb{R}$
-% e qualquer função de perda $\mathcal{L}\text{ : } \mathbb{R}^n \to \mathbb{R} \cup \{+\infty\}$, a solução do problema
-
-% \[
-% \arg\min_{h\in \mathcal{H}} \left\{ \mathcal{L}(h(x_1), \dots, h(x_n)) + G(\|h\|_{\mathcal{H}}) \right\}
-% % {\arg\min}_{h \in \mathcal{H}} \left\{ \mathcal{L}(h(x_1), \dots, h(x_n)) + \lambda \|h\|_{\mathcal{H}}^2 \right\}
-% \]
-
-% % \[
-% % \min_{f \in \mathcal{H}}
-% % \left\{
-% % \mathcal{L}(f(x_1), \dots, f(x_n))
-% % +
-% % \lambda \|f\|_{\mathcal{H}}^2
-% % \right\}
-% % \]
-
-% admite uma solução na forma
-
-% \[
-% h^*(x)=\sum_{i=1}^{n}\alpha_i K(x_i,x)\text{.}
-% \]
-
-% % \end{teo}
-
-% \end{frame}
-
-% %------------------------------------------------Slide 6
-% \begin{frame}{O que isso significa?}
-
-% \begin{itemize}
-%     \item Problema de dimensão infinita
-
-%     % [
-%     % \Downarrow
-%     % \]
-%     \vfill
-
-%     \item Otimização em dimensão finita
-
-%     % \[
-%     % \Downarrow
-%     % \]
-%     \vfill
-
-%     \item Apenas os coeficientes $\alpha_1,\dots,\alpha_n$ são necessários
-
-%     \vfill
-
-%     \item Métodos de kernel tornam-se computacionalmente viáveis
-% \end{itemize}
-
-% \end{frame}
-
-% \setLayout{mainpoint}
-
-% \begin{frame}
-% % \includegraphics[width = .25\linewidth]{Images/evaluate.png} %Adiciona imagem
-% \frametitle{\Huge Exemplo de aplicação do Representer Theorem}
-% \end{frame}
-
-% %------------------------------------------------Slide 7
-% \setLayout{vertical}
-
-% \begin{frame}{Kernel Ridge Regression}
-
-% No Kernel Ridge Regression, resolvemos:
-
-% \[
-% \begin{aligned}
-% \min_{\mathbf{w}} \quad &
-% \sum_{i=1}^n
-% \left(
-% \mathbf{w}\cdot\Phi(x_i)-y_i
-% \right)^2
-% +
-% \lambda \|\mathbf{w}\|^2
-% \end{aligned}
-% \]
-
-% Pelo Teorema do Representante, a solução ótima deve pertencer ao subespaço gerado por:
-
-% \[
-% \mathbf{w}
-% =
-% \sum_{i=1}^n
-% \alpha_i \Phi(x_i)
-% \]
-
-% Substituindo essa representação no modelo:
-
-% \[
-% h(x)
-% =
-% \mathbf{w}\cdot\Phi(x)
-% =
-% \sum_{i=1}^n
-% \alpha_i K(x_i,x)
-% \]
-
-
-% \end{frame}
-
-
-% \begin{frame}{Support Vector Machine}
-
-% No Support Vector Machine (sem intercepto), resolvemos:
-
-% \[
-% \begin{aligned}
-% \min_{f \in \mathcal{H}} \quad &
-% \frac{1}{n}\sum_{i=1}^{n}\max\left(0,1-y_if(x_i)\right)
-% + \frac{\lambda}{2}\|f\|_{\mathcal H}^2
-% \end{aligned}
-% \]
-
-% Pelo Teorema do Representante, a solução ótima tem a forma:
-
-% \[
-% f(x)=\sum_{i=1}^{n}\alpha_iK(x_i,x)
-% \]
-
-% Substituindo na otimização:
-
-% \[
-% \begin{aligned}
-% \min_{\alpha}\quad &
-% -\sum_{i=1}^{n}\alpha_i
-% +
-% \frac12\sum_{i=1}^{n}\sum_{j=1}^{n}
-% y_iy_j\alpha_i\alpha_jK(x_i,x_j)\quad &
-% \text{sujeito a}\quad &
-% 0\leq \alpha_i \leq \frac{1}{n\lambda}
-% \end{aligned}
-% \]
-
-% \end{frame}
-
-% %------------------------------------------------Conclusão
-% \section{Conclusão}
-
-% \setLayout{mainpoint}
-
-% \begin{frame}
-% \frametitle{\Huge Conclusão}
-% \end{frame}
-
-% %------------------------------------------------Slide conclusão
-% \setLayout{vertical}
-
-% \begin{frame}{Conclusões}
-
-% \begin{itemize}
-%     \item O Teorema do Representante reduz problemas de dimensão infinita para dimensão finita
-
-%     \vspace{0.4cm}
-
-%     \item A solução ótima pertence ao subespaço gerado pelos dados:
-
-%     \[
-%     f^*(x)=\sum_{i=1}^n \alpha_i K(x_i,x)
-%     \]
-
-%     \vspace{0.4cm}
-
-%     \item Isso torna métodos de kernel computacionalmente viáveis
-
-%     \vspace{0.4cm}
-
-%     \item Kernel Ridge Regression e SVM são aplicações diretas desse resultado
-
-% \end{itemize}
-
-% \end{frame}
-
-% %------------------------------------------------Referências
-% \section{Referências}
-
-% \setLayout{mainpoint}
-
-% % \setLayout{vertical}
-% % \begin{frame}[allowframebreaks]{Referências}
-% % \bibliographystyle{plain}
-% % \bibliography{references}
-
-% % \cite{mohri2018foundations}
-% % \end{frame}
-
-% \begin{frame}
-% \frametitle{\Huge Referências}
-% \end{frame}
-
-% %------------------------------------------------Slide referências
-% \setLayout{vertical}
-
-% \begin{frame}[allowframebreaks]{Referências}
-
-% \footnotesize
-% \bibliographystyle{plain}
-% \bibliography{references}
-
-% \cite{mohri2018foundations}
-
-% \cite{wahba2019representer}
-
-% \end{frame}
 
 \end{document}
