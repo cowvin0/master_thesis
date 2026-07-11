@@ -120,6 +120,18 @@ class GG_KM:
         )
         return log_f
 
+    def _penalized_loglikelihood(self, alpha, t, delta):
+
+        f = self.K_ @ alpha
+
+        theta = np.exp(f)
+
+        ll = np.sum(delta * (f + self._log_fGG(t)) - theta * self._FGG(t))
+
+        pen = (self.lambda_reg / 2) * (alpha @ self.K_ @ alpha)
+
+        return ll - pen
+
     def _FGG(self, t):
         return gammainc(self.d / self.p, (t / self.a) ** self.p)
 
@@ -135,60 +147,166 @@ class GG_KM:
         J = -(ll - pen)
         return J if np.isfinite(J) else 1e18
 
-    def _gradients(self, params, K, t, delta):
-        alpha, a, d, p = params[:-3], params[-3], params[-2], params[-1]
-        self.a, self.d, self.p = a, d, p
+    def _e_step(self, alpha, t, delta):
 
-        f = K @ alpha
-        w = np.exp(f)
-        s = d / p
-        u = (t / a) ** p
+        theta = np.exp(self.K_ @ alpha)
+
+        SGG = 1.0 - self._FGG(t)
+
+        Nhat = delta + theta * SGG
+
+        return Nhat
+
+    def _alpha_objective(self, alpha, Nhat):
+
+        f = self.K_ @ alpha
+
+        theta = np.exp(f)
+
+        Q = np.sum(-theta + Nhat * f) - (self.lambda_reg / 2) * (
+            alpha @ self.K_ @ alpha
+        )
+
+        return -Q
+
+    def _alpha_gradient(self, alpha, Nhat):
+
+        theta = np.exp(self.K_ @ alpha)
+
+        return -self.K_ @ (Nhat - theta) + self.lambda_reg * self.K_ @ alpha
+
+    def _gg_objective(self, pars, t, delta, Nhat):
+
+        a, d, p = pars
+
+        self.a = a
+        self.d = d
+        self.p = p
+
         FGG = self._FGG(t)
+
+        SGG = np.clip(1.0 - FGG, 1e-15, None)
+
+        Q = np.sum(delta * self._log_fGG(t) + (Nhat - delta) * np.log(SGG))
+
+        return -Q
+
+    def _gg_gradient(self, pars, t, delta, Nhat):
+
+        a, d, p = pars
+
+        self.a = a
+        self.d = d
+        self.p = p
+
+        s = d / p
+
+        u = (t / a) ** p
+
+        FGG = self._FGG(t)
+
+        SGG = np.clip(1.0 - FGG, 1e-15, None)
 
         G = pgamma_shape_derivative_vec(u, s)
 
         log_ta = np.log(t / a)
+
         psi_s = digamma(s)
+
         gamma_s = gamma(s)
+
         us_exp_neg_u = np.exp(s * np.log(u) - u)
 
-        grad_alpha = -K @ (delta - w * FGG) + self.lambda_reg * K @ alpha
-        grad_a = -np.sum(
-            delta * (p * u - d) / a + w * (p * us_exp_neg_u) / (a * gamma_s)
+        H = us_exp_neg_u / gamma_s
+
+        grad_a = np.sum(
+            delta * ((p * u - d) / a) + (Nhat - delta) * ((p / a) * H / SGG)
         )
 
-        grad_d = -np.sum(delta * (log_ta - psi_s / p) - w * G / p)
+        grad_d = np.sum(delta * (log_ta - psi_s / p) - (Nhat - delta) * (G / (p * SGG)))
 
-        grad_p = -np.sum(
-            delta * (1 / p - u * log_ta + s * psi_s / p)
-            - w * (-d * G / p**2 + us_exp_neg_u * log_ta / gamma_s)
+        grad_p = np.sum(
+            delta * (1 / p - u * log_ta + d * psi_s / p**2)
+            - (Nhat - delta) * ((-d * G / p**2 + H * log_ta) / SGG)
         )
 
-        grads = np.concatenate([grad_alpha, [grad_a, grad_d, grad_p]])
+        return -np.array([grad_a, grad_d, grad_p])
 
-        return grads
+    def fit(
+        self,
+        X,
+        t,
+        delta,
+        tol=1e-6,
+        max_em_iter=1000,
+    ):
 
-    def fit(self, X, t, delta):
         n = len(t)
+
+        self.loglik_history_ = []
         self.X_train_ = X
         self.K_ = self._compute_kernel(X, X)
 
-        params_0 = np.concatenate([np.zeros(n), [self.a, self.d, self.p]])
-        bounds = [(-np.inf, np.inf)] * n + [(1e-4, 1e4)] * 3
+        alpha = np.zeros(n)
 
-        result = minimize(
-            fun=self._objective,
-            x0=params_0,
-            jac=self._gradients,
-            args=(self.K_, t, delta),
-            method="L-BFGS-B",
-            bounds=bounds,
-            options={"maxiter": 1000, "ftol": 1e-9, "gtol": 1e-6},
-        )
+        self.converged_ = False
 
-        self.alpha_ = result.x[:n]
-        self.a, self.d, self.p = result.x[n], result.x[n + 1], result.x[n + 2]
-        self.converged_ = result.success
+        self.n_iter_ = 0
+
+        ll_old = self._penalized_loglikelihood(alpha, t, delta)
+
+        while True:
+
+            self.n_iter_ += 1
+
+            Nhat = self._e_step(alpha, t, delta)
+
+            result_alpha = minimize(
+                fun=self._alpha_objective,
+                x0=alpha,
+                jac=self._alpha_gradient,
+                args=(Nhat,),
+                method="L-BFGS-B",
+            )
+
+            alpha = result_alpha.x
+
+            result_gg = minimize(
+                fun=self._gg_objective,
+                x0=[self.a, self.d, self.p],
+                jac=self._gg_gradient,
+                args=(t, delta, Nhat),
+                method="L-BFGS-B",
+                bounds=[
+                    (1e-5, None),
+                    (1e-5, None),
+                    (1e-5, None),
+                ],
+            )
+
+            self.a, self.d, self.p = result_gg.x
+
+            ll_new = self._penalized_loglikelihood(alpha, t, delta)
+            self.loglik_history_.append(ll_new)
+
+            diff_ll = abs(ll_new - ll_old)
+
+            if diff_ll < tol:
+
+                self.converged_ = True
+
+                break
+
+            if self.n_iter_ >= max_em_iter:
+
+                break
+
+            ll_old = ll_new
+
+        self.alpha_ = alpha
+
+        self.final_loglik_ = ll_new
+
         return self
 
     def predict_survival(self, X_new, t_grid):
