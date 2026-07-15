@@ -123,11 +123,8 @@ class GG_KM:
     def _penalized_loglikelihood(self, alpha, t, delta):
 
         f = self.K_ @ alpha
-
         theta = np.exp(f)
-
         ll = np.sum(delta * (f + self._log_fGG(t)) - theta * self._FGG(t))
-
         pen = (self.lambda_reg / 2) * (alpha @ self.K_ @ alpha)
 
         return ll - pen
@@ -135,17 +132,17 @@ class GG_KM:
     def _FGG(self, t):
         return gammainc(self.d / self.p, (t / self.a) ** self.p)
 
-    def _objective(self, params, K, t, delta):
-        alpha, a, d, p = params[:-3], params[-3], params[-2], params[-1]
-        self.a, self.d, self.p = a, d, p
+    # def _objective(self, params, K, t, delta):
+    #     alpha, a, d, p = params[:-3], params[-3], params[-2], params[-1]
+    #     self.a, self.d, self.p = a, d, p
 
-        f = K @ alpha
-        w = np.exp(f)
-        ll = np.sum(delta * (f + self._log_fGG(t)) - w * self._FGG(t))
-        pen = (self.lambda_reg / 2) * (alpha @ K @ alpha)
+    #     f = K @ alpha
+    #     w = np.exp(f)
+    #     ll = np.sum(delta * (f + self._log_fGG(t)) - w * self._FGG(t))
+    #     pen = (self.lambda_reg / 2) * (alpha @ K @ alpha)
 
-        J = -(ll - pen)
-        return J if np.isfinite(J) else 1e18
+    #     J = -(ll - pen)
+    #     return J if np.isfinite(J) else 1e18
 
     def _e_step(self, alpha, t, delta):
 

@@ -1,65 +1,38 @@
-\noindent Em diversos contextos aplicados, não é suficiente determinar se um evento de
-interesse ocorrerá; torna-se igualmente, e frequentemente mais relevante, modelar o
-tempo até a sua ocorrência. Considere, por exemplo, um paciente acometido por uma
-doença crônica. Nesse caso, profissionais da saúde estão interessados não apenas em
-avaliar a eficácia de diferentes intervenções terapêuticas, mas também em estimar o
-tempo de sobrevivência associado a cada estratégia. De maneira análoga, no setor
-financeiro, instituições buscam modelar o tempo até a ocorrência de inadimplência de
-um cliente, com o objetivo de aprimorar mecanismos de controle e gestão de risco.
-De forma semelhante, em aplicações de marketing e negócios, o fenômeno de churn
-refere-se ao tempo até que um cliente deixe de utilizar um serviço, sendo sua antecipação
-fundamental para a implementação de políticas eficazes de retenção.
+\section{Introdução}
 
-Esses exemplos evidenciam a ampla gama de aplicações em que o tempo até a ocorrência
-de um evento constitui a principal variável de interesse. Nesse contexto, a análise de
-sobrevivência emerge como um arcabouço estatístico voltado à modelagem de tempos até
-evento, caracterizando-se, em particular, pela presença de observações incompletas,
-decorrentes de mecanismos de censura. A incorporação adequada dessas informações
-parciais é um dos aspectos centrais que distinguem a análise de sobrevivência de
-abordagens tradicionais de modelagem estatística.
-
+Saber se um evento de interesse ocorrerá ou não é crucial. No entanto, em diversos cenários, saber quando
+ele ocorrerá pode ser ainda mais importante. Nesse contexto, surge uma metodologia estatística denominada
+análise de sobrevivência. O tempo transcorrido até a ocorrência de um evento de interesse é denominado
+tempo de sobrevivência \cite{aalen2008survival}. Por exemplo, em um estudo cujo interesse seja a inadimplência de associados de uma cooperativa de crédito,
+o tempo de sobrevivência pode ser definido como o tempo até a ocorrência da inadimplência. Assim sendo, a
+análise de sobrevivência tem como objetivo modelar a distribuição desse tempo e investigar fatores que possam
+influenciar sua ocorrência. Portanto, este capítulo terá como objetivo apresentar conceitos que fundamentam a
+análise de sobrevivência.
 
 \section{Censura}
 
-A principal característica que distingue a análise de sobrevivência de outras áreas da
-estatística é a presença de censura. De forma geral, diz-se que uma observação é censurada
-quando o tempo exato de ocorrência do evento de interesse não é completamente observado.
-Assim, enquanto para alguns indivíduos o tempo até o evento é conhecido, para outros apenas
-se dispõe de informação parcial, o que caracteriza a presença de dados censurados
-\cite{clark2003survival}.
+A principal característica que distingue a análise de sobrevivência de outras áreas da estatística é a
+presença de censura nos dados. Por exemplo, considere que os associados de uma cooperativa de crédito
+estejam sendo acompanhados ao longo do tempo para analisar a ocorrência de inadimplência. Nesse contexto,
+duas situações podem ocorrer. Alguns associados podem se tornar inadimplentes durante o período de
+acompanhamento, enquanto outros podem não experimentar o evento até o término do estudo. Neste último caso,
+ocorre censura, pois o tempo de sobrevivência desses indivíduos não é observado completamente, mas é conhecido
+que o evento ocorrerá após um determinado instante de tempo.
+% mas sabe-se
+% apenas que o evento ocorrerá após um determinado instante de tempo.
+% Portanto, a censura ocorre quando o
+% tempo de sobrevivência não é observado de forma exata \cite{moore2016applied}.
 
-No contexto da análise de sobrevivência, a censura pode ser classificada em três categorias
-principais: à direita, à esquerda e intervalar. A censura à direita ocorre quando o evento
-de interesse não é observado durante o período de acompanhamento, seja em razão da saída
-do indivíduo do estudo antes de sua conclusão, seja pelo término do estudo sem a ocorrência
-do evento. A censura à esquerda, por sua vez, ocorre quando o evento já aconteceu antes do
-início do período de observação, embora o instante exato de sua ocorrência seja desconhecido.
-Por fim, a censura intervalar caracteriza-se pelo fato de que o evento é conhecido apenas
-como tendo ocorrido em algum instante dentro de um intervalo de tempo, delimitado por duas
-observações sucessivas.
 
-Neste trabalho, o foco será direcionado aos casos de censura à esquerda e à direita, que
-são os mais frequentemente encontrados em aplicações práticas. Formalmente, uma observação
-censurada pode ser representada por um triplo $\left(\mathbf{x}_i, l_i, u_i\right)$,
-para $i = 1, \ldots, m$, em que $\mathbf{x}_i \in \mathbb{R}^d$ denota o vetor de covariáveis,
-$l_i \in \mathbb{R} \cup \{-\infty\}$ representa o limite inferior e $u_i \in \mathbb{R} \cup \{+\infty\}$
-o limite superior do intervalo no qual o tempo de ocorrência do evento está contido.
-
-Nesse formalismo, a censura à direita é representada por observações da forma $\left(\mathbf{x}_i, l_i, +\infty\right)$,
-indicando que o evento ocorreu após o tempo $l_i$, mas seu instante exato é desconhecido.
-Analogamente, a censura à esquerda é representada por $\left(\mathbf{x}_i, -\infty, u_i\right)$,
-indicando que o evento ocorreu antes de $u_i$. Quando ambos os limites são finitos, isto é,
-$l_i < u_i < +\infty$, tem-se o caso de censura intervalar.
-
-No caso particular de observações não censuradas, o tempo de ocorrência do evento é conhecido
-exatamente, de modo que $l_i = u_i = y_i$. Nesse caso, a observação pode ser representada
-simplesmente por $\left(\mathbf{x}_i, y_i\right)$, em que $y_i$ corresponde ao tempo de
-sobrevivência observado.
-
-Essa representação unificada permite tratar, de forma coerente, diferentes mecanismos de
-censura dentro de um mesmo arcabouço matemático, sendo particularmente útil na formulação
-de métodos de aprendizado que incorporam explicitamente a informação parcial disponível
-nos dados.
+A censura pode ocorrer de três formas diferentes. O exemplo dado anteriormente pode ser entendido como sendo
+uma censura à direita. A censura à direita ocorre quando o evento ocorreu depois de um determinado tempo, mas o tempo
+exato não é conhecido. Outro tipo de censura é a censura à esquerda, que ocorre quando o evento ocorreu antes de um determinado
+tempo. Ainda no caso da inadimplência, um exemplo de censura à esquerda seria quando um associado já se
+encontrava inadimplente no início do estudo, mas o tempo exato de ocorrência da inadimplência não é
+conhecido. Por fim, a censura intervalar ocorre quando o evento ocorreu dentro de um intervalo de tempo,
+mas o tempo exato não é conhecido. No exemplo da inadimplência, a censura intervalar poderia ocorrer se os
+associados fossem avaliados periodicamente, e o evento de inadimplência fosse detectado apenas durante
+essas avaliações, sem que o tempo exato de ocorrência fosse conhecido.
 
 \section{Funções importantes para análise de sobrevivência e suas relações}
 
