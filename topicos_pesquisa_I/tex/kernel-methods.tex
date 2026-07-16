@@ -6,86 +6,86 @@ terá como objetivo definir e apresentar os conceitos fundamentais sobre método
 incluindo a definição de funções de kernel, o teorema do representer e Reproducing Kernel Hilbert
 Space (RKHS).
 
-\section{Kernels}
+% \section{Kernels}
 
-Por definição, uma função $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ é chamada de kernel sobre
-$\mathcal{X}$.
-A ideia central é construir um kernel $K$ tal que, para quaisquer dois pontos $x, x' \in \mathcal{X}$, $K(x, x')$
-corresponda ao produto interno entre duas representações desses pontos em um espaço de Hilbert
-$\mathcal{H}$, isto é,
-$$
-\forall x, x' \in \mathcal{X}, \quad K(x,x') = \langle \phi(x), \phi(x') \rangle,
-$$
-para algum mapeamento $\phi: \mathcal{X} \to \mathcal{H}$. O espaço $\mathcal{H}$ é chamado de
-feature space.
+% Por definição, uma função $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ é chamada de kernel sobre
+% $\mathcal{X}$.
+% A ideia central é construir um kernel $K$ tal que, para quaisquer dois pontos $x, x' \in \mathcal{X}$, $K(x, x')$
+% corresponda ao produto interno entre duas representações desses pontos em um espaço de Hilbert
+% $\mathcal{H}$, isto é,
+% $$
+% \forall x, x' \in \mathcal{X}, \quad K(x,x') = \langle \phi(x), \phi(x') \rangle,
+% $$
+% para algum mapeamento $\phi: \mathcal{X} \to \mathcal{H}$. O espaço $\mathcal{H}$ é chamado de
+% feature space.
 
-Sob essa perspectiva, o kernel pode ser interpretado como uma medida de similaridade entre elementos
-de $\mathcal{X}$, uma vez que o produto interno mensura a similaridade entre dois vetores.
+% Sob essa perspectiva, o kernel pode ser interpretado como uma medida de similaridade entre elementos
+% de $\mathcal{X}$, uma vez que o produto interno mensura a similaridade entre dois vetores.
 
-Uma vantagem fundamental dessa abordagem é computacional. Isto é, muitas vezes é significativamente mais eficiente
-calcular diretamente $K(x,x')$ do que computar explicitamente $\phi(x)$ e $\phi(x')$ e então avaliar
-seu produto interno.
+% Uma vantagem fundamental dessa abordagem é computacional. Isto é, muitas vezes é significativamente mais eficiente
+% calcular diretamente $K(x,x')$ do que computar explicitamente $\phi(x)$ e $\phi(x')$ e então avaliar
+% seu produto interno.
 
-\subsection{Kernels positivos definidos}
+% \subsection{Kernels positivos definidos}
 
-Para que uma função $K$ possa ser utilizada como kernel, é necessário que sejam satisfeitas duas condições, que
-a função seja simétrica e positiva definida. Satisfazendo essas condições, o kernel é capaz de induzir uma geometria
-em um espaço de Hilbert.
+% Para que uma função $K$ possa ser utilizada como kernel, é necessário que sejam satisfeitas duas condições, que
+% a função seja simétrica e positiva definida. Satisfazendo essas condições, o kernel é capaz de induzir uma geometria
+% em um espaço de Hilbert.
 
-Formalmente, um kernel $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ é dito simétrico e positivo
-definido se, para qualquer conjunto finito $\{x_1, \ldots, x_n\} \subset \mathcal{X}$, a matriz de Gram
-$$
-\mathbf{K} = [K(x_i,x_j)]_{i,j=1}^n \in \mathbb{R}^{n \times n}
-$$
-for positiva semidefinida. Isto é, para qualquer vetor $\mathbf{c}=(c_1,\ldots,c_n)^\top \in \mathbb{R}^n$,
-$$
-\mathbf{c}^\top \mathbf{K}\mathbf{c}
-=
-\sum_{i=1}^n \sum_{j=1}^n c_i c_j K(x_i,x_j)
-\geq 0.
-$$
+% Formalmente, um kernel $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ é dito simétrico e positivo
+% definido se, para qualquer conjunto finito $\{x_1, \ldots, x_n\} \subset \mathcal{X}$, a matriz de Gram
+% $$
+% \mathbf{K} = [K(x_i,x_j)]_{i,j=1}^n \in \mathbb{R}^{n \times n}
+% $$
+% for positiva semidefinida. Isto é, para qualquer vetor $\mathbf{c}=(c_1,\ldots,c_n)^\top \in \mathbb{R}^n$,
+% $$
+% \mathbf{c}^\top \mathbf{K}\mathbf{c}
+% =
+% \sum_{i=1}^n \sum_{j=1}^n c_i c_j K(x_i,x_j)
+% \geq 0.
+% $$
 
-Equivalentemente, todos os autovalores de $\mathbf{K}$ são não negativos. Essa propriedade é essencial,
-pois garante a existência de uma representação geométrica consistente do kernel.
+% Equivalentemente, todos os autovalores de $\mathbf{K}$ são não negativos. Essa propriedade é essencial,
+% pois garante a existência de uma representação geométrica consistente do kernel.
 
-\subsection{Espaços de Hilbert}
+% \subsection{Espaços de Hilbert}
 
-A noção de espaço de Hilbert fornece a estrutura matemática necessária para a teoria de kernels.
+% A noção de espaço de Hilbert fornece a estrutura matemática necessária para a teoria de kernels.
 
-Por definição, um espaço de Hilbert $\mathcal{H}$ é um espaço vetorial munido de um produto interno
-$\langle \cdot, \cdot \rangle_{\mathcal{H}}$ e que é completo com relação à norma induzida por esse produto interno. A norma em $\mathcal{H}$ é definida por
-$$
-\forall h \in \mathcal{H}, \quad \|h\|_{\mathcal{H}} = \sqrt{\langle h,h\rangle}.
-$$
+% Por definição, um espaço de Hilbert $\mathcal{H}$ é um espaço vetorial munido de um produto interno
+% $\langle \cdot, \cdot \rangle_{\mathcal{H}}$ e que é completo com relação à norma induzida por esse produto interno. A norma em $\mathcal{H}$ é definida por
+% $$
+% \forall h \in \mathcal{H}, \quad \|h\|_{\mathcal{H}} = \sqrt{\langle h,h\rangle}.
+% $$
 
-A completude implica que toda sequência de Cauchy em $\mathcal{H}$ converge para um elemento do próprio
-espaço, garantindo estabilidade analítica para problemas de otimização e aproximação.
+% A completude implica que toda sequência de Cauchy em $\mathcal{H}$ converge para um elemento do próprio
+% espaço, garantindo estabilidade analítica para problemas de otimização e aproximação.
 
-No contexto de kernels, o espaço de Hilbert atua como o espaço onde os dados são representados via o
-mapeamento $\phi$.
+% No contexto de kernels, o espaço de Hilbert atua como o espaço onde os dados são representados via o
+% mapeamento $\phi$.
 
-\subsection{Reproducing Kernel Hilbert Spaces}
+% \subsection{Reproducing Kernel Hilbert Spaces}
 
-A relação entre kernels positivos definidos e espaços de Hilbert é formalizada pelo teorema.
+% A relação entre kernels positivos definidos e espaços de Hilbert é formalizada pelo teorema.
 
-Seja $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ um kernel simétrico e positivo definido. Então existe um espaço de Hilbert $\mathcal{H}$ e um mapeamento $\phi: \mathcal{X} \to \mathcal{H}$ tais que
+% Seja $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ um kernel simétrico e positivo definido. Então existe um espaço de Hilbert $\mathcal{H}$ e um mapeamento $\phi: \mathcal{X} \to \mathcal{H}$ tais que
 
-$$
-\forall x,x' \in \mathcal{X}, \quad K(x,x') = \langle \phi(x), \phi(x') \rangle_{\mathcal{H}}.
-$$
+% $$
+% \forall x,x' \in \mathcal{X}, \quad K(x,x') = \langle \phi(x), \phi(x') \rangle_{\mathcal{H}}.
+% $$
 
-Além disso, esse espaço satisfaz a chamada propriedade de reprodução:
+% Além disso, esse espaço satisfaz a chamada propriedade de reprodução:
 
-$$
-\forall h \in \mathcal{H}, \forall x \in \mathcal{X}, \quad h(x) = \langle h, K(x,\cdot)\rangle_{\mathcal{H}}.
-$$
+% $$
+% \forall h \in \mathcal{H}, \forall x \in \mathcal{X}, \quad h(x) = \langle h, K(x,\cdot)\rangle_{\mathcal{H}}.
+% $$
 
-Essa propriedade estabelece que a avaliação funcional é contínua e pode ser representada por meio do próprio
- kernel.
+% Essa propriedade estabelece que a avaliação funcional é contínua e pode ser representada por meio do próprio
+%  kernel.
 
-O espaço $\mathcal{H}$ associado a $K$ é chamado de Reproducing Kernel Hilbert Space (RKHS), desempenhando
-papel central em métodos de aprendizado estatístico, particularmente em problemas de regularização,
-estimação não paramétrica e aprendizado supervisionado.
+% O espaço $\mathcal{H}$ associado a $K$ é chamado de Reproducing Kernel Hilbert Space (RKHS), desempenhando
+% papel central em métodos de aprendizado estatístico, particularmente em problemas de regularização,
+% estimação não paramétrica e aprendizado supervisionado.
 
 \subsection{Teorema do Representante}
 
@@ -180,7 +180,7 @@ Dessa forma, suponha que a estimação do modelo de promoção de cura seja feit
 penalizada:
 \begin{equation}
 \label{eq:ggkm_penalized_likelihood}
-\max_{f} \sum_{i=1}^n l(\mathbf{x}_i) - \lambda \|f\|^2 = \min_{f} \sum_{i=1}^n - l(\mathbf{x}_i) + \lambda \|f\|^2
+\min_{f} \sum_{i=1}^n - l(\mathbf{x}_i) + \frac{\lambda}{2} \|f\|^2
 \end{equation}
 em que $l(\mathbf{x}_i)$ representa a log-verossimilhança e $\lambda$ é uma parâmetro de regularização da complexidade
 do modelo. No entanto, supondo que a função $f$ pertença a um Reproducing Kernel Hilbert Space (RKHS)
@@ -213,7 +213,7 @@ f(\mathbf{x}_i) = \sum_{j=1}^{n} \alpha_j K(\mathbf{x}_i,\mathbf{x}_j),
 Sob a formulação do modelo de tempo de promoção, assume-se que o número de riscos latentes associados ao
 indivíduo $i$ segue uma distribuição de Poisson com média $\theta(\mathbf{x}_i)$, isto é,
 \begin{equation}
-N_i \mid \mathbf{x}_i
+N_i
 \sim
 \text{Poisson}
 \left(
@@ -221,14 +221,17 @@ N_i \mid \mathbf{x}_i
 \right).
 \end{equation}
 
-Entretanto, os riscos competitivos $N_i$ associados ao evento de interesse não são observados. Assim, a
-estimação dos parâmetros pode ser conduzida por meio do algoritmo EM. Neste caso, considera-se o algoritmo
-EM penalizado \cite{mclachlan2008algorithm}.
+Para realizar a estimação dos parâmetros, foi considerado o algoritmo EM. Em particular, considera-se uma extensão
+particular, o EM penalizado \cite{mclachlan2008algorithm}.
+
+% Entretanto, os riscos competitivos $N_i$ associados ao evento de interesse não são observados. Assim, a
+% estimação dos parâmetros pode ser conduzida por meio do algoritmo EM. Neste caso, considera-se o algoritmo
+% EM penalizado \cite{mclachlan2008algorithm}.
 
 Dessa forma, considere os dados completos $D_{\text{comp}} = \left\{t_i, \delta_i, N_i, \mathbf{x}_i\right\}^n_{i=1}$,
 em que $t_i$ representa o tempo observado, $\delta_i$ o indicador de falha e $N_i$ o número de riscos latentes
-associados ao $i\text{-ésimo}$ indíviduo. A log-verossimilhança completa, menos uma constante aditiva, pode ser escrita
-como
+associados ao $i\text{-ésimo}$ indíviduo. A log-verossimilhança completa, menos uma constante aditiva
+$C = -\sum_{i=1}^n \log\left(N_i!\right)$, pode ser escrita como
 \begin{equation}
 \begin{aligned}
 l_c
@@ -259,7 +262,8 @@ N_i f(\mathbf{x}_i)
 \end{aligned}
 \end{equation}
 
-Para controlar a complexidade da função estimada, adiciona-se uma penalização baseada na norma do RKHS. Dessa forma, obtém-se a log-verossimilhança completa penalizada
+Portanto, tem-se a log-verossimilhança completa penalizada:
+
 \begin{equation}
 \ell_{c, P} = l_c - \frac{\lambda}{2} \boldsymbol{\alpha}^{\top} K \boldsymbol{\alpha},
 \end{equation}
@@ -269,10 +273,10 @@ em que
 \end{equation}
 e $K$ denota a matriz de kernel com elementos $K_{ij}=K(\mathbf{x}_i,\mathbf{x}_j)$.
 
-O algoritmo EM consiste em alternar entre o cálculo da esperança condicional dos riscos latentes e a
-maximização da esperança da log-verossimilhança completa penalizada.
+O algoritmo EM consiste em alternar entre o cálculo das esperanças condicionais das variáveis latentes e a maximização da esperança da log-verossimilhança completa penalizada.
 
-No passo E, calcula-se
+No passo E, as quantidades não observadas são substituídas por suas respectivas esperanças condicionais, calculadas sob os valores correntes dos parâmetros. Dessa forma, define-se a função auxiliar
+
 \begin{equation}
 Q\!\left(
 \Theta \mid \Theta^{(k)}
@@ -284,11 +288,16 @@ Q\!\left(
 \mid
 \mathcal{D}_{\mathrm{obs}},
 \Theta^{(k)}
-\right].
+\right],
 \end{equation}
-em que $\Theta = \left(\boldsymbol{\alpha},a,d,p\right)$.
 
-Utilizando propriedades do modelo de tempo de promoção, obtém-se que
+em que
+\[
+\Theta=(\boldsymbol{\alpha},a,d,p)
+\]
+representa o vetor de parâmetros do modelo.
+
+Utilizando propriedades do modelo de tempo de promoção, obtém-se que a esperança condicional do número de riscos latentes possui forma fechada, dada por
 
 \begin{equation}
 \widehat{N}_i^{(k+1)}
@@ -297,7 +306,7 @@ Utilizando propriedades do modelo de tempo de promoção, obtém-se que
 \!\left[
 N_i
 \mid
-\mathcal{D}_{obs},
+\mathcal{D}_{\mathrm{obs}},
 \Theta^{(k)}
 \right]
 =
@@ -312,7 +321,9 @@ d^{(k)},
 p^{(k)}
 \right),
 \end{equation}
+
 em que
+
 \begin{equation}
 \theta_i^{(k)}
 =
@@ -329,8 +340,8 @@ K(\mathbf{x}_i,\mathbf{x}_j)
 \right).
 \end{equation}
 
-Substituindo as quantidades não observadas por suas respectivas
-esperanças condicionais, a função auxiliar penalizada assume a forma
+Substituindo \(N_i\) por sua esperança condicional na log-verossimilhança completa penalizada e eliminando
+termos constantes em relação aos parâmetros, obtém-se a função auxiliar penalizada
 \begin{equation}
 Q_P
 =
@@ -338,7 +349,7 @@ Q_{\alpha}
 +
 Q_{GG},
 \end{equation}
-com
+em que
 \begin{equation}
 Q_{\alpha}
 =
@@ -369,11 +380,10 @@ Q_{GG}
 \right].
 \end{equation}
 
-Observa-se que a função auxiliar penalizada é separável em dois blocos de parâmetros,
-\(\boldsymbol{\alpha}\) e \((a,d,p)\). Consequentemente, o passo M pode ser realizado por
-otimização alternada.
+Observa-se que a função auxiliar penalizada é separável em dois blocos de parâmetros: o primeiro associado aos coeficientes do kernel, \(\boldsymbol{\alpha}\), e o segundo aos parâmetros da distribuição Gama Generalizada, \((a,d,p)\). Essa decomposição permite que o passo M seja realizado por meio de atualizações alternadas dos dois blocos.
 
 Inicialmente, atualizam-se os coeficientes do kernel resolvendo
+
 \begin{equation}
 \boldsymbol{\alpha}^{(k+1)}
 =
@@ -388,11 +398,12 @@ Em seguida, atualizam-se os parâmetros da distribuição Gama Generalizada por 
 \arg\max_{a,d,p}
 Q_{GG}.
 \end{equation}
+% Cabe destacar que o termo de penalização afeta apenas a atualização dos coeficientes do kernel, não
+% alterando a forma da atualização dos parâmetros da distribuição Gama Generalizada.
+Ambos os problemas de maximização são resolvidos numericamente por meio do algoritmo L-BFGS-B, utilizando as derivadas analíticas
+das respectivas funções objetivo.
 
-A otimização de ambos problemas de otimização é realizada numericamente através de L-BFGS-B, utilizando-se
-as derivadas analíticas das respectivas funções objetivos.
-
-O processo iterativo é repetido até a convergência da log-verossimilhança penalizada observada,
+Após cada iteração, calcula-se a log-verossimilhança penalizada observada
 \begin{equation}
 \ell_P
 =
@@ -414,7 +425,9 @@ F_{GG}(t_i;a,d,p)
 K
 \boldsymbol{\alpha},
 \end{equation}
-sendo adotado como critério de parada
+a qual é utilizada para monitorar a convergência do algoritmo. O procedimento iterativo é interrompido quando
+a variação absoluta da log-verossimilhança penalizada observada entre duas iterações consecutivas se torna
+inferior a uma tolerância previamente especificada, isto é,
 \begin{equation}
 \left|
 \ell_P^{(k+1)}
@@ -424,10 +437,167 @@ sendo adotado como critério de parada
 <
 \varepsilon,
 \end{equation}
-em que \(\varepsilon > 0\) representa uma tolerância previamente especificada.
+em que \(\varepsilon>0\) representa uma constante de tolerância.
+
+% O algoritmo EM consiste em alternar entre o cálculo da esperança condicional dos riscos latentes e a
+% maximização da esperança da log-verossimilhança completa penalizada.
+
+% No passo E, calcula-se
+% \begin{equation}
+% Q\!\left(
+% \Theta \mid \Theta^{(k)}
+% \right)
+% =
+% \mathbb{E}
+% \left[
+% \ell_{c,P}
+% \mid
+% \mathcal{D}_{\mathrm{obs}},
+% \Theta^{(k)}
+% \right].
+% \end{equation}
+% em que $\Theta = \left(\boldsymbol{\alpha},a,d,p\right)$.
+
+% Pode-se provar que:
+% % Utilizando propriedades do modelo de tempo de promoção, obtém-se que
+% \begin{equation}
+% \widehat{N}_i^{(k+1)}
+% =
+% \mathbb{E}
+% \!\left[
+% N_i
+% \mid
+% \mathcal{D}_{obs},
+% \Theta^{(k)}
+% \right]
+% =
+% \delta_i
+% +
+% \theta_i^{(k)}
+% S_{GG}
+% \!\left(
+% t_i;
+% a^{(k)},
+% d^{(k)},
+% p^{(k)}
+% \right),
+% \end{equation}
+% em que
+% \begin{equation}
+% \theta_i^{(k)}
+% =
+% \exp
+% \!\left(
+% f^{(k)}(\mathbf{x}_i)
+% \right)
+% =
+% \exp
+% \!\left(
+% \sum_{j=1}^{n}
+% \alpha_j^{(k)}
+% K(\mathbf{x}_i,\mathbf{x}_j)
+% \right).
+% \end{equation}
+
+% Substituindo as quantidades não observadas por suas respectivas
+% esperanças condicionais, a função auxiliar penalizada assume a forma
+% \begin{equation}
+% Q_P
+% =
+% Q_{\alpha}
+% +
+% Q_{GG},
+% \end{equation}
+% com
+% \begin{equation}
+% Q_{\alpha}
+% =
+% \sum_{i=1}^{n}
+% \left[
+% -\exp\!\bigl(f(\mathbf{x}_i)\bigr)
+% +
+% \widehat N_i^{(k+1)}
+% f(\mathbf{x}_i)
+% \right]
+% -
+% \frac{\lambda}{2}
+% \boldsymbol{\alpha}^{\top}
+% K
+% \boldsymbol{\alpha},
+% \end{equation}
+% e
+% \begin{equation}
+% Q_{GG}
+% =
+% \sum_{i=1}^{n}
+% \left[
+% \delta_i
+% \log f_{GG}(t_i;a,d,p)
+% +
+% \bigl(\widehat N_i^{(k+1)}-\delta_i\bigr)
+% \log S_{GG}(t_i;a,d,p)
+% \right].
+% \end{equation}
+
+% Observa-se que a função auxiliar penalizada é separável em dois blocos de parâmetros,
+% \(\boldsymbol{\alpha}\) e \((a,d,p)\). Consequentemente, o passo M pode ser realizado por
+% otimização alternada.
+
+% Inicialmente, atualizam-se os coeficientes do kernel resolvendo
+% \begin{equation}
+% \boldsymbol{\alpha}^{(k+1)}
+% =
+% \arg\max_{\boldsymbol{\alpha}}
+% Q_{\alpha}.
+% \end{equation}
+
+% Em seguida, atualizam-se os parâmetros da distribuição Gama Generalizada por meio de
+% \begin{equation}
+% (a^{(k+1)},d^{(k+1)},p^{(k+1)})
+% =
+% \arg\max_{a,d,p}
+% Q_{GG}.
+% \end{equation}
+
+% A otimização de ambos problemas de otimização é realizada numericamente através de L-BFGS-B, utilizando-se
+% as derivadas analíticas das respectivas funções objetivos.
+
+% O processo iterativo é repetido até a convergência da log-verossimilhança penalizada observada,
+% \begin{equation}
+% \ell_P
+% =
+% \sum_{i=1}^{n}
+% \left[
+% \delta_i
+% \left(
+% f(\mathbf{x}_i)
+% +
+% \log f_{GG}(t_i;a,d,p)
+% \right)
+% -
+% \exp\!\bigl(f(\mathbf{x}_i)\bigr)
+% F_{GG}(t_i;a,d,p)
+% \right]
+% -
+% \frac{\lambda}{2}
+% \boldsymbol{\alpha}^{\top}
+% K
+% \boldsymbol{\alpha},
+% \end{equation}
+% sendo adotado como critério de parada
+% \begin{equation}
+% \left|
+% \ell_P^{(k+1)}
+% -
+% \ell_P^{(k)}
+% \right|
+% <
+% \varepsilon,
+% \end{equation}
+% em que \(\varepsilon > 0\) representa uma tolerância previamente especificada.
 
 \begin{algorithm}[H]
-\caption{Algoritmo EM penalizado para estimar o modelo GG-KM}
+\caption{Algoritmo EM penalizado para estimar o modelo GG-KM - $N_i \sim \mathrm{Poisson}\!\bigl(\theta(\mathbf{x}_i)\bigr).$}
 \begin{algorithmic}[1]
 
 \State Inicialize
@@ -443,46 +613,27 @@ e escolha uma tolerância $\varepsilon>0$.
 
 \Repeat
 
-\State Calcule
-\[
-\theta_i^{(k)}
-=
-\exp\!\left(
-\sum_{j=1}^{n}
-\alpha_j^{(k)}
-K(x_i,x_j)
-\right),
-\qquad i=1,\ldots,n.
-\]
-
-\State Calcule
-\[
-F_i^{(k)}
-=
-F_{GG}
-\!\left(
-t_i;
-a^{(k)},
-d^{(k)},
-p^{(k)}
-\right),
-\qquad
-S_i^{(k)}
-=
-1-F_i^{(k)}.
-\]
-
 \State \textbf{E-step:} para $i=1,\ldots,n$, calcule
 \[
 \widehat N_i^{(k+1)}
 =
 \delta_i
 +
-\theta_i^{(k)}
-S_i^{(k)}.
+\exp\!\left(
+\sum_{j=1}^{n}
+\alpha_j^{(k)}
+K(x_i,x_j)
+\right)
+S_{GG}
+\!\left(
+t_i;
+a^{(k)},
+d^{(k)},
+p^{(k)}
+\right).
 \]
 
-\State \textbf{M-step ($\boldsymbol{\alpha}$):}
+\State \textbf{M-step:}
 \[
 \alpha^{(k+1)}
 =
@@ -490,31 +641,24 @@ S_i^{(k)}.
 \left\{
 \sum_{i=1}^{n}
 \left[
--\theta_i
-+
-\widehat N_i^{(k+1)}
-\log(\theta_i)
-\right]
 -
-\frac{\lambda_{\mathrm{reg}}}{2}
-\alpha^\top K\alpha
-\right\},
-\]
-
-onde
-
-\[
-\theta_i
-=
-\exp
-\left(
+\exp\!\left(
 \sum_{j=1}^{n}
 \alpha_j
 K(x_i,x_j)
-\right).
+\right)
++
+\widehat N_i^{(k+1)}
+\sum_{j=1}^{n}
+\alpha_j
+K(x_i,x_j)
+\right]
+-
+\frac{\lambda}{2}
+\alpha^\top K\alpha
+\right\}.
 \]
 
-\State \textbf{M-step (GG):}
 \[
 (a^{(k+1)},d^{(k+1)},p^{(k+1)})
 =
@@ -529,67 +673,20 @@ K(x_i,x_j)
 \right].
 \]
 
-\State Calcule
-
-\[
-f_i^{(k+1)}
-=
-\sum_{j=1}^{n}
-\alpha_j^{(k+1)}
-K(x_i,x_j),
-\qquad
-\theta_i^{(k+1)}
-=
-\exp\!\left(f_i^{(k+1)}\right).
-\]
-
 \State Calcule a log-verossimilhança penalizada observada
-
 \[
-\begin{aligned}
 \ell_P^{(k+1)}
 =
-&
-\sum_{i=1}^{n}
-\Bigg[
-\delta_i
-\Bigg(
-f_i^{(k+1)}
-+
-\log
-f_{GG}
+\ell_P
 \!\left(
-t_i;
+\alpha^{(k+1)},
 a^{(k+1)},
 d^{(k+1)},
 p^{(k+1)}
-\right)
-\Bigg)
-\\
-&
-\qquad
--
-\theta_i^{(k+1)}
-F_{GG}
-\!\left(
-t_i;
-a^{(k+1)},
-d^{(k+1)},
-p^{(k+1)}
-\right)
-\Bigg]
-\\
-&
--
-\frac{\lambda_{\mathrm{reg}}}{2}
-(\alpha^{(k+1)})^\top
-K
-\alpha^{(k+1)}.
-\end{aligned}
+\right).
 \]
 
-\State Calcule
-
+\State Atualize
 \[
 \Delta^{(k+1)}
 =
@@ -602,7 +699,376 @@ K
 
 \State $k \gets k+1$.
 
-\Until{$\Delta^{(k+1)}<\varepsilon$}
+\Until{$\Delta^{(k+1)} < \varepsilon$}
+
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Estimação do modelo GG-KM com riscos latentes Binomial Negativa}
+
+Uma generalização do modelo apresentado anteriormente consiste em assumir que o número de riscos latentes
+\(N_i\) segue uma distribuição Binomial Negativa em vez de uma distribuição de Poisson. Em vez de
+especificar essa distribuição por meio de sua função de probabilidade, adota-se a parametrização definida
+pela função geradora de probabilidades
+\begin{equation}
+A(u)
+=
+\left[
+1+\phi\theta_i(1-u)
+\right]^{-1/\phi},
+\end{equation}
+onde \(\theta_i>0\) representa o número médio de riscos latentes e \(\phi\) é um parâmetro de dispersão.
+Sob essa parametrização,
+
+\begin{equation}
+\mathbb{E}(N_i)=\theta_i,
+\qquad
+\mathrm{Var}(N_i)
+=
+\theta_i+\phi\theta_i^2.
+\end{equation}
+
+Assim, valores positivos de \(\phi\) produzem sobredispersão em relação ao modelo de Poisson. Além disso,
+essa parametrização engloba importantes casos particulares. Quando \(\phi \to 0\), recupera-se a
+distribuição de Poisson e, consequentemente, o modelo GG-KM apresentado na seção anterior. Já o caso
+\(\phi=-1\) conduz ao modelo de mistura de \citeonline{berkson1952survival}. Neste trabalho, entretanto,
+considera-se apenas o cenário \(\phi>0\), correspondente à presença de sobredispersão.
+
+A função de sobrevivência populacional passa a ser
+\begin{equation}
+S_{\text{pop}}(t)
+=
+\left[
+1+\phi\theta_i
+F_{GG}(t;a,d,p)
+\right]^{-1/\phi},
+\end{equation}
+com
+\begin{equation}
+\theta_i
+=
+\exp
+\!\left(
+\sum_{j=1}^{n}
+\alpha_j
+K(\mathbf{x}_i,\mathbf{x}_j)
+\right).
+\end{equation}
+
+Consequentemente, a log-verossimilhança penalizada observada é dada por
+
+\begin{equation}
+\ell_P
+=
+\sum_{i=1}^{n}
+\left\{
+\delta_i
+\left[
+f(\mathbf{x}_i)
++
+\log
+f_{GG}(t_i;a,d,p)
+\right]
+-
+\left(
+\frac{1}{\phi}
++
+\delta_i
+\right)
+\log
+\left[
+1+
+\phi
+\theta_i
+F_{GG}(t_i;a,d,p)
+\right]
+\right\}
+-
+\frac{\lambda}{2}
+\boldsymbol{\alpha}^{\top}
+K
+\boldsymbol{\alpha}.
+\end{equation}
+
+Quando o parâmetro de dispersão \(\phi\) é previamente especificado, ele é mantido fixo ao
+longo do processo iterativo e apenas os parâmetros \(\boldsymbol{\alpha}\), \(a\), \(d\) e \(p\) são estimados.
+Por outro lado, quando \(\phi\) não é previamente informado, sua estimação é realizada conjuntamente com os
+demais parâmetros do modelo.
+
+Neste último caso, a estimação é realizada por meio de uma extensão do algoritmo EM, o
+Expectation Conditional Maximization Either (ECME) \cite{mclachlan2008algorithm}. A escolha desse
+algoritmo decorre da presença do parâmetro de dispersão \(\phi\), cuja
+atualização não admite solução analítica em forma fechada. De fato,
+\(\phi\) aparece simultaneamente nos termos \(\log(1+\phi\theta_iF_{GG}(t_i))\), \(1/\phi\) e nas
+esperanças condicionais dos riscos latentes, o que torna a maximização da função auxiliar substancialmente
+mais complexa do que a atualização dos demais parâmetros. Assim, os parâmetros \(\boldsymbol{\alpha}\)
+e \((a,d,p)\) são atualizados por meio da maximização da função auxiliar, enquanto \(\phi\) é atualizado
+diretamente pela maximização da log-verossimilhança observada.
+
+% Neste último caso, a estimação é realizada por meio de uma extensão do algoritmo EM, o ECME
+% (Expectation Conditional Maximization Either), \cite{mclachlan2008algorithm}. A escolha desse algoritmo decorre da presença do
+% parâmetro de dispersão \(\phi\), cuja atualização a partir da função auxiliar não conduz a uma etapa de
+% maximização simples. Assim, os parâmetros \(\boldsymbol{\alpha}\) e \((a,d,p)\) são atualizados por meio da
+% maximização da função auxiliar, enquanto \(\phi\) é atualizado diretamente pela maximização da
+% log-verossimilhança observada.
+
+No passo E, obtém-se
+
+\begin{equation}
+\widehat N_i^{(k+1)}
+=
+\mathbb{E}
+\!\left[
+N_i
+\mid
+\mathcal D_{\mathrm{obs}},
+\Theta^{(k)}
+\right]
+=
+\delta_i
++
+\frac{
+\left(
+1+\phi^{(k)}\delta_i
+\right)
+\theta_i^{(k)}
+S_{GG}
+\!\left(
+t_i;
+a^{(k)},
+d^{(k)},
+p^{(k)}
+\right)
+}{
+1+
+\phi^{(k)}
+\theta_i^{(k)}
+F_{GG}
+\!\left(
+t_i;
+a^{(k)},
+d^{(k)},
+p^{(k)}
+\right)
+}.
+\end{equation}
+
+Substituindo as quantidades não observadas por suas respectivas esperanças condicionais, obtém-se uma
+função auxiliar penalizada que pode ser decomposta em
+
+\begin{equation}
+Q_P
+=
+Q_{\alpha}
++
+Q_{GG}.
+\end{equation}
+
+O termo associado aos parâmetros da distribuição Gama Generalizada, \(Q_{GG}\), permanece idêntico ao
+obtido no caso Poisson. Já a componente dependente de \(\boldsymbol{\alpha}\) passa a ser
+
+\begin{equation}
+Q_{\alpha}
+=
+\sum_{i=1}^{n}
+\left[
+\widehat N_i^{(k+1)}
+\log(\theta_i)
+-
+\left(
+\widehat N_i^{(k+1)}
++
+\frac{1}{\phi}
+\right)
+\log(1+\phi\theta_i)
+\right]
+-
+\frac{\lambda}{2}
+\boldsymbol{\alpha}^{\top}
+K
+\boldsymbol{\alpha}.
+\end{equation}
+
+O passo CM consiste então nas atualizações
+\begin{equation}
+\boldsymbol{\alpha}^{(k+1)}
+=
+\arg\max_{\boldsymbol{\alpha}}
+Q_{\alpha},
+\end{equation}
+e
+\begin{equation}
+(a^{(k+1)},d^{(k+1)},p^{(k+1)})
+=
+\arg\max_{a,d,p}
+Q_{GG}.
+\end{equation}
+
+Quando \(\phi\) não é previamente especificado, realiza-se adicionalmente a etapa ECME
+
+\begin{equation}
+\phi^{(k+1)}
+=
+\arg\max_{\phi>0}
+\;
+\ell_P
+\!\left(
+\boldsymbol{\alpha}^{(k+1)},
+a^{(k+1)},
+d^{(k+1)},
+p^{(k+1)},
+\phi
+\right).
+\end{equation}
+
+A otimização dos problemas de maximização é realizada numericamente por meio do algoritmo L-BFGS-B,
+utilizando-se as derivadas analíticas das respectivas funções objetivo. O processo iterativo é repetido
+até a convergência da log-verossimilhança penalizada observada.
+
+\begin{algorithm}[H]
+\caption{Algoritmo ECME para estimar o modelo GG-KM com riscos latentes Binomial Negativa}
+\begin{algorithmic}[1]
+
+\State Inicialize
+$
+\alpha^{(0)},\,
+a^{(0)},\,
+d^{(0)},\,
+p^{(0)},\,
+\phi^{(0)}
+$
+e escolha uma tolerância $\varepsilon>0$.
+
+\State Defina $k \gets 0$.
+
+\Repeat
+
+\State Para $i=1,\ldots,n$, calcule
+\[
+\theta_i^{(k)}
+=
+\exp\!\left(
+\sum_{j=1}^{n}
+\alpha_j^{(k)}
+K(x_i,x_j)
+\right),
+\]
+\[
+F_{GG}^{(k)}(t_i)
+=
+F_{GG}
+\!\left(
+t_i;
+a^{(k)},
+d^{(k)},
+p^{(k)}
+\right),
+\qquad
+S_{GG}^{(k)}(t_i)
+=
+1-F_{GG}^{(k)}(t_i).
+\]
+
+\State \textbf{E-step:}
+\[
+\widehat N_i^{(k+1)}
+=
+\delta_i
++
+\frac{
+\bigl(1+\phi^{(k)}\delta_i\bigr)
+\theta_i^{(k)}
+S_{GG}^{(k)}(t_i)
+}{
+1+\phi^{(k)}
+\theta_i^{(k)}
+F_{GG}^{(k)}(t_i)
+},
+\qquad
+i=1,\ldots,n.
+\]
+
+\State \textbf{M-step:}
+\[
+\alpha^{(k+1)}
+=
+\arg\max_{\alpha}
+\left\{
+\sum_{i=1}^{n}
+\left[
+\widehat N_i^{(k+1)}
+\log(\theta_i)
+-
+\left(
+\widehat N_i^{(k+1)}
++
+\frac{1}{\phi^{(k)}}
+\right)
+\log\!\bigl(1+\phi^{(k)}\theta_i\bigr)
+\right]
+-
+\frac{\lambda}{2}
+\alpha^\top K\alpha
+\right\},
+\]
+
+\[
+(a^{(k+1)},d^{(k+1)},p^{(k+1)})
+=
+\arg\max_{a,d,p}
+\sum_{i=1}^{n}
+\left[
+\delta_i
+\log f_{GG}(t_i;a,d,p)
++
+(\widehat N_i^{(k+1)}-\delta_i)
+\log S_{GG}(t_i;a,d,p)
+\right].
+\]
+
+\[
+\phi^{(k+1)}
+=
+\arg\max_{\phi>0}
+\,
+\ell_O
+\!\left(
+\alpha^{(k+1)},
+a^{(k+1)},
+d^{(k+1)},
+p^{(k+1)},
+\phi
+\right).
+\]
+
+\State Calcule a log-verossimilhança penalizada observada
+\[
+\ell_P^{(k+1)}
+=
+\ell_P
+\!\left(
+\alpha^{(k+1)},
+a^{(k+1)},
+d^{(k+1)},
+p^{(k+1)},
+\phi^{(k+1)}
+\right).
+\]
+
+\State Atualize
+\[
+\Delta^{(k+1)}
+=
+\left|
+\ell_P^{(k+1)}
+-
+\ell_P^{(k)}
+\right|.
+\]
+
+\State $k \gets k+1$.
+
+\Until{$\Delta^{(k+1)} < \varepsilon$}
 
 \end{algorithmic}
 \end{algorithm}

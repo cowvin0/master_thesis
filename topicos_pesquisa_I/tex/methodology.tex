@@ -1,44 +1,44 @@
-Este capítulo descreve, de forma sistemática, os procedimentos adotados para a construção,
-treinamento e avaliação dos modelos considerados neste trabalho. Em particular, são detalhados
-os processos de particionamento dos dados, seleção de hiperparâmetros e geração de dados
-experimentais, seguindo práticas consolidadas na literatura de aprendizado de máquina aplicado
-à análise de sobrevivência.
+% Este capítulo descreve, de forma sistemática, os procedimentos adotados para a construção,
+% treinamento e avaliação dos modelos considerados neste trabalho. Em particular, são detalhados
+% os processos de particionamento dos dados, seleção de hiperparâmetros e geração de dados
+% experimentais, seguindo práticas consolidadas na literatura de aprendizado de máquina aplicado
+% à análise de sobrevivência.
 
-\section{Recursos Computacionais}
+% \section{Recursos Computacionais}
 
-\noindent Nesta seção, são apresentados os principais recursos computacionais utilizados no
-desenvolvimento deste trabalho, incluindo ferramentas para escrita do documento,
-linguagens de programação empregadas na implementação dos modelos e bibliotecas utilizadas
-na resolução dos problemas de otimização convexa. A escolha dessas ferramentas foi guiada
-pela necessidade de garantir rigor científico, reprodutibilidade dos experimentos e
-eficiência computacional na implementação dos algoritmos propostos.
+% \noindent Nesta seção, são apresentados os principais recursos computacionais utilizados no
+% desenvolvimento deste trabalho, incluindo ferramentas para escrita do documento,
+% linguagens de programação empregadas na implementação dos modelos e bibliotecas utilizadas
+% na resolução dos problemas de otimização convexa. A escolha dessas ferramentas foi guiada
+% pela necessidade de garantir rigor científico, reprodutibilidade dos experimentos e
+% eficiência computacional na implementação dos algoritmos propostos.
 
-\subsection{Ambiente de desenvolvimento e escrita}
+% \subsection{Ambiente de desenvolvimento e escrita}
 
-A redação deste trabalho foi realizada utilizando o sistema de preparação de documentos
-\LaTeX, amplamente adotado na comunidade científica devido à sua capacidade de lidar de
-forma robusta com expressões matemáticas, referências bibliográficas e formatação de
-documentos técnicos. O uso do \LaTeX\ foi particularmente importante neste trabalho,
-dado o elevado número de equações e demonstrações envolvidas na formulação dos modelos
-baseados em máquinas de vetores de suporte.
+% A redação deste trabalho foi realizada utilizando o sistema de preparação de documentos
+% \LaTeX, amplamente adotado na comunidade científica devido à sua capacidade de lidar de
+% forma robusta com expressões matemáticas, referências bibliográficas e formatação de
+% documentos técnicos. O uso do \LaTeX\ foi particularmente importante neste trabalho,
+% dado o elevado número de equações e demonstrações envolvidas na formulação dos modelos
+% baseados em máquinas de vetores de suporte.
 
-Para a edição do código-fonte e do documento, foi utilizado o editor Visual Studio Code
-(VSCode), que oferece um ambiente leve e altamente configurável. O VSCode permite integração
-com diversas extensões, possibilitando suporte eficiente tanto para a escrita em \LaTeX\
-quanto para o desenvolvimento em linguagens de programação como Python. Entre as
-funcionalidades utilizadas, destacam-se a navegação facilitada entre arquivos,
-realce de sintaxe, execução de scripts e integração com sistemas de controle de versão.
+% Para a edição do código-fonte e do documento, foi utilizado o editor Visual Studio Code
+% (VSCode), que oferece um ambiente leve e altamente configurável. O VSCode permite integração
+% com diversas extensões, possibilitando suporte eficiente tanto para a escrita em \LaTeX\
+% quanto para o desenvolvimento em linguagens de programação como Python. Entre as
+% funcionalidades utilizadas, destacam-se a navegação facilitada entre arquivos,
+% realce de sintaxe, execução de scripts e integração com sistemas de controle de versão.
 
-\subsection{Linguagem de programação e implementação dos modelos}
+% \subsection{Linguagem de programação e implementação dos modelos}
 
-A implementação dos modelos propostos neste trabalho foi realizada na linguagem de
-programação Python, devido à sua ampla adoção na área de ciência de dados e aprendizado
-de máquina, bem como à disponibilidade de bibliotecas eficientes para computação numérica.
+% A implementação dos modelos propostos neste trabalho foi realizada na linguagem de
+% programação Python, devido à sua ampla adoção na área de ciência de dados e aprendizado
+% de máquina, bem como à disponibilidade de bibliotecas eficientes para computação numérica.
 
-O Python foi utilizado tanto para a geração de dados simulados quanto para a implementação
-do algoritmo proposto, o GG-KM. As bibliotecas utilizadas para estimação do modelo foram NumPy \cite{harris2020array},
-que oferece estruturas eficientes para operações matriciais e vetoriais, e o SciPy \cite{virtanen2020scipy}, que contém
-diferentes métodos de otimização, como, por exemplo, o L-BFGS.
+% O Python foi utilizado tanto para a geração de dados simulados quanto para a implementação
+% do algoritmo proposto, o GG-KM. As bibliotecas utilizadas para estimação do modelo foram NumPy \cite{harris2020array},
+% que oferece estruturas eficientes para operações matriciais e vetoriais, e o SciPy \cite{virtanen2020scipy}, que contém
+% diferentes métodos de otimização, como, por exemplo, o L-BFGS.
 
 % Além disso, o Python permite uma integração natural com bibliotecas de otimização e
 % facilita a prototipagem de modelos matemáticos complexos, o que foi essencial para o
@@ -145,15 +145,8 @@ onde a função de risco basal foi definida como
 h_0(t)=\alpha t^{\alpha-1}, \quad \alpha>0.
 \]
 
-Essa especificação implica que os tempos latentes seguem uma distribuição Weibull com parâmetro de forma $\alpha$ e parâmetro de escala
-
-\[
-\lambda(\mathbf{x})
-=
-\left\{
-\exp(\beta_1x_1+\beta_2x_2)
-\right\}^{-1/\alpha}.
-\]
+Essa especificação implica que os tempos latentes seguem uma distribuição Weibull com parâmetro de forma
+$\alpha$ e parâmetro de escala $\lambda(\mathbf{x}) = \left\{\exp(\beta_1x_1+\beta_2x_2)\right\}^{-1/\alpha}$.
 
 Os valores utilizados para os parâmetros foram $(\alpha,\beta_1,\beta_2)=(2,1,0.5)$ Os tempos de censura
 foram gerados independentemente a partir de uma distribuição exponencial com taxa igual a $0.2$, isto é
