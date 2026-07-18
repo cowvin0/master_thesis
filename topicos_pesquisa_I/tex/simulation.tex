@@ -181,12 +181,21 @@ a curva de sobrevivência estimada pelo modelo proposto e o estimador de Kaplan-
 na Figura~\ref{fig:melanoma_km_ggkm}. Como pode ser observado a partir da figura, há de fato indícios de que
 o modelo está conseguindo capturar adequadamente a fração de cura presente nos dados.
 
+% \begin{figure}[htb]
+%     \centering
+%     \includegraphics[width=0.6\textwidth]{images/melanoma_violin_ibs_em.png}
+%     \caption{Distribuição do IBS em relação a cada kernel.}
+%     \label{fig:melanoma_violin_ibs}
+% \end{figure}
+
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=0.6\textwidth]{images/melanoma_violin_ibs_em.png}
+    \includegraphics[width=0.6\textwidth]{images/boxplot_cindex_poisson.png}
+    \includegraphics[width=0.6\textwidth]{images/nestedcv_poisson_cindex.png}
     \caption{Distribuição do IBS em relação a cada kernel.}
     \label{fig:melanoma_violin_ibs}
 \end{figure}
+
 
 
 Na Figura~\ref{fig:melanoma_violin_ibs}, pode-se observar a variação do desempenho do modelo GG-KM para
@@ -202,12 +211,12 @@ erro.
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\caption{Resultados do IBS médio e desvio padrão para cada kernel no conjunto de dados Melanoma.}
+\caption{Resultados do IBS médio, C-index médio e respectivos desvios padrão para cada kernel no conjunto de dados Melanoma.}
 \label{tab:melanoma_kernels}
 
 \begin{tabular}{
 >{\centering\arraybackslash}p{3cm}
->{\centering\arraybackslash}p{1.5cm}
+>{\centering\arraybackslash}p{2cm}
 ccccccc
 }
 \toprule
@@ -215,13 +224,13 @@ $N$ & Métrica &
 linear &
 exponential &
 cauchy &
-RBF &
+rbf &
 laplacian &
 polynomial &
 sigmoid \\
 \midrule
 
-\multirow{2}{*}{Poisson}
+\multirow{4}{*}{Poisson}
 & IBS
 & 0.1511
 & 0.1545
@@ -239,6 +248,24 @@ sigmoid \\
 & 0.0239
 & 0.0312
 & 0.0267 \\
+
+& C-index
+& 0.7088
+& 0.7186
+& 0.7127
+& 0.7108
+& 0.6976
+& 0.7009
+& 0.6815 \\
+
+& DP C-index
+& 0.0435
+& 0.0337
+& 0.0420
+& 0.0416
+& 0.0481
+& 0.0435
+& 0.0644 \\
 
 \midrule
 
@@ -264,6 +291,73 @@ sigmoid \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+% \begin{table}[ht]
+% \centering
+% \footnotesize
+% \setlength{\tabcolsep}{3pt}
+% \caption{Resultados do IBS médio e desvio padrão para cada kernel no conjunto de dados Melanoma.}
+% \label{tab:melanoma_kernels}
+
+% \begin{tabular}{
+% >{\centering\arraybackslash}p{3cm}
+% >{\centering\arraybackslash}p{1.5cm}
+% ccccccc
+% }
+% \toprule
+% $N$ & Métrica &
+% linear &
+% exponential &
+% cauchy &
+% RBF &
+% laplacian &
+% polynomial &
+% sigmoid \\
+% \midrule
+
+% \multirow{2}{*}{Poisson}
+% & IBS
+% & 0.1511
+% & 0.1545
+% & 0.1549
+% & 0.1556
+% & 0.1559
+% & 0.1570
+% & 0.1594 \\
+
+% & DP IBS
+% & 0.0293
+% & 0.0222
+% & 0.0260
+% & 0.0289
+% & 0.0239
+% & 0.0312
+% & 0.0267 \\
+
+% \midrule
+
+% \multirow{2}{*}{\shortstack[c]{Binomial Negativa\\com $\phi$ estimado}}
+% & IBS
+% & 0.1573
+% & 0.1544
+% & 0.1548
+% & 0.1572
+% & 0.1559
+% & 0.1592
+% & 0.1598 \\
+
+% & DP IBS
+% & 0.0246
+% & 0.0223
+% & 0.0250
+% & 0.0245
+% & 0.0239
+% & 0.0178
+% & 0.0264 \\
+
+% \bottomrule
+% \end{tabular}
+% \end{table}
 
 A Tabela~\ref{tab:melanoma_kernels} resume esses resultados ao apresentar o IBS médio e seu respectivo
 desvio padrão para cada kernel. Observa-se que o kernel linear apresentou o menor IBS médio, indicando o
