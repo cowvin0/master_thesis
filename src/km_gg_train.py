@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 import warnings
 
-from gg_boosting import PTCMBoost
-from utils import integrated_brier_score
-from km_gg import GG_KM
+from aplicacao_relatorio_2.gg_boosting import PTCMBoost
+from aplicacao_relatorio_2.utils import integrated_brier_score
+from aplicacao_relatorio_2.km_gg import GG_KM
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 
