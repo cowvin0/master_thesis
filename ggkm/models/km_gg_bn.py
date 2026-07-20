@@ -1,11 +1,12 @@
 import numpy as np
 
+from utils.kernels import KernelFunc
 from utils.pgamma_derivate import pgamma_shape_derivative_vec
 from scipy.special import gamma, gammainc, digamma, gammaln
 from scipy.optimize import minimize
 
 
-class GG_KM:
+class GG_KM(KernelFunc):
 
     def __init__(
         self,
@@ -27,62 +28,11 @@ class GG_KM:
         self.phi = 0.5 if phi is None else phi
 
         self.lambda_reg = lambda_reg
-        self.gamma = gamma
-        self.kernel = kernel
-        self.coef0 = coef0
-        self.degree = degree
+        super().__init__(kernel=kernel, gamma=gamma, degree=degree, coef0=coef0)
 
         self.alpha_ = None
         self.K_ = None
         self.X_train_ = None
-
-    def _compute_kernel(self, X1, X2):
-        kernels = {
-            "linear": self.linear_kernel,
-            "rbf": self.gaussian_kernel,
-            "laplacian": self.laplacian_kernel,
-            "exponential": self.exponential_kernel,
-            "cauchy": self.cauchy_kernel,
-            "sigmoid": self.sigmoid_kernel,
-            "polynomial": self.polynomial_kernel,
-        }
-
-        if self.kernel not in kernels:
-            raise ValueError(
-                f"Unknown kernel '{self.kernel}'. "
-                f"Available kernels: {list(kernels.keys())}"
-            )
-
-        return kernels[self.kernel](X1, X2)
-
-    def linear_kernel(self, X1, X2):
-        return X1 @ X2.T
-
-    def laplacian_kernel(self, X1, X2):
-        diff = np.abs(X1[:, None, :] - X2[None, :, :])
-        dist = np.sum(diff, axis=2)
-        return np.exp(-self.gamma * dist)
-
-    def sigmoid_kernel(self, X1, X2):
-        return np.tanh(self.gamma * (X1 @ X2.T) + self.coef0)
-
-    def cauchy_kernel(self, X1, X2):
-        diff = X1[:, None, :] - X2[None, :, :]
-        sq_dist = np.sum(diff**2, axis=2)
-        return 1 / (1 + self.gamma * sq_dist)
-
-    def exponential_kernel(self, X1, X2):
-        diff = X1[:, None, :] - X2[None, :, :]
-        dist = np.sqrt(np.sum(diff**2, axis=2))
-        return np.exp(-self.gamma * dist)
-
-    def polynomial_kernel(self, X1, X2):
-        return (self.gamma * (X1 @ X2.T) + self.coef0) ** self.degree
-
-    def gaussian_kernel(self, X1, X2):
-        diff = X1[:, None, :] - X2[None, :, :]
-        sq_dist = np.sum(diff**2, axis=2)
-        return np.exp(-self.gamma * sq_dist)
 
     def _fGG(self, t):
         a, d, p = self.a, self.d, self.p

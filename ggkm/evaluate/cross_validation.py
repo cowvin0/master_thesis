@@ -313,7 +313,7 @@ def cross_validate_gg_km(
     random_state=42,
     bagging=False,
     kernels=None,
-    n_estimators=50,
+    # n_estimators=50,
 ):
 
     outer_cv = KFold(
@@ -381,17 +381,19 @@ def cross_validate_gg_km(
                     1e-5,
                     1.0,
                     log=True,
-                )
+                ),
+                # "crop": trial.suggest_int("crop", 0, 100),
             }
 
             if bagging:
 
-                params["gamma"] = trial.suggest_float(
-                    "gamma",
-                    1e-3,
-                    10.0,
-                    log=True,
-                )
+                params["n_estimators"] = trial.suggest_int("n_estimators", 50, 50)
+                # params["gamma"] = trial.suggest_float(
+                #     "gamma",
+                #     1e-3,
+                #     10.0,
+                #     log=True,
+                # )
 
             else:
 
@@ -477,7 +479,7 @@ def cross_validate_gg_km(
 
                         model = estimator(
                             kernels=kernels,
-                            n_estimators=n_estimators,
+                            # n_estimators=n_estimators,
                             random_state=random_state,
                             **params,
                         )
@@ -555,7 +557,7 @@ def cross_validate_gg_km(
 
             final_model = estimator(
                 kernels=kernels,
-                n_estimators=n_estimators,
+                # n_estimators=n_estimators,
                 random_state=random_state,
                 **best_params,
             )
