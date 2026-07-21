@@ -6,7 +6,7 @@ from scipy.special import gamma, gammainc, digamma, gammaln
 from scipy.optimize import minimize
 
 
-class GG_KM(KernelFunc):
+class GGNB(KernelFunc):
 
     def __init__(
         self,

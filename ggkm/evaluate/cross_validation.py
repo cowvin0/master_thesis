@@ -382,7 +382,7 @@ def cross_validate_gg_km(
                     1.0,
                     log=True,
                 ),
-                # "crop": trial.suggest_int("crop", 0, 100),
+                "K_bin": trial.suggest_int("K_bin", 2, 1000),
             }
 
             if bagging:

@@ -2,7 +2,7 @@ import numpy as np
 import os
 
 from joblib import Parallel, delayed
-from models.km_gg import GG_KM
+from models.km_gg import GGPoisson
 
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
@@ -63,7 +63,7 @@ class GGKMKernelBagging:
             X_boot = X
             t_boot = t
             delta_boot = delta
-        model = GG_KM(
+        model = GGPoisson(
             kernel=kernel,
             **ggkm_params,
         )

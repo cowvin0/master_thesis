@@ -13,11 +13,11 @@ from scipy.special import (
 from scipy.optimize import minimize
 
 
-class GG_KM_Binomial(KernelFunc):
+class GGBinomial(KernelFunc):
 
     def __init__(
         self,
-        K_bin=10,
+        K_bin=1,
         a=1.0,
         d=1.0,
         p=1.0,
@@ -53,6 +53,7 @@ class GG_KM_Binomial(KernelFunc):
         self.X_train_ = None
 
     def _FGG(self, t):
+
         return gammainc(
             self.d / self.p,
             (t / self.a) ** self.p,
@@ -95,16 +96,12 @@ class GG_KM_Binomial(KernelFunc):
     ):
 
         f = self.K_ @ alpha
-
         theta_star = self._theta_star(f)
-
         FGG = self._FGG(t)
-
         ll = np.sum(
             delta * (np.log(self.K_bin) + np.log(theta_star) + self._log_fGG(t))
             + (self.K_bin - delta) * np.log(1.0 - theta_star * FGG)
         )
-
         pen = (self.lambda_reg / 2) * (alpha @ self.K_ @ alpha)
 
         return ll - pen
@@ -117,7 +114,6 @@ class GG_KM_Binomial(KernelFunc):
     ):
 
         f = self.K_ @ alpha
-
         theta_star = self._theta_star(f)
         SGG = np.clip(
             1.0 - self._FGG(t),
@@ -163,7 +159,6 @@ class GG_KM_Binomial(KernelFunc):
     ):
 
         self.a, self.d, self.p = pars
-
         FGG = self._FGG(t)
         SGG = np.clip(
             1.0 - FGG,
