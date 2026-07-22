@@ -27,7 +27,8 @@ already in default at the beginning of the study, while the exact time at which 
 unknown. Finally, interval censoring occurs when the event takes place within a given time interval, but
 its exact occurrence time is unknown. Given the loan default example, interval censoring could arise if
 members were evaluated periodically and default was detected only during these assessments, without
-knowledge of the exact time at which it occurred. Each type of censoring can be observe in Figure \ref{fig:censoring_system}.
+knowledge of the exact time at which it occurred. Figure \ref{fig:censoring_system} illustrates each type
+of censoring.
 
 \begin{figure}[htb]
     \centering
@@ -36,15 +37,42 @@ knowledge of the exact time at which it occurred. Each type of censoring can be 
     \label{fig:censoring_system}
 \end{figure}
 
-Therefore, survival data are generally composed of both complete and censored observations. This characteristic
-distinguishes survival analysis from many other areas of statistics \cite{aalen2008survival}, since the
-exact event time is not always observed. As a result, specialized statistical methods are required to
-properly account for censored observations when modeling time-to-event outcomes. Notice also that, although
-the examples of censoring were given in the context of a credit union, censoring can occur in many
-other scenarios. Given the definition of censoring in this section, the next section will introduce
-the survival function and hazard rate for
+Formally, let \(T\) denote the survival time and let \(l\) and \(u\) denote the lower and upper bounds of
+the censoring interval, respectively. Under interval censoring, it is only known that \(l < T \leq u\),
+where both \(l\) and \(u\) are finite. Notice that left and right censoring can be viewed as special cases
+of interval censoring. Hence, left censoring corresponds to the interval \((-\infty, u]\), whereas
+right censoring corresponds to the interval \((l, \infty)\).
 
-\section{Survival function and hazard rate}
+The methods presented in this work consider only right censoring, since it is the most common type
+encountered in practice. Thus, to represent survival data, let \(T^*\) be a random variable representing
+the time to failure, i.e., the time until the occurrence of the event of interest, and let \(U\) be a
+random variable representing the time to a censoring event. The observed time is \(T = \min(T^*, U)\) and a
+censoring indicator \(\delta = I[T^* \leq U]\). That is, \(\delta\) takes the value 0 or 1 according to
+whether \(T\) is an observed failure time or a censored time \cite{moore2016applied}. Hence, throughout
+this work, survival data will be represented by the triplet \(\{(\mathbf{x}_i, t_i, \delta_i)\}_{i=1}^{n}\),
+where \(\mathbf{x}_i \in \mathbb{R}^{p}\) denotes the vector of covariates, \(t_i\) the observed time, and
+\(\delta_i\) an indicator variable associated with the \(i\)-th individual. The sample size is denoted by
+\(n\), and \(p\) denotes the number of covariates.
+
+Therefore, survival data are generally composed of both complete and incomplete observations
+\cite{aalen2008survival}. As a result, survival analysis methods seek to incorporate censored observations
+into their methodology. Given the definition of censoring presented in this section, the next section
+introduces the definitions of the survival function and hazard rate, as well as some relationships
+between these functions.
+
+\section{Survival and hazard rate functions}
+
+According to \citeonline{moore2016applied}, survival analysis methods depend on the survival distribution,
+and the two main ways of specifying it are the survival function and the hazard rate function. The survival
+function gives the expected proportion of individuals for which the event has not yet happened by time $t$.
+Formally, let $T$ denotes the survival time, the survival function is given by:
+\begin{equation}
+\label{eq:surv_function}
+S\left(t\right) = P\left(T>t\right)\text{, } t>0\text{, } 0 < S\left(t\right) < 1
+\end{equation}
+
+% Although the name survival function resembles an event of death, it can be used in a quite general sense,
+% that is, it does not need to be related to the study of death.
 
 % Os métodos de análise de sobrevivência são fundamentados na caracterização da distribuição
 % do tempo até a ocorrência de um evento aleatório. As principais formas de descrever essa
