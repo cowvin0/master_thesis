@@ -1283,68 +1283,68 @@
 \setboolean{carimbo-folha-rosto}{true}
 \renewcommand{\folhaderostocontent}{
 
-  % \vspace*{-6.2mm}
-  % \ifthenelse{\boolean{carimbo-folha-rosto}}{
-  %   \makebox[14.9cm][r]{%
-  %     \fbox{
-  %       \parbox{7.2cm}{
-  %         \vspace{0.3cm}
-  %         \makebox[\linewidth][c]{\@icmcSVPG{SERVI{\c C}O DE P{\'O}S-GRADUA{\c C}{\~A}O DO ICMC-USP}}
+  \vspace*{-6.2mm}
+  \ifthenelse{\boolean{carimbo-folha-rosto}}{
+    \makebox[14.9cm][r]{%
+      \fbox{
+        \parbox{7.2cm}{
+          \vspace{0.3cm}
+          \makebox[\linewidth][c]{\@icmcSVPG{SERVI{\c C}O DE P{\'O}S-GRADUA{\c C}{\~A}O DO ICMC-USP}}
 
-  %         {
-  %           \@icmcCarimbo
-  %           \vspace{12pt}
-  %           \hspace{2pt} Data de Dep{\'o}sito:
+          {
+            \@icmcCarimbo
+            \vspace{12pt}
+            \hspace{2pt} Data de Dep{\'o}sito:
 
-  %           \vspace{9pt}
-  %           \hspace{2pt} Assinatura: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
-  %           \vspace{9pt}
-  %         }
-  %       }
-  %     }
-  %   }
-  % }{\vspace{2.95cm}}
-  % \begin{center}
+            \vspace{9pt}
+            \hspace{2pt} Assinatura: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+            \vspace{9pt}
+          }
+        }
+      }
+    }
+  }{\vspace{2.95cm}}
+  \begin{center}
 
-  %   \vspace{0.5cm}
+    \vspace{0.5cm}
 
-  %   {\@icmcAutorFolhaRosto\nohyphens{\imprimirautor}}
+    {\@icmcAutorFolhaRosto\nohyphens{\imprimirautor}}
 
-  %   \vfill
+    \vfill
 
-  %   \begin{Spacing}{1.5}
-  %     {\@icmcTituloFolhaRosto\nohyphens{\imprimirtitulo}}
-  %   \end{Spacing}
+    \begin{Spacing}{1.5}
+      {\@icmcTituloFolhaRosto\nohyphens{\imprimirtitulo}}
+    \end{Spacing}
 
-  %   \vfill
+    \vfill
 
-  %   \abntex@ifnotempty{\imprimirpreambulo}{%
-  %     \hspace{.43\textwidth}
-  %     \begin{minipage}{8.4cm}
-  %       \begin{Spacing}{0.9}
-  %         {\@icmcPreambulo\imprimirpreambulo}%
+    \abntex@ifnotempty{\imprimirpreambulo}{%
+      \hspace{.43\textwidth}
+      \begin{minipage}{8.4cm}
+        \begin{Spacing}{0.9}
+          {\@icmcPreambulo\imprimirpreambulo}%
 
-  %         \vspace{5pt}
-  %         {\@icmcPreambulo\arealabel: \nohyphens{\imprimirarea}}%
+          \vspace{5pt}
+          {\@icmcPreambulo\arealabel: \nohyphens{\imprimirarea}}%
 
-  %         \vspace{5pt}
-  %         {\@icmcOrientador\imprimirorientadorRotulo: \titulacaoorientador{} \nohyphens{\imprimirorientador}}%
-  %         \abntex@ifnotempty{\imprimircoorientador}{%
-  %             \\{\@icmcOrientador\imprimircoorientadorRotulo: \titulacaocoorientador{} \nohyphens{\imprimircoorientador}}
-  %         }%
-  %       \end{Spacing}
-  %     \end{minipage}%
-  %   }%
+          \vspace{5pt}
+          {\@icmcOrientador\imprimirorientadorRotulo: \titulacaoorientador{} \nohyphens{\imprimirorientador}}%
+          \abntex@ifnotempty{\imprimircoorientador}{%
+              \\{\@icmcOrientador\imprimircoorientadorRotulo: \titulacaocoorientador{} \nohyphens{\imprimircoorientador}}
+          }%
+        \end{Spacing}
+      \end{minipage}%
+    }%
 
-  %   \vspace{1cm}
+    \vspace{1cm}
 
-  %   {
-  %     \@icmcLocalData
-  %     \imprimiruniversidade~-- S{\~a}o Carlos\\
-  %     \IfLangPortuguese{\Monthname[\@month] de \@year\\}{\Monthname[\@month]~\@year\\}
-  %   }
-  %   \vspace*{1.2cm}
-  % \end{center}
+    {
+      \@icmcLocalData
+      \imprimiruniversidade~-- S{\~a}o Carlos\\
+      \IfLangPortuguese{\Monthname[\@month] de \@year\\}{\Monthname[\@month]~\@year\\}
+    }
+    \vspace*{1.2cm}
+  \end{center}
 
 } %folha de rosto
 

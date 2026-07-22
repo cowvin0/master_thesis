@@ -1,40 +1,50 @@
-% \section{Introdução}
+\section{Introduction}
 
-% Saber se um evento de interesse ocorrerá ou não é crucial. No entanto, em diversos cenários, saber quando
-% ele ocorrerá pode ser ainda mais importante. Nesse contexto, surge uma metodologia estatística denominada
-% análise de sobrevivência. O tempo transcorrido até a ocorrência de um evento de interesse é denominado
-% tempo de sobrevivência \cite{aalen2008survival}. Por exemplo, em um estudo cujo interesse seja a inadimplência de associados de uma cooperativa de crédito,
-% o tempo de sobrevivência pode ser definido como o tempo até a ocorrência da inadimplência. Assim sendo, a
-% análise de sobrevivência tem como objetivo modelar a distribuição desse tempo e investigar fatores que possam
-% influenciar sua ocorrência. Portanto, este capítulo terá como objetivo apresentar conceitos que fundamentam a
-% análise de sobrevivência.
-
-% \section{Censura}
-
-% A principal característica que distingue a análise de sobrevivência de outras áreas da estatística é a
-% presença de censura nos dados. Por exemplo, considere que os associados de uma cooperativa de crédito
-% estejam sendo acompanhados ao longo do tempo para analisar a ocorrência de inadimplência. Nesse contexto,
-% duas situações podem ocorrer. Alguns associados podem se tornar inadimplentes durante o período de
-% acompanhamento, enquanto outros podem não experimentar o evento até o término do estudo. Neste último caso,
-% ocorre censura, pois o tempo de sobrevivência desses indivíduos não é observado completamente, mas é conhecido
-% que o evento ocorrerá após um determinado instante de tempo.
-% % mas sabe-se
-% % apenas que o evento ocorrerá após um determinado instante de tempo.
-% % Portanto, a censura ocorre quando o
-% % tempo de sobrevivência não é observado de forma exata \cite{moore2016applied}.
+Knowing whether an event of interest will occur is crucial. However, in many situations, knowing when
+it will occur can be even more informative. In this context, a statistical methodology known as survival
+analysis arises. The elapsed time until the occurrence of an event of interest is referred to as the
+survival time \cite{aalen2008survival}. For example, in a study concerned with loan default among credit
+union members, the survival time may be defined as the time until a member defaults on a loan. Survival
+analysis is therefore concerned with modeling the distribution of this time and investigating factors that
+may influence its occurrence. Thus, the objective of this chapter is to present the fundamental
+concepts underlying survival analysis.
 
 
-% A censura pode ocorrer de três formas diferentes. O exemplo dado anteriormente pode ser entendido como sendo
-% uma censura à direita. A censura à direita ocorre quando o evento ocorreu depois de um determinado tempo, mas o tempo
-% exato não é conhecido. Outro tipo de censura é a censura à esquerda, que ocorre quando o evento ocorreu antes de um determinado
-% tempo. Ainda no caso da inadimplência, um exemplo de censura à esquerda seria quando um associado já se
-% encontrava inadimplente no início do estudo, mas o tempo exato de ocorrência da inadimplência não é
-% conhecido. Por fim, a censura intervalar ocorre quando o evento ocorreu dentro de um intervalo de tempo,
-% mas o tempo exato não é conhecido. No exemplo da inadimplência, a censura intervalar poderia ocorrer se os
-% associados fossem avaliados periodicamente, e o evento de inadimplência fosse detectado apenas durante
-% essas avaliações, sem que o tempo exato de ocorrência fosse conhecido.
+\section{Censoring}
 
-% \section{Funções importantes para análise de sobrevivência e suas relações}
+The main characteristic that distinguishes survival analysis from other areas of statistics is the presence
+of censored data. For example, consider a study in which credit union members are followed over time to
+investigate the occurrence of loan default. In this context, two situations may happen. Some members may
+default during the follow-up period, whereas others may not experience the event before the end of the
+study. In the latter case, censoring occurs because the survival time of these individuals is not fully
+observed; it is only known that the event will occur after a certain point in time.
+
+Censoring can occur in three different forms. The example described above can be regarded as right
+censoring. Right censoring occurs when the event takes place after a certain time, but its exact occurrence
+time is unknown. Another type is left censoring, which occurs when the event has taken place before a
+certain time. In the context of loan default, an example of left censoring would be a member who was
+already in default at the beginning of the study, while the exact time at which the default occurred is
+unknown. Finally, interval censoring occurs when the event takes place within a given time interval, but
+its exact occurrence time is unknown. Given the loan default example, interval censoring could arise if
+members were evaluated periodically and default was detected only during these assessments, without
+knowledge of the exact time at which it occurred. Each type of censoring can be observe in Figure \ref{fig:censoring_system}.
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/figure_censore_representation.png}
+	\caption{Illustration of observed events and censoring types in survival analysis: observed event, right censoring, left censoring, and interval censoring.}
+    \label{fig:censoring_system}
+\end{figure}
+
+Therefore, survival data are generally composed of both complete and censored observations. This characteristic
+distinguishes survival analysis from many other areas of statistics \cite{aalen2008survival}, since the
+exact event time is not always observed. As a result, specialized statistical methods are required to
+properly account for censored observations when modeling time-to-event outcomes. Notice also that, although
+the examples of censoring were given in the context of a credit union, censoring can occur in many
+other scenarios. Given the definition of censoring in this section, the next section will introduce
+the survival function and hazard rate for
+
+\section{Survival function and hazard rate}
 
 % Os métodos de análise de sobrevivência são fundamentados na caracterização da distribuição
 % do tempo até a ocorrência de um evento aleatório. As principais formas de descrever essa
@@ -112,70 +122,70 @@
 % para a modelagem de dados de sobrevivência, permitindo diferentes formas de especificação
 % de modelos conforme as características do problema e dos dados disponíveis.
 
-% % \section{Estimador de Kaplan-Meier}
+% \section{Estimador de Kaplan-Meier}
 
-% \section{Modelo de Riscos Proporcionais de Cox}
+\section{Modelo de Riscos Proporcionais de Cox}
 
-% O modelo de riscos proporcionais de Cox, proposto por \cite{cox1972regression}, constitui
-% uma das abordagens mais influentes e amplamente empregadas na análise de sobrevivência.
-% Sua principal característica reside na natureza semiparamétrica da modelagem, na qual a
-% função de risco é decomposta em um componente basal arbitrário e um componente paramétrico
-% associado às covariáveis, sem a necessidade de especificação explícita da forma funcional
-% do risco basal ao longo do tempo.
+O modelo de riscos proporcionais de Cox, proposto por \cite{cox1972regression}, constitui
+uma das abordagens mais influentes e amplamente empregadas na análise de sobrevivência.
+Sua principal característica reside na natureza semiparamétrica da modelagem, na qual a
+função de risco é decomposta em um componente basal arbitrário e um componente paramétrico
+associado às covariáveis, sem a necessidade de especificação explícita da forma funcional
+do risco basal ao longo do tempo.
 
-% Formalmente, seja $\mathbf{x}_i \in \mathbb{R}^p$ o vetor de covariáveis associado ao
-% $i$-ésimo indivíduo. O modelo de Cox é definido por:
-% \begin{equation}
-% h(t \mid \mathbf{x}_i) = h_0(t)\exp\left(\mathbf{x}_i^\top \bm{\beta}\right),
-% \end{equation}
-% em que $h_0(t)$ é a função de risco basal, comum a todos os indivíduos, e
-% $\bm{\beta} \in \mathbb{R}^p$ é o vetor de parâmetros que quantifica o efeito das
-% covariáveis sobre o risco.
+Formalmente, seja $\mathbf{x}_i \in \mathbb{R}^p$ o vetor de covariáveis associado ao
+$i$-ésimo indivíduo. O modelo de Cox é definido por:
+\begin{equation}
+h(t \mid \mathbf{x}_i) = h_0(t)\exp\left(\mathbf{x}_i^\top \bm{\beta}\right),
+\end{equation}
+em que $h_0(t)$ é a função de risco basal, comum a todos os indivíduos, e
+$\bm{\beta} \in \mathbb{R}^p$ é o vetor de parâmetros que quantifica o efeito das
+covariáveis sobre o risco.
 
-% A hipótese central do modelo é a de riscos proporcionais, segundo a qual a razão entre as
-% funções de risco de quaisquer dois indivíduos permanece constante ao longo do tempo. Mais
-% precisamente, para dois indivíduos com vetores de covariáveis $\mathbf{x}_i$ e $\mathbf{x}_j$,
-% tem-se:
-% \begin{equation}
-% \frac{h(t \mid \mathbf{x}_i)}{h(t \mid \mathbf{x}_j)} = \exp\left((\mathbf{x}_i - \mathbf{x}_j)^\top \bm{\beta}\right),
-% \end{equation}
-% o que evidencia que essa razão independe do tempo $t$. Essa propriedade confere ao modelo
-% uma interpretação particularmente conveniente, pois o termo $\exp(\beta_k)$ pode ser
-% interpretado como o efeito multiplicativo associado a um aumento unitário na $k$-ésima
-% covariável sobre o risco instantâneo, mantendo as demais fixas.
+A hipótese central do modelo é a de riscos proporcionais, segundo a qual a razão entre as
+funções de risco de quaisquer dois indivíduos permanece constante ao longo do tempo. Mais
+precisamente, para dois indivíduos com vetores de covariáveis $\mathbf{x}_i$ e $\mathbf{x}_j$,
+tem-se:
+\begin{equation}
+\frac{h(t \mid \mathbf{x}_i)}{h(t \mid \mathbf{x}_j)} = \exp\left((\mathbf{x}_i - \mathbf{x}_j)^\top \bm{\beta}\right),
+\end{equation}
+o que evidencia que essa razão independe do tempo $t$. Essa propriedade confere ao modelo
+uma interpretação particularmente conveniente, pois o termo $\exp(\beta_k)$ pode ser
+interpretado como o efeito multiplicativo associado a um aumento unitário na $k$-ésima
+covariável sobre o risco instantâneo, mantendo as demais fixas.
 
-% Uma das principais vantagens do modelo de Cox é que a estimação do vetor de parâmetros
-% $\bm{\beta}$ pode ser realizada sem a necessidade de especificar a função de risco basal
-% $h_0(t)$. Esse resultado é obtido por meio da verossimilhança parcial, que explora apenas
-% a informação contida na ordenação dos tempos de falha observados. Seja
-% $t_{(1)} < \cdots < t_{(D)}$ a sequência dos tempos de falha distintos e
-% $\mathcal{R}(t_{(d)})$ o conjunto de risco imediatamente antes de $t_{(d)}$.
-% A verossimilhança parcial é definida por:
-% \begin{equation}
-% L(\bm{\beta}) = \prod_{d=1}^{D} \frac{\exp\left(\mathbf{x}_{(d)}^\top \bm{\beta}\right)}{\sum_{j \in \mathcal{R}(t_{(d)})} \exp\left(\mathbf{x}_j^\top \bm{\beta}\right)}.
-% \end{equation}
+Uma das principais vantagens do modelo de Cox é que a estimação do vetor de parâmetros
+$\bm{\beta}$ pode ser realizada sem a necessidade de especificar a função de risco basal
+$h_0(t)$. Esse resultado é obtido por meio da verossimilhança parcial, que explora apenas
+a informação contida na ordenação dos tempos de falha observados. Seja
+$t_{(1)} < \cdots < t_{(D)}$ a sequência dos tempos de falha distintos e
+$\mathcal{R}(t_{(d)})$ o conjunto de risco imediatamente antes de $t_{(d)}$.
+A verossimilhança parcial é definida por:
+\begin{equation}
+L(\bm{\beta}) = \prod_{d=1}^{D} \frac{\exp\left(\mathbf{x}_{(d)}^\top \bm{\beta}\right)}{\sum_{j \in \mathcal{R}(t_{(d)})} \exp\left(\mathbf{x}_j^\top \bm{\beta}\right)}.
+\end{equation}
 
-% Sob condições de regularidade, a maximização dessa função conduz a estimativas consistentes
-% e assintoticamente normais para $\bm{\beta}$, mesmo na presença de censura à direita.
-% Uma vez obtidas as estimativas dos parâmetros, é possível recuperar a função de risco basal,
-% tipicamente por meio do estimador de Breslow, e, consequentemente, a função de sobrevivência.
+Sob condições de regularidade, a maximização dessa função conduz a estimativas consistentes
+e assintoticamente normais para $\bm{\beta}$, mesmo na presença de censura à direita.
+Uma vez obtidas as estimativas dos parâmetros, é possível recuperar a função de risco basal,
+tipicamente por meio do estimador de Breslow, e, consequentemente, a função de sobrevivência.
 
-% A função de sobrevivência condicional associada ao indivíduo $i$ pode ser expressa como:
-% \begin{equation}
-% S(t \mid \mathbf{x}_i) = S_0(t)^{\exp\left(\mathbf{x}_i^\top \bm{\beta}\right)},
-% \end{equation}
-% em que $S_0(t)$ denota a função de sobrevivência basal correspondente a $h_0(t)$. Essa
-% expressão evidencia que o efeito das covariáveis atua de forma multiplicativa sobre o risco
-% e, de maneira equivalente, exponencial sobre a função de sobrevivência.
+A função de sobrevivência condicional associada ao indivíduo $i$ pode ser expressa como:
+\begin{equation}
+S(t \mid \mathbf{x}_i) = S_0(t)^{\exp\left(\mathbf{x}_i^\top \bm{\beta}\right)},
+\end{equation}
+em que $S_0(t)$ denota a função de sobrevivência basal correspondente a $h_0(t)$. Essa
+expressão evidencia que o efeito das covariáveis atua de forma multiplicativa sobre o risco
+e, de maneira equivalente, exponencial sobre a função de sobrevivência.
 
-% Apesar de sua ampla aplicabilidade e interpretabilidade, o modelo de Cox depende
-% criticamente da validade da hipótese de riscos proporcionais. Violações dessa suposição
-% podem resultar em estimativas viesadas e comprometer a interpretação dos coeficientes.
-% Nesse contexto, diversas extensões têm sido propostas na literatura, incluindo modelos
-% com coeficientes dependentes do tempo, abordagens estratificadas e métodos baseados em
-% aprendizado de máquina, que buscam maior flexibilidade na modelagem de relações complexas
-% entre covariáveis e o risco de ocorrência do evento, especialmente em cenários de alta
-% dimensionalidade.
+Apesar de sua ampla aplicabilidade e interpretabilidade, o modelo de Cox depende
+criticamente da validade da hipótese de riscos proporcionais. Violações dessa suposição
+podem resultar em estimativas viesadas e comprometer a interpretação dos coeficientes.
+Nesse contexto, diversas extensões têm sido propostas na literatura, incluindo modelos
+com coeficientes dependentes do tempo, abordagens estratificadas e métodos baseados em
+aprendizado de máquina, que buscam maior flexibilidade na modelagem de relações complexas
+entre covariáveis e o risco de ocorrência do evento, especialmente em cenários de alta
+dimensionalidade.
 
 \section{Modelos de Longa Duração}
 
