@@ -68,9 +68,28 @@ of individuals for which the event has not yet happened by time $t$. Formally, l
 survival time, the survival function is given by:
 \begin{equation}
 \label{eq:surv_function}
-S\left(t\right) = P\left(T>t\right)\text{.}
+S\left(t\right) = P\left(T>t\right)\text{,}\quad t \in \left(0, +\infty\right)\text{.}
 \end{equation}
 
+The survival curve is a function that starts at 1 and declines over time or remains constant over time.
+It will often tend to zero as $t$ increases because, intuitivelly, over time more individuals
+will experience the event of interest. Nonetheless, it might not happen, and, when this happen,
+it is said to be an improper survival function and proper, otherwise. It will be discussed in
+the next section.
+
+The hazard rate function $h\left(t\right)$ specifies a conditional probability. Assuming $T$ is absolutely
+continuous, i.e., that it has probability density, one looks at those individuals who have not yet experienced
+the event of interest by time $t$ and considers the probability of experiencing the event in the small
+time interval $\left[t, t + dt\right)$, giving $h\left(t\right)dt$ \cite{aalen2008survival}. Therefore,
+the hazard rate function is defined as:
+\begin{equation}
+	h\left(t\right) = \lim_{\Delta t \to 0} \frac{1}{\Delta t} P \left(t \le T < t + \Delta t | T \ge t\right)
+\end{equation}
+
+% The survival function is often defined in terms of the hazard rate function. Assuming $T$ is absolutely
+% continous, i.e, that it has a probability density, one looks at those individuals who have not yet
+% experienced the event of interest by time $t$ and considers the probability of experiencing the event
+% in the small time interval $\left[t, \right]$
 
 % Os métodos de análise de sobrevivência são fundamentados na caracterização da distribuição
 % do tempo até a ocorrência de um evento aleatório. As principais formas de descrever essa
