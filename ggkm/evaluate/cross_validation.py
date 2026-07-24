@@ -58,7 +58,8 @@ def cross_validate_pcm(
         def objective(trial):
 
             params = {
-                "lambda_reg": trial.suggest_float("lambda_reg", 1e-5, 1.0, log=True)
+                "lambda_reg": trial.suggest_float("lambda_reg", 1e-5, 1.0, log=True),
+                # "K_bin": trial.suggest_float("K_bin", 2, 1000),
             }
 
             if kernel != "linear":
