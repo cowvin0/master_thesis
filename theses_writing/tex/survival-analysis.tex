@@ -62,17 +62,15 @@ between these functions.
 
 \section{Survival and hazard rate functions}
 
-According to \citeonline{moore2016applied}, survival analysis methods depend on the survival distribution,
-and the two main ways of specifying it are the survival function and the hazard rate function. The survival
-function gives the expected proportion of individuals for which the event has not yet happened by time $t$.
-Formally, let $T$ denotes the survival time, the survival function is given by:
+Survival analysis methods depend on the survival distribution, and the two main ways of specifying it are
+the survival function and the hazard rate function \cite{moore2016applied}. The survival function gives the expected proportion
+of individuals for which the event has not yet happened by time $t$. Formally, let $T$ denotes the
+survival time, the survival function is given by:
 \begin{equation}
 \label{eq:surv_function}
 S\left(t\right) = P\left(T>t\right)\text{, } t>0\text{, } 0 < S\left(t\right) < 1
 \end{equation}
 
-% Although the name survival function resembles an event of death, it can be used in a quite general sense,
-% that is, it does not need to be related to the study of death.
 
 % Os métodos de análise de sobrevivência são fundamentados na caracterização da distribuição
 % do tempo até a ocorrência de um evento aleatório. As principais formas de descrever essa
@@ -152,68 +150,68 @@ S\left(t\right) = P\left(T>t\right)\text{, } t>0\text{, } 0 < S\left(t\right) < 
 
 % \section{Estimador de Kaplan-Meier}
 
-\section{Modelo de Riscos Proporcionais de Cox}
+% \section{Modelo de Riscos Proporcionais de Cox}
 
-O modelo de riscos proporcionais de Cox, proposto por \cite{cox1972regression}, constitui
-uma das abordagens mais influentes e amplamente empregadas na análise de sobrevivência.
-Sua principal característica reside na natureza semiparamétrica da modelagem, na qual a
-função de risco é decomposta em um componente basal arbitrário e um componente paramétrico
-associado às covariáveis, sem a necessidade de especificação explícita da forma funcional
-do risco basal ao longo do tempo.
+% O modelo de riscos proporcionais de Cox, proposto por \cite{cox1972regression}, constitui
+% uma das abordagens mais influentes e amplamente empregadas na análise de sobrevivência.
+% Sua principal característica reside na natureza semiparamétrica da modelagem, na qual a
+% função de risco é decomposta em um componente basal arbitrário e um componente paramétrico
+% associado às covariáveis, sem a necessidade de especificação explícita da forma funcional
+% do risco basal ao longo do tempo.
 
-Formalmente, seja $\mathbf{x}_i \in \mathbb{R}^p$ o vetor de covariáveis associado ao
-$i$-ésimo indivíduo. O modelo de Cox é definido por:
-\begin{equation}
-h(t \mid \mathbf{x}_i) = h_0(t)\exp\left(\mathbf{x}_i^\top \bm{\beta}\right),
-\end{equation}
-em que $h_0(t)$ é a função de risco basal, comum a todos os indivíduos, e
-$\bm{\beta} \in \mathbb{R}^p$ é o vetor de parâmetros que quantifica o efeito das
-covariáveis sobre o risco.
+% Formalmente, seja $\mathbf{x}_i \in \mathbb{R}^p$ o vetor de covariáveis associado ao
+% $i$-ésimo indivíduo. O modelo de Cox é definido por:
+% \begin{equation}
+% h(t \mid \mathbf{x}_i) = h_0(t)\exp\left(\mathbf{x}_i^\top \bm{\beta}\right),
+% \end{equation}
+% em que $h_0(t)$ é a função de risco basal, comum a todos os indivíduos, e
+% $\bm{\beta} \in \mathbb{R}^p$ é o vetor de parâmetros que quantifica o efeito das
+% covariáveis sobre o risco.
 
-A hipótese central do modelo é a de riscos proporcionais, segundo a qual a razão entre as
-funções de risco de quaisquer dois indivíduos permanece constante ao longo do tempo. Mais
-precisamente, para dois indivíduos com vetores de covariáveis $\mathbf{x}_i$ e $\mathbf{x}_j$,
-tem-se:
-\begin{equation}
-\frac{h(t \mid \mathbf{x}_i)}{h(t \mid \mathbf{x}_j)} = \exp\left((\mathbf{x}_i - \mathbf{x}_j)^\top \bm{\beta}\right),
-\end{equation}
-o que evidencia que essa razão independe do tempo $t$. Essa propriedade confere ao modelo
-uma interpretação particularmente conveniente, pois o termo $\exp(\beta_k)$ pode ser
-interpretado como o efeito multiplicativo associado a um aumento unitário na $k$-ésima
-covariável sobre o risco instantâneo, mantendo as demais fixas.
+% A hipótese central do modelo é a de riscos proporcionais, segundo a qual a razão entre as
+% funções de risco de quaisquer dois indivíduos permanece constante ao longo do tempo. Mais
+% precisamente, para dois indivíduos com vetores de covariáveis $\mathbf{x}_i$ e $\mathbf{x}_j$,
+% tem-se:
+% \begin{equation}
+% \frac{h(t \mid \mathbf{x}_i)}{h(t \mid \mathbf{x}_j)} = \exp\left((\mathbf{x}_i - \mathbf{x}_j)^\top \bm{\beta}\right),
+% \end{equation}
+% o que evidencia que essa razão independe do tempo $t$. Essa propriedade confere ao modelo
+% uma interpretação particularmente conveniente, pois o termo $\exp(\beta_k)$ pode ser
+% interpretado como o efeito multiplicativo associado a um aumento unitário na $k$-ésima
+% covariável sobre o risco instantâneo, mantendo as demais fixas.
 
-Uma das principais vantagens do modelo de Cox é que a estimação do vetor de parâmetros
-$\bm{\beta}$ pode ser realizada sem a necessidade de especificar a função de risco basal
-$h_0(t)$. Esse resultado é obtido por meio da verossimilhança parcial, que explora apenas
-a informação contida na ordenação dos tempos de falha observados. Seja
-$t_{(1)} < \cdots < t_{(D)}$ a sequência dos tempos de falha distintos e
-$\mathcal{R}(t_{(d)})$ o conjunto de risco imediatamente antes de $t_{(d)}$.
-A verossimilhança parcial é definida por:
-\begin{equation}
-L(\bm{\beta}) = \prod_{d=1}^{D} \frac{\exp\left(\mathbf{x}_{(d)}^\top \bm{\beta}\right)}{\sum_{j \in \mathcal{R}(t_{(d)})} \exp\left(\mathbf{x}_j^\top \bm{\beta}\right)}.
-\end{equation}
+% Uma das principais vantagens do modelo de Cox é que a estimação do vetor de parâmetros
+% $\bm{\beta}$ pode ser realizada sem a necessidade de especificar a função de risco basal
+% $h_0(t)$. Esse resultado é obtido por meio da verossimilhança parcial, que explora apenas
+% a informação contida na ordenação dos tempos de falha observados. Seja
+% $t_{(1)} < \cdots < t_{(D)}$ a sequência dos tempos de falha distintos e
+% $\mathcal{R}(t_{(d)})$ o conjunto de risco imediatamente antes de $t_{(d)}$.
+% A verossimilhança parcial é definida por:
+% \begin{equation}
+% L(\bm{\beta}) = \prod_{d=1}^{D} \frac{\exp\left(\mathbf{x}_{(d)}^\top \bm{\beta}\right)}{\sum_{j \in \mathcal{R}(t_{(d)})} \exp\left(\mathbf{x}_j^\top \bm{\beta}\right)}.
+% \end{equation}
 
-Sob condições de regularidade, a maximização dessa função conduz a estimativas consistentes
-e assintoticamente normais para $\bm{\beta}$, mesmo na presença de censura à direita.
-Uma vez obtidas as estimativas dos parâmetros, é possível recuperar a função de risco basal,
-tipicamente por meio do estimador de Breslow, e, consequentemente, a função de sobrevivência.
+% Sob condições de regularidade, a maximização dessa função conduz a estimativas consistentes
+% e assintoticamente normais para $\bm{\beta}$, mesmo na presença de censura à direita.
+% Uma vez obtidas as estimativas dos parâmetros, é possível recuperar a função de risco basal,
+% tipicamente por meio do estimador de Breslow, e, consequentemente, a função de sobrevivência.
 
-A função de sobrevivência condicional associada ao indivíduo $i$ pode ser expressa como:
-\begin{equation}
-S(t \mid \mathbf{x}_i) = S_0(t)^{\exp\left(\mathbf{x}_i^\top \bm{\beta}\right)},
-\end{equation}
-em que $S_0(t)$ denota a função de sobrevivência basal correspondente a $h_0(t)$. Essa
-expressão evidencia que o efeito das covariáveis atua de forma multiplicativa sobre o risco
-e, de maneira equivalente, exponencial sobre a função de sobrevivência.
+% A função de sobrevivência condicional associada ao indivíduo $i$ pode ser expressa como:
+% \begin{equation}
+% S(t \mid \mathbf{x}_i) = S_0(t)^{\exp\left(\mathbf{x}_i^\top \bm{\beta}\right)},
+% \end{equation}
+% em que $S_0(t)$ denota a função de sobrevivência basal correspondente a $h_0(t)$. Essa
+% expressão evidencia que o efeito das covariáveis atua de forma multiplicativa sobre o risco
+% e, de maneira equivalente, exponencial sobre a função de sobrevivência.
 
-Apesar de sua ampla aplicabilidade e interpretabilidade, o modelo de Cox depende
-criticamente da validade da hipótese de riscos proporcionais. Violações dessa suposição
-podem resultar em estimativas viesadas e comprometer a interpretação dos coeficientes.
-Nesse contexto, diversas extensões têm sido propostas na literatura, incluindo modelos
-com coeficientes dependentes do tempo, abordagens estratificadas e métodos baseados em
-aprendizado de máquina, que buscam maior flexibilidade na modelagem de relações complexas
-entre covariáveis e o risco de ocorrência do evento, especialmente em cenários de alta
-dimensionalidade.
+% Apesar de sua ampla aplicabilidade e interpretabilidade, o modelo de Cox depende
+% criticamente da validade da hipótese de riscos proporcionais. Violações dessa suposição
+% podem resultar em estimativas viesadas e comprometer a interpretação dos coeficientes.
+% Nesse contexto, diversas extensões têm sido propostas na literatura, incluindo modelos
+% com coeficientes dependentes do tempo, abordagens estratificadas e métodos baseados em
+% aprendizado de máquina, que buscam maior flexibilidade na modelagem de relações complexas
+% entre covariáveis e o risco de ocorrência do evento, especialmente em cenários de alta
+% dimensionalidade.
 
 \section{Modelos de Longa Duração}
 
