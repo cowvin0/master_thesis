@@ -2,7 +2,7 @@ import numpy as np
 import os
 
 from joblib import Parallel, delayed
-from models.km_gg import GGPoisson
+from ggkm.models.km_gg import GGPoisson
 
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
