@@ -42,7 +42,7 @@ python --version
 echo "Testing libspecfun:"
 python -c "import ctypes; ctypes.CDLL('$HOME/master_thesis/ggkm/utils/libspecfun.so'); print('libspecfun OK')"
 
-python -m ggkm.scripts.run_pcm_experiment
+python -u -m ggkm.scripts.run_pcm_experiment
 
 echo "Job finished"
 echo "Date: $(date)"
