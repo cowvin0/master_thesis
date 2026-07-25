@@ -59,7 +59,7 @@ def cross_validate_pcm(
 
             params = {
                 "lambda_reg": trial.suggest_float("lambda_reg", 1e-5, 1.0, log=True),
-                # "K_bin": trial.suggest_float("K_bin", 2, 1000),
+                "K_bin": trial.suggest_float("K_bin", 2, 1000),
             }
 
             if kernel != "linear":
@@ -116,6 +116,7 @@ def cross_validate_pcm(
             n_trials=n_trials,
             show_progress_bar=False,
             callbacks=[optuna_callback],
+            n_jobs=16,
         )
         best_params = study.best_params
         all_best_params.append(best_params)
