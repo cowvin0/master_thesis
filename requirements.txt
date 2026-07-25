@@ -52,7 +52,6 @@ pytz==2026.2
 pyyaml==6.0.3
 pyzmq==27.1.0
 scikit-learn==1.8.0
-scikit-survival==0.27.0
 scipy==1.16.3
 seaborn==0.13.2
 setuptools==81.0.0
