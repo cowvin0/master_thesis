@@ -4,43 +4,39 @@
 #PBS -e pcm_experiment.err
 
 # Resources
-# Adjust these according to your cluster limits
 #PBS -l select=1:ncpus=16:mem=64gb
 #PBS -l walltime=72:00:00
-
 
 echo "Job started"
 echo "Host: $(hostname)"
 echo "Date: $(date)"
 
-
 # Move to submission directory
-cd $PBS_O_WORKDIR
-
+cd "$PBS_O_WORKDIR" || exit 1
 
 # Load modules
 module purge
-module load R/4.4.3
 module load gcc/14.2.0
 module load python/3.12.8
 
-export LD_LIBRARY_PATH=/modules/apps/gcc/14.2.0/lib64:$LD_LIBRARY_PATH
+# Local R build (needed by libspecfun.so)
+export LD_LIBRARY_PATH=$HOME/master_thesis/ggkm/utils/R-4.4.3/lib:$LD_LIBRARY_PATH
 
-export LD_LIBRARY_PATH=$(R RHOME)/lib:$(R RHOME)/lib64:$(R RHOME)/lib/R/lib:$LD_LIBRARY_PATH
-
-# Activate environment
+# Activate Python environment
 source ~/venvs/master_thesis/bin/activate
-
 
 echo "Python:"
 which python
 python --version
 
+echo "LD_LIBRARY_PATH:"
+echo $LD_LIBRARY_PATH
+
+echo "Testing libspecfun:"
+python -c "import ctypes; ctypes.CDLL('$HOME/master_thesis/ggkm/utils/libspecfun.so'); print('libspecfun OK')"
 
 # Run experiment
-
 python -m ggkm.scripts.run_pcm_experiment
-
 
 echo "Job finished"
 echo "Date: $(date)"
