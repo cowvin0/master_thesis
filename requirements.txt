@@ -39,21 +39,21 @@ nest-asyncio==1.6.0
 networkx==3.6.1
 numexpr==2.14.1
 numpy==2.4.4
-nvidia-cublas==13.1.1.3
-nvidia-cuda-cupti==13.0.85
-nvidia-cuda-nvrtc==13.0.88
-nvidia-cuda-runtime==13.0.96
-nvidia-cudnn-cu13==9.20.0.48
-nvidia-cufft==12.0.0.61
-nvidia-cufile==1.15.1.6
-nvidia-curand==10.4.0.35
-nvidia-cusolver==12.0.4.66
-nvidia-cusparse==12.6.3.3
-nvidia-cusparselt-cu13==0.8.1
-nvidia-nccl-cu13==2.29.7
-nvidia-nvjitlink==13.0.88
-nvidia-nvshmem-cu13==3.4.5
-nvidia-nvtx==13.0.85
+# nvidia-cublas==13.1.1.3
+# nvidia-cuda-cupti==13.0.85
+# nvidia-cuda-nvrtc==13.0.88
+# nvidia-cuda-runtime==13.0.96
+# nvidia-cudnn-cu13==9.20.0.48
+# nvidia-cufft==12.0.0.61
+# nvidia-cufile==1.15.1.6
+# nvidia-curand==10.4.0.35
+# nvidia-cusolver==12.0.4.66
+# nvidia-cusparse==12.6.3.3
+# nvidia-cusparselt-cu13==0.8.1
+# nvidia-nccl-cu13==2.29.7
+# nvidia-nvjitlink==13.0.88
+# nvidia-nvshmem-cu13==3.4.5
+# nvidia-nvtx==13.0.85
 optuna==4.8.0
 osqp==1.1.1
 packaging==26.2
