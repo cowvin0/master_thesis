@@ -63,7 +63,7 @@ threadpoolctl==3.6.0
 tornado==6.5.5
 tqdm==4.67.3
 traitlets==5.14.3
-triton==3.7.0
+# triton==3.7.0
 typing-extensions==4.15.0
 tzdata==2026.2
 wcwidth==0.6.0
