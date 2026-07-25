@@ -2,8 +2,9 @@
 
 #ifndef SPECFUN_STANDALONE_H
 #define SPECFUN_STANDALONE_H
+#define MATHLIB_STANDALONE
 
-#include <R.h>
+// #include <R.h>
 #include <Rmath.h>
 
 void pgamma_derivative(
