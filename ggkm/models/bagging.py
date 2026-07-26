@@ -1,8 +1,9 @@
 import numpy as np
 import os
 
+from copy import deepcopy
 from joblib import Parallel, delayed
-from ggkm.models.km_gg import GGPoisson
+from models.km_gg import GGPoisson
 
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
@@ -10,15 +11,20 @@ os.environ["OPENBLAS_NUM_THREADS"] = "1"
 
 
 class GGKMKernelBagging:
+
     def __init__(
         self,
+        estimator=None,
         kernels=None,
         n_estimators=50,
         bootstrap=True,
         random_state=None,
         n_jobs=-1,
-        **ggkm_params,
+        **estimator_params,
     ):
+
+        self.estimator = estimator
+
         self.kernels = (
             kernels
             if kernels is not None
@@ -30,50 +36,76 @@ class GGKMKernelBagging:
                 "cauchy",
             ]
         )
+
         self.n_estimators = n_estimators
         self.bootstrap = bootstrap
         self.random_state = random_state
         self.n_jobs = n_jobs
-        self.ggkm_params = ggkm_params
+
+        self.estimator_params = estimator_params
         self.models_ = []
 
     @staticmethod
     def _fit_single_estimator(
         seed,
+        estimator,
         kernels,
         bootstrap,
         X,
         t,
         delta,
-        ggkm_params,
+        estimator_params,
     ):
+
         rng = np.random.default_rng(seed)
-        kernel = rng.choice(kernels)
+
         n = len(t)
+
         if bootstrap:
+
             idx = rng.choice(
                 n,
                 size=n,
                 replace=True,
             )
+
             X_boot = X[idx]
             t_boot = t[idx]
             delta_boot = delta[idx]
+
         else:
+
             X_boot = X
             t_boot = t
             delta_boot = delta
-        model = GGPoisson(
-            kernel=kernel,
-            **ggkm_params,
-        )
+
+        if estimator is not None:
+
+            model = deepcopy(estimator)
+
+            kernel_name = getattr(
+                model,
+                "kernel",
+                "user_estimator",
+            )
+
+        else:
+
+            kernel_name = rng.choice(kernels)
+
+            model = GGPoisson(
+                kernel=kernel_name,
+                **estimator_params,
+            )
+
         model.fit(
             X_boot,
             t_boot,
             delta_boot,
         )
+
         return {
-            "kernel": kernel,
+            "kernel": kernel_name,
             "model": model,
         }
 
@@ -97,18 +129,32 @@ class GGKMKernelBagging:
             X_new,
         )
 
+    @staticmethod
+    def _average_results(results):
+        total = np.array(results[0], dtype=float, copy=True)
+
+        for r in results[1:]:
+            total += r
+
+        total /= len(results)
+
+        return total
+
     def fit(
         self,
         X,
         t,
         delta,
     ):
+
         rng = np.random.default_rng(self.random_state)
+
         seeds = rng.integers(
             low=0,
             high=2**32 - 1,
             size=self.n_estimators,
         )
+
         self.models_ = Parallel(
             n_jobs=self.n_jobs,
             backend="loky",
@@ -116,15 +162,17 @@ class GGKMKernelBagging:
         )(
             delayed(self._fit_single_estimator)(
                 seed=seed,
+                estimator=self.estimator,
                 kernels=self.kernels,
                 bootstrap=self.bootstrap,
                 X=X,
                 t=t,
                 delta=delta,
-                ggkm_params=self.ggkm_params,
+                estimator_params=self.estimator_params,
             )
             for seed in seeds
         )
+
         return self
 
     def predict_survival(
@@ -132,6 +180,7 @@ class GGKMKernelBagging:
         X_new,
         t_grid,
     ):
+
         survs = Parallel(
             n_jobs=self.n_jobs,
             backend="threading",
@@ -143,19 +192,14 @@ class GGKMKernelBagging:
             )
             for obj in self.models_
         )
-        survs = np.asarray(
-            survs,
-            dtype=float,
-        )
-        return np.mean(
-            survs,
-            axis=0,
-        )
+
+        return self._average_results(survs)
 
     def predict_cure_probability(
         self,
         X_new,
     ):
+
         cures = Parallel(
             n_jobs=self.n_jobs,
             backend="threading",
@@ -166,19 +210,15 @@ class GGKMKernelBagging:
             )
             for obj in self.models_
         )
-        cures = np.asarray(
-            cures,
-            dtype=float,
-        )
-        return np.mean(
-            cures,
-            axis=0,
-        )
+
+        return self._average_results(cures)
 
     @property
     def kernel_counts_(self):
         counts = {}
+
         for obj in self.models_:
             kernel = obj["kernel"]
             counts[kernel] = counts.get(kernel, 0) + 1
+
         return counts
