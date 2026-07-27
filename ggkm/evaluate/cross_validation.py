@@ -52,12 +52,14 @@ def cross_validate_pcm(
     all_best_params = []
 
     optuna_callback = lambda study, trial: pbar.update(1)
+
     for _, (train_idx, test_idx) in enumerate(outer_cv.split(X)):
 
         X_outer_train, X_test = (X[train_idx], X[test_idx])
         t_outer_train, t_test = (t[train_idx], t[test_idx])
         d_outer_train, d_test = (delta[train_idx], delta[test_idx])
         p_cure_test_true = p_cure_true[test_idx]
+
         t_grid = np.linspace(
             np.percentile(t_outer_train, 5),
             np.percentile(t_outer_train, 95),
@@ -153,6 +155,7 @@ def cross_validate_pcm(
         study = optuna.create_study(
             direction="minimize", sampler=optuna.samplers.TPESampler(seed=random_state)
         )
+
         study.optimize(
             objective,
             n_trials=n_trials,
@@ -160,6 +163,7 @@ def cross_validate_pcm(
             callbacks=[optuna_callback],
             n_jobs=16,
         )
+
         best_params = study.best_params
         all_best_params.append(best_params)
 
@@ -207,11 +211,11 @@ def cross_validate_pcm(
         all_test_cindex.append(test_cindex)
 
         p_cure_hat = final_model.predict_cure_probability(X_test_s)
+        test_auc, test_tpr, test_fpr, _ = auc_cure(p_cure_hat)
 
-        auc_cure_val, tpr_curve, fpr_curve, c_grid = auc_cure(p_cure_hat)
-        all_test_auc.append(auc_cure_val)
-        all_test_tpr.append(tpr_curve)
-        all_test_fpr.append(fpr_curve)
+        all_test_auc.append(test_auc)
+        all_test_tpr.append(test_tpr)
+        all_test_fpr.append(test_fpr)
 
         fold_bias = np.mean(p_cure_hat - p_cure_test_true)
         fold_mse = np.mean((p_cure_hat - p_cure_test_true) ** 2)
