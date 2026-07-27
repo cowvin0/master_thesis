@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 import pandas as pd
 
 from ggkm.models.km_gg_bin import GGBinomial
@@ -16,33 +19,74 @@ kernels = [
 sample_sizes = [300, 600]
 methods = [1, 2, 3]
 
-experiment_results = {}
+task_id = int(os.environ["PBS_ARRAY_INDEX"])
+
+experiments = []
 
 for n in sample_sizes:
-    experiment_results[n] = {}
     for method in methods:
-        experiment_results[n][method] = {}
-
         for kernel in kernels:
-            print(f"Running n={n}, method={method}, kernel={kernel}", flush=True)
-
-            results = cross_validate_pcm(
-                n=n,
-                method=method,
-                kernel=kernel,
-                estimator=GGBinomial,
-                n_outer_splits=5,
-                n_inner_splits=4,
-                n_trials=20,
-                t_grid_points=50,
-                random_state=42,
+            experiments.append(
+                {
+                    "n": n,
+                    "method": method,
+                    "kernel": kernel,
+                }
             )
 
-            experiment_results[n][method][kernel] = results
+
+if task_id >= len(experiments):
+    raise ValueError(
+        f"Invalid PBS_ARRAY_INDEX={task_id}. " f"Expected 0-{len(experiments)-1}."
+    )
 
 
-df_results = pd.DataFrame(experiment_results)
-output_path = "data/experimental_results_em_binomial.csv"
-df_results.to_csv(output_path, index=False)
+experiment = experiments[task_id]
 
-print(f"Results saved to {output_path}", flush=True)
+n = experiment["n"]
+method = experiment["method"]
+kernel = experiment["kernel"]
+
+
+print(
+    f"Task {task_id}: " f"Running n={n}, method={method}, kernel={kernel}",
+    flush=True,
+)
+
+results = cross_validate_pcm(
+    n=n,
+    method=method,
+    kernel=kernel,
+    estimator=GGBinomial,
+    n_outer_splits=5,
+    n_inner_splits=4,
+    n_trials=20,
+    t_grid_points=50,
+    random_state=42,
+)
+
+output_dir = Path("data/results")
+
+output_dir.mkdir(
+    parents=True,
+    exist_ok=True,
+)
+
+
+output_file = output_dir / (
+    f"result_task{task_id}" f"_n{n}" f"_method{method}" f"_kernel{kernel}.csv"
+)
+
+df = pd.DataFrame([results])
+
+
+df.to_csv(
+    output_file,
+    index=False,
+)
+
+
+print(
+    f"Task {task_id} finished. " f"Saved {output_file}",
+    flush=True,
+)

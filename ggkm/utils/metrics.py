@@ -113,3 +113,57 @@ def integrated_brier_score(
     tau = t_grid[-1] - t_grid[0]
 
     return np.trapezoid(bs_grid, t_grid) / tau
+
+
+def cure_tpr_fpr(
+    pi_hat,
+    c_grid=None,
+):
+    pi_hat = np.asarray(pi_hat, dtype=float)
+
+    if not np.all(np.isfinite(pi_hat)):
+        return None, None, None
+
+    pi_hat = np.clip(pi_hat, 0.0, 1.0)
+
+    if c_grid is None:
+        c_grid = np.linspace(0.0, 1.0, 101)
+    else:
+        c_grid = np.asarray(c_grid, dtype=float)
+
+    w_pos = 1.0 - pi_hat
+    w_neg = pi_hat
+
+    denom_tpr = np.sum(w_pos)
+    denom_fpr = np.sum(w_neg)
+
+    if denom_tpr <= 0 or denom_fpr <= 0:
+        return c_grid, np.full_like(c_grid, np.nan), np.full_like(c_grid, np.nan)
+
+    tpr = np.empty_like(c_grid, dtype=float)
+    fpr = np.empty_like(c_grid, dtype=float)
+
+    for j, c in enumerate(c_grid):
+        selected = pi_hat <= c
+        tpr[j] = np.sum(selected * w_pos) / denom_tpr
+        fpr[j] = np.sum(selected * w_neg) / denom_fpr
+
+    return c_grid, tpr, fpr
+
+
+def auc_cure(
+    pi_hat,
+    c_grid=None,
+):
+    c_grid, tpr, fpr = cure_tpr_fpr(pi_hat, c_grid=c_grid)
+
+    if tpr is None or fpr is None:
+        return np.nan, None, None, None
+
+    order = np.argsort(fpr)
+    fpr_sorted = fpr[order]
+    tpr_sorted = tpr[order]
+
+    auc = np.trapezoid(tpr_sorted, fpr_sorted)
+
+    return auc, tpr_sorted, fpr_sorted, c_grid[order]
