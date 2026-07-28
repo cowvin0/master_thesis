@@ -4,12 +4,12 @@ import numpy as np
 from tqdm.auto import tqdm
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
-from utils.metrics import (
+from ggkm.utils.metrics import (
     uno_c_index_rmst,
     integrated_brier_score,
     auc_cure,
 )
-from evaluate.simulated_data import simulate_pcm
+from ggkm.evaluate.simulated_data import simulate_pcm
 
 
 def cross_validate_pcm(

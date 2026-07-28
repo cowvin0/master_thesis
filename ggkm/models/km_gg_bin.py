@@ -1,7 +1,7 @@
 import numpy as np
 
-from utils.kernels import KernelFunc
-from utils.pgamma_derivate import pgamma_shape_derivative_vec
+from ggkm.utils.kernels import KernelFunc
+from ggkm.utils.pgamma_derivate import pgamma_shape_derivative_vec
 
 from scipy.special import (
     gamma,
@@ -9,7 +9,6 @@ from scipy.special import (
     digamma,
     gammaln,
 )
-
 from scipy.optimize import minimize
 
 
