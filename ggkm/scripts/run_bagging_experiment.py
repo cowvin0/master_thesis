@@ -2,9 +2,9 @@ import os
 import pandas as pd
 
 from ggkm.models.km_gg_bin import GGBinomial
-from ggkm.models.km_gg_pois import GGPoisson
-from ggkm.models.km_gg_nb import GGNB
-from ggkm.models.kernel_bagging import GGKMKernelBagging
+from ggkm.models.km_gg import GGPoisson
+from ggkm.models.km_gg_bn import GGNB
+from ggkm.models.bagging import GGKMKernelBagging
 
 from ggkm.evaluate.cross_validation import cross_validate_pcm
 from ggkm.utils.experiment_utils import explode_experimental_data
