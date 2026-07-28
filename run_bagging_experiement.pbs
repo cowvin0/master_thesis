@@ -4,7 +4,7 @@
 #PBS -o logs/bagging_%J_%I.out
 #PBS -e logs/bagging_%J_%I.err
 
-#PBS -J 0-23%8
+#PBS -J 0-23
 
 #PBS -l select=1:ncpus=4:mem=16gb
 #PBS -l walltime=72:00:00
