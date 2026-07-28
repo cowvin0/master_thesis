@@ -22,7 +22,7 @@ experiments = []
 for model_name in data_model:
 
     df = pd.read_csv(
-        f"data/experimental_results/experiment_results_em_{model_name}.csv"
+        f"ggkm/data/experimental_results/experiment_results_em_{model_name}.csv"
     )
 
     best_hp = explode_experimental_data(
