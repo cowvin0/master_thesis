@@ -12,11 +12,6 @@
 
 cd "$PBS_O_WORKDIR" || exit 1
 
-
-# ============================
-# Timing information
-# ============================
-
 START_TIME=$(date +%s)
 
 echo "================================="
@@ -51,10 +46,6 @@ echo "Running experiment..."
 
 python -u -m ggkm.scripts.run_bagging_experiment
 
-
-# ============================
-# End timing
-# ============================
 
 END_TIME=$(date +%s)
 
