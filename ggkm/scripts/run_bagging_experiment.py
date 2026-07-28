@@ -1,4 +1,6 @@
 import os
+import time
+import traceback
 import pandas as pd
 
 from ggkm.models.km_gg_bin import GGBinomial
@@ -22,7 +24,7 @@ experiments = []
 for model_name in data_model:
 
     df = pd.read_csv(
-        f"ggkm/data/experimental_results/experiment_results_em_{model_name}.csv"
+        f"ggkm/data/experimental_results/" f"experiment_results_em_{model_name}.csv"
     )
 
     best_hp = explode_experimental_data(
@@ -53,56 +55,156 @@ sample_size = exp["sample_size"]
 kernel = exp["kernel"]
 best_params = exp["best_params"]
 
-ModelClass = data_model[model_name]
+
+start_time = time.time()
+
 
 print(
-    f"Running model={model_name}, "
-    f"method={method}, "
-    f"n={sample_size}, "
-    f"kernel={kernel}",
+    """
+=================================
+Starting bagging experiment
+=================================
+Task ID: {task}
+Model: {model}
+Method: {method}
+Sample size: {n}
+Kernel: {kernel}
+Start time: {time}
+=================================
+""".format(
+        task=task_id,
+        model=model_name,
+        method=method,
+        n=sample_size,
+        kernel=kernel,
+        time=time.ctime(),
+    ),
     flush=True,
 )
 
-if model_name == "bernoulli":
 
-    base_estimator = ModelClass(
-        kernel=kernel,
-        K_bin=1,
-        **best_params,
+try:
+
+    ModelClass = data_model[model_name]
+
+    if model_name == "bernoulli":
+
+        base_estimator = ModelClass(
+            kernel=kernel,
+            K_bin=1,
+            **best_params,
+        )
+
+    else:
+
+        base_estimator = ModelClass(
+            kernel=kernel,
+            **best_params,
+        )
+
+    results = cross_validate_pcm(
+        method=method,
+        n=sample_size,
+        estimator=GGKMKernelBagging,
+        bagging=True,
+        bagging_estimator=base_estimator,
+        n_outer_splits=5,
+        n_inner_splits=4,
+        n_trials=20,
+        t_grid_points=50,
+        random_state=42,
     )
 
-else:
+    status = "success"
 
-    base_estimator = ModelClass(
-        kernel=kernel,
-        **best_params,
+
+except Exception:
+
+    status = "failed"
+
+    print(
+        "Experiment failed with exception:",
+        flush=True,
     )
 
+    traceback.print_exc()
 
-results = cross_validate_pcm(
-    method=method,
-    n=sample_size,
-    estimator=GGKMKernelBagging,
-    bagging=True,
-    bagging_estimator=base_estimator,
-    n_outer_splits=5,
-    n_inner_splits=4,
-    n_trials=20,
-    t_grid_points=50,
-    random_state=42,
+    results = {"error": traceback.format_exc()}
+
+
+end_time = time.time()
+
+elapsed_seconds = end_time - start_time
+elapsed_minutes = elapsed_seconds / 60
+
+
+print(
+    """
+=================================
+Finished bagging experiment
+=================================
+Task ID: {task}
+Model: {model}
+Method: {method}
+Sample size: {n}
+Kernel: {kernel}
+
+Status: {status}
+
+End time: {time}
+Elapsed seconds: {seconds:.2f}
+Elapsed minutes: {minutes:.2f}
+=================================
+""".format(
+        task=task_id,
+        model=model_name,
+        method=method,
+        n=sample_size,
+        kernel=kernel,
+        status=status,
+        time=time.ctime(),
+        seconds=elapsed_seconds,
+        minutes=elapsed_minutes,
+    ),
+    flush=True,
 )
 
-os.makedirs("results_bagging", exist_ok=True)
 
-pd.DataFrame([results]).to_csv(
-    (
-        f"results_bagging/"
-        f"task{task_id}_"
-        f"{model_name}_"
-        f"method{method}_"
-        f"n{sample_size}.csv"
-    ),
+os.makedirs(
+    "results_bagging",
+    exist_ok=True,
+)
+
+
+results_df = pd.DataFrame([results])
+
+results_df["task_id"] = task_id
+results_df["model_name"] = model_name
+results_df["method"] = method
+results_df["sample_size"] = sample_size
+results_df["kernel"] = kernel
+results_df["elapsed_seconds"] = elapsed_seconds
+results_df["elapsed_minutes"] = elapsed_minutes
+results_df["status"] = status
+
+
+output_file = (
+    f"results_bagging/"
+    f"task{task_id}_"
+    f"{model_name}_"
+    f"method{method}_"
+    f"n{sample_size}_"
+    f"kernel{kernel}.csv"
+)
+
+
+results_df.to_csv(
+    output_file,
     index=False,
 )
 
-print("Finished", flush=True)
+
+print(
+    f"Saved results: {output_file}",
+    flush=True,
+)
