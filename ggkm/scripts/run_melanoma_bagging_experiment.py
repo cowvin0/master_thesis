@@ -65,27 +65,36 @@ def get_experiment(
 
 def select_best_model(model_name):
 
-    file = f"data/melanoma_results/" f"melanoma_results_em_{model_name}.csv"
+    file = f"ggkm/data/melanoma_results/" f"melanoma_results_em_{model_name}.csv"
 
     df = pd.read_csv(file)
 
-    best_params = (
-        df.iloc[[3, 4, 5, 6], :]
-        .T.reset_index()
-        .rename(
-            columns={
-                "index": "kernel",
-                3: "cindex",
-                4: "cindex_mean",
-                5: "std_cindex",
-                6: "best_params",
-            }
-        )
-        .assign(
-            cindex=lambda x: x.cindex.apply(parse_cell),
-            best_params=lambda x: x.best_params.apply(parse_cell),
-        )
+    best_params = df.assign(
+        test_cindex=lambda x: x.test_cindex.apply(parse_cell),
+        best_params=lambda x: x.best_params.apply(parse_cell),
+    ).rename(
+        columns={
+            "test_cindex": "cindex",
+            "mean_cindex": "cindex_mean",
+        }
     )
+    # best_params = (
+    #     df.iloc[[3, 4, 5, 6], :]
+    #     .T.reset_index()
+    #     .rename(
+    #         columns={
+    #             "index": "kernel",
+    #             3: "cindex",
+    #             4: "cindex_mean",
+    #             5: "std_cindex",
+    #             6: "best_params",
+    #         }
+    #     )
+    #     .assign(
+    #         cindex=lambda x: x.cindex.apply(parse_cell),
+    #         best_params=lambda x: x.best_params.apply(parse_cell),
+    #     )
+    # )
 
     flat_df = best_params.explode(
         [
