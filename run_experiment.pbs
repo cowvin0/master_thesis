@@ -2,22 +2,30 @@
 
 #PBS -N pcm_array
 
-#PBS -J 0-41
-
-#PBS -o logs/
-#PBS -e logs/
+# 4 models × 2 sample sizes × 3 methods × 7 kernels = 168 tasks
+#PBS -J 0-167
 
 #PBS -l select=1:ncpus=4:mem=16gb
 #PBS -l walltime=72:00:00
 
 
-echo "Array job ID: $PBS_ARRAY_ID"
-echo "Task ID: $PBS_ARRAY_INDEX"
-
 cd "$PBS_O_WORKDIR" || exit 1
+
+mkdir -p logs
 
 exec > logs/pcm_${PBS_JOBID}_${PBS_ARRAY_INDEX}.out
 exec 2> logs/pcm_${PBS_JOBID}_${PBS_ARRAY_INDEX}.err
+
+
+echo "=================================="
+echo "Job ID: $PBS_JOBID"
+echo "Task ID: $PBS_ARRAY_INDEX"
+echo "Host: $(hostname)"
+echo "Start: $(date)"
+echo "=================================="
+
+
+TASK_START=$(date +%s)
 
 
 module purge
@@ -28,16 +36,22 @@ module load pcre2/10.44
 
 
 export R_HOME=$HOME/master_thesis/ggkm/utils/R-4.4.3
-
 export LD_LIBRARY_PATH=$R_HOME/lib:$LD_LIBRARY_PATH
 
 
 source ~/venvs/master_thesis/bin/activate
 
 
-echo "Python:"
-which python
-python --version
-
-
 python -u -m ggkm.scripts.run_pcm_experiment
+
+
+TASK_END=$(date +%s)
+
+ELAPSED=$((TASK_END - TASK_START))
+
+echo ""
+echo "=================================="
+echo "Finished: $(date)"
+echo "Elapsed seconds: $ELAPSED"
+echo "Elapsed minutes: $(awk "BEGIN {printf \"%.2f\", $ELAPSED/60}")"
+echo "=================================="

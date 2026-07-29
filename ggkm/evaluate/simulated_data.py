@@ -1,15 +1,17 @@
 import numpy as np
 import pandas as pd
 
+from scipy.special import expit
+
 
 def pi_method(x1, x2, method):
     if method == 1:
         eta = 0.3 - 5 * x1 - 3 * x2
-        return np.exp(eta) / (1 + np.exp(eta))
+        return expit(eta)
 
     elif method == 2:
-        eta = 0.3 + 5 * (x1**2) - 3 * (x2**2)
-        return np.exp(eta) / (1 + np.exp(eta))
+        eta = 0.3 - 5 * (x1**2) + 3 * (x2**2)
+        return expit(eta)
 
     elif method == 3:
         eta = 0.3 - 5 * np.cos(x1) - 3 * np.sin(x2)
@@ -21,7 +23,7 @@ def pi_method(x1, x2, method):
 
 def weibull_inverse(u, alpha, beta1, beta2, z1, z2):
     linpred = beta1 * z1 + beta2 * z2
-    return ((-np.log(u)) / np.exp(linpred)) ** (1 / alpha)
+    return ((-np.log(1 - u)) / np.exp(linpred)) ** (1 / alpha)
 
 
 def simulate_pcm(
@@ -37,7 +39,7 @@ def simulate_pcm(
     z1 = x1.copy()
     z2 = x2.copy()
 
-    pi_x = pi_method(x1, x2, method)
+    pi_x = np.clip(pi_method(x1, x2, method), 1e-12, 1 - 1e-12)
 
     t = np.zeros(n)
     delta = np.zeros(n, dtype=int)
@@ -55,9 +57,7 @@ def simulate_pcm(
 
         else:
             U1 = np.random.uniform(1 - pi_x[i], 1)
-
             v = np.log(U1) / np.log(1 - pi_x[i])
-
             y = weibull_inverse(
                 u=v, alpha=alpha, beta1=beta1, beta2=beta2, z1=z1[i], z2=z2[i]
             )
