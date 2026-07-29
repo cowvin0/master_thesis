@@ -2,7 +2,6 @@ import numpy as np
 
 from ggkm.utils.kernels import KernelFunc
 from ggkm.utils.pgamma_derivate import pgamma_shape_derivative_vec
-
 from scipy.special import (
     gamma,
     gammainc,

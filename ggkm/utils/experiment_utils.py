@@ -11,49 +11,58 @@ def parse_cell(x):
 
 def explode_experimental_data(df, model_name):
 
-    if model_name != "binomial":
-        records = []
+    # if model_name != "binomial":
+    #     records = []
 
-        for idx, row in df.iterrows():
-            for n in df.columns:
-                cell = row[n]
-                if isinstance(cell, str):
-                    results = parse_cell(cell)
-                else:
-                    results = cell
+    #     for idx, row in df.iterrows():
+    #         for n in df.columns:
+    #             cell = row[n]
+    #             if isinstance(cell, str):
+    #                 results = parse_cell(cell)
+    #             else:
+    #                 results = cell
 
-                if not isinstance(results, dict):
-                    continue
+    #             if not isinstance(results, dict):
+    #                 continue
 
-                for kernel, values in results.items():
-                    records.append(
-                        {
-                            "method": idx + 1,
-                            "sample_size": int(n),
-                            "kernel": kernel,
-                            "cindex": values.get("test_cindex"),
-                            "cindex_mean": values.get("mean_cindex"),
-                            "std_cindex": values.get("std_cindex"),
-                            "best_params": values.get("best_params"),
-                            "test_ibs": values.get("test_ibs"),
-                            "ibs_mean": values.get("mean_ibs"),
-                            "std_ibs": values.get("std_ibs"),
-                        }
-                    )
+    #             for kernel, values in results.items():
+    #                 records.append(
+    #                     {
+    #                         "method": idx + 1,
+    #                         "sample_size": int(n),
+    #                         "kernel": kernel,
+    #                         "cindex": values.get("test_cindex"),
+    #                         "cindex_mean": values.get("mean_cindex"),
+    #                         "std_cindex": values.get("std_cindex"),
+    #                         "best_params": values.get("best_params"),
+    #                         "test_ibs": values.get("test_ibs"),
+    #                         "ibs_mean": values.get("mean_ibs"),
+    #                         "std_ibs": values.get("std_ibs"),
+    #                     }
+    #                 )
 
-        results_df = pd.DataFrame(records).explode(
-            ["cindex", "best_params", "test_ibs"]
+    #     results_df = pd.DataFrame(records).explode(
+    #         ["cindex", "best_params", "test_ibs"]
+    #     )
+    # else:
+    #     results_df = (
+    #         df.assign(
+    #             test_ibs=lambda x: x.test_ibs.apply(parse_cell),
+    #             test_cindex=lambda x: x.test_cindex.apply(parse_cell),
+    #             best_params=lambda x: x.best_params.apply(parse_cell),
+    #         )
+    #         .explode(["test_ibs", "test_cindex", "best_params"])
+    #         .rename(columns={"test_cindex": "cindex"})
+    #     )
+    results_df = (
+        df.assign(
+            test_ibs=lambda x: x.test_ibs.apply(parse_cell),
+            test_cindex=lambda x: x.test_cindex.apply(parse_cell),
+            best_params=lambda x: x.best_params.apply(parse_cell),
         )
-    else:
-        results_df = (
-            df.assign(
-                test_ibs=lambda x: x.test_ibs.apply(parse_cell),
-                test_cindex=lambda x: x.test_cindex.apply(parse_cell),
-                best_params=lambda x: x.best_params.apply(parse_cell),
-            )
-            .explode(["test_ibs", "test_cindex", "best_params"])
-            .rename(columns={"test_cindex": "cindex"})
-        )
+        .explode(["test_ibs", "test_cindex", "best_params"])
+        .rename(columns={"test_cindex": "cindex"})
+    )
 
     kernel_selection = results_df.groupby(
         ["method", "sample_size", "kernel"], as_index=False

@@ -3,11 +3,9 @@ import time
 import pandas as pd
 
 from pathlib import Path
-
 from ggkm.models.km_gg_bin import GGBinomial
 from ggkm.models.km_gg import GGPoisson
 from ggkm.models.km_gg_bn import GGNB
-
 from ggkm.evaluate.cross_validation import cross_validate_pcm
 
 KERNELS = [

@@ -2,18 +2,14 @@ import os
 import time
 import ast
 import re
-
-from pathlib import Path
-
 import pandas as pd
 
 
+from pathlib import Path
 from ggkm.models.km_gg_bin import GGBinomial
 from ggkm.models.km_gg import GGPoisson
 from ggkm.models.km_gg_bn import GGNB
 from ggkm.models.bagging import GGKMKernelBagging
-
-
 from ggkm.evaluate.cross_validation import cross_validate_gg_km
 
 MODELS = {
