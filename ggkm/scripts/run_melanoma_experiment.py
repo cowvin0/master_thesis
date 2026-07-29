@@ -65,7 +65,7 @@ def get_experiment(
 def load_melanoma():
 
     melanoma = (
-        pd.read_csv("data/melanoma.csv")
+        pd.read_csv("ggkm/data/melanoma.csv")
         .assign(status=lambda x: (x.status == 1).astype(int))
         .fillna(0)
     )
