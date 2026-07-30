@@ -40,7 +40,6 @@ def build_experiments():
     experiments = []
 
     for model_name in MODELS:
-
         experiments.append(
             {
                 "model_name": model_name,
@@ -145,13 +144,13 @@ def build_estimator(
 
     ModelClass = MODELS[model_name]
 
-    if model_name == "bernoulli":
+    # if model_name == "bernoulli":
 
-        return ModelClass(
-            kernel=kernel,
-            K_bin=1,
-            **best_params,
-        )
+    #     return ModelClass(
+    #         kernel=kernel,
+    #         K_bin=1,
+    #         **best_params,
+    #     )
 
     return ModelClass(
         kernel=kernel,
