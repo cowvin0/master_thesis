@@ -56,7 +56,7 @@ def get_experiment(
     if task_id >= len(experiments):
 
         raise ValueError(
-            f"Invalid PBS_ARRAY_INDEX={task_id}. " f"Expected 0-{len(experiments)-1}"
+            f"Invalid PBS_ARRAY_INDEX={task_id}. Expected 0-{len(experiments)-1}"
         )
 
     return experiments[task_id]
@@ -125,7 +125,7 @@ def save_results(
     )
 
     output_file = OUTPUT_DIR / (
-        f"melanoma_task{task_id}_" f"{model_name}_" f"kernel_{kernel}.csv"
+        f"melanoma_task{task_id}_{model_name}_kernel_{kernel}.csv"
     )
 
     pd.DataFrame([results]).to_csv(

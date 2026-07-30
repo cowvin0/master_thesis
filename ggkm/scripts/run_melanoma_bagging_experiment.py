@@ -65,7 +65,7 @@ def get_experiment(
 
 def select_best_model(model_name):
 
-    file = f"ggkm/data/melanoma_results/" f"melanoma_results_em_{model_name}.csv"
+    file = f"ggkm/data/melanoma_results/melanoma_results_em_{model_name}.csv"
 
     df = pd.read_csv(file)
 
@@ -78,23 +78,6 @@ def select_best_model(model_name):
             "mean_cindex": "cindex_mean",
         }
     )
-    # best_params = (
-    #     df.iloc[[3, 4, 5, 6], :]
-    #     .T.reset_index()
-    #     .rename(
-    #         columns={
-    #             "index": "kernel",
-    #             3: "cindex",
-    #             4: "cindex_mean",
-    #             5: "std_cindex",
-    #             6: "best_params",
-    #         }
-    #     )
-    #     .assign(
-    #         cindex=lambda x: x.cindex.apply(parse_cell),
-    #         best_params=lambda x: x.best_params.apply(parse_cell),
-    #     )
-    # )
 
     flat_df = best_params.explode(
         [
@@ -190,7 +173,7 @@ def save_results(
     )
 
     output = OUTPUT_DIR / (
-        f"melanoma_bagging_task{task_id}_" f"{model_name}_" f"kernel_{kernel}.csv"
+        f"melanoma_bagging_task{task_id}_{model_name}_kernel_{kernel}.csv"
     )
 
     pd.DataFrame([results]).to_csv(

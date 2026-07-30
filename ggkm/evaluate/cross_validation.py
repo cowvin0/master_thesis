@@ -25,6 +25,7 @@ def cross_validate_pcm(
     bagging=False,
     bagging_estimator=None,
     kernels=None,
+    estimator_name=None,
 ):
 
     df = simulate_pcm(n=n, method=method, seed=random_state)
@@ -74,8 +75,12 @@ def cross_validate_pcm(
 
             params = {
                 "lambda_reg": trial.suggest_float("lambda_reg", 1e-5, 1.0, log=True),
-                # "K_bin": trial.suggest_int("K_bin", 2, 1000),
             }
+
+            if estimator_name == "binomial":
+                params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
+            elif estimator_name == "bernoulli":
+                params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
 
             if bagging:
 
@@ -257,6 +262,7 @@ def cross_validate_gg_km(
     bagging=False,
     bagging_estimator=None,
     kernels=None,
+    estimator_name=None,
 ):
 
     outer_cv = KFold(
@@ -329,6 +335,11 @@ def cross_validate_gg_km(
                     log=True,
                 ),
             }
+
+            if estimator_name == "binomial":
+                params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
+            elif estimator_name == "bernoulli":
+                params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
 
             if bagging:
 
