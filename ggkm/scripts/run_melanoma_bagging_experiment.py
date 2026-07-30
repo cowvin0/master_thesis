@@ -141,16 +141,7 @@ def build_estimator(
     kernel,
     best_params,
 ):
-
     ModelClass = MODELS[model_name]
-
-    # if model_name == "bernoulli":
-
-    #     return ModelClass(
-    #         kernel=kernel,
-    #         K_bin=1,
-    #         **best_params,
-    #     )
 
     return ModelClass(
         kernel=kernel,

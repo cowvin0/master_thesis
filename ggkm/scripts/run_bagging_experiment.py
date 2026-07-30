@@ -74,12 +74,7 @@ def build_experiments():
 
 def build_base_estimator(model_name, kernel, best_params):
     ModelClass = DATA_MODEL[model_name]
-    # if model_name == "bernoulli":
-    #     return ModelClass(
-    #         kernel=kernel,
-    #         K_bin=1,
-    #         **best_params,
-    #     )
+
     return ModelClass(
         kernel=kernel,
         **best_params,
