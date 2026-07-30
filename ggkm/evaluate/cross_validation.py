@@ -73,14 +73,15 @@ def cross_validate_pcm(
 
         def objective(trial):
 
-            params = {
-                "lambda_reg": trial.suggest_float("lambda_reg", 1e-5, 1.0, log=True),
-            }
+            params = {}
+            # params = {
+            #     "lambda_reg": trial.suggest_float("lambda_reg", 1e-5, 1.0, log=True),
+            # }
 
-            if estimator_name == "binomial":
-                params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
-            elif estimator_name == "bernoulli":
-                params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
+            # if estimator_name == "binomial":
+            #     params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
+            # elif estimator_name == "bernoulli":
+            #     params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
 
             if bagging:
 
@@ -91,6 +92,16 @@ def cross_validate_pcm(
                 )
 
             else:
+                params = {
+                    "lambda_reg": trial.suggest_float(
+                        "lambda_reg", 1e-5, 1.0, log=True
+                    ),
+                }
+
+                if estimator_name == "binomial":
+                    params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
+                elif estimator_name == "bernoulli":
+                    params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
 
                 if kernel != "linear":
                     params["gamma"] = trial.suggest_float("gamma", 1e-3, 10.0, log=True)
@@ -327,22 +338,9 @@ def cross_validate_gg_km(
 
         def objective(trial):
 
-            params = {
-                "lambda_reg": trial.suggest_float(
-                    "lambda_reg",
-                    1e-5,
-                    1.0,
-                    log=True,
-                ),
-            }
-
-            if estimator_name == "binomial":
-                params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
-            elif estimator_name == "bernoulli":
-                params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
+            params = {}
 
             if bagging:
-
                 params["n_estimators"] = trial.suggest_int(
                     "n_estimators",
                     50,
@@ -350,6 +348,19 @@ def cross_validate_gg_km(
                 )
 
             else:
+                params = {
+                    "lambda_reg": trial.suggest_float(
+                        "lambda_reg",
+                        1e-5,
+                        1.0,
+                        log=True,
+                    ),
+                }
+
+                if estimator_name == "binomial":
+                    params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
+                elif estimator_name == "bernoulli":
+                    params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
 
                 if kernel in {
                     "rbf",

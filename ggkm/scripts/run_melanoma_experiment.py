@@ -35,9 +35,7 @@ def build_experiments():
     experiments = []
 
     for model_name in MODELS:
-
         for kernel in KERNELS:
-
             experiments.append(
                 {
                     "model_name": model_name,
@@ -54,7 +52,6 @@ def get_experiment(
 ):
 
     if task_id >= len(experiments):
-
         raise ValueError(
             f"Invalid PBS_ARRAY_INDEX={task_id}. Expected 0-{len(experiments)-1}"
         )
@@ -78,9 +75,7 @@ def load_melanoma():
     ]
 
     X = melanoma.drop(columns=y.columns.tolist()).to_numpy()
-
     t = y["time"].to_numpy().astype(float)
-
     delta = y["status"].to_numpy().astype(float)
 
     return X, t, delta
@@ -140,11 +135,8 @@ def save_results(
 def main():
 
     start = time.time()
-
     task_id = int(os.environ["PBS_ARRAY_INDEX"])
-
     experiments = build_experiments()
-
     exp = get_experiment(
         experiments,
         task_id,

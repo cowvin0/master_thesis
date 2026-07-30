@@ -68,19 +68,6 @@ def run_experiment(model_name, n, method, kernel):
 
     estimator_class = MODELS[model_name]
 
-    # if model_name == "bernoulli":
-
-    #     estimator = estimator_class(
-    #         kernel=kernel,
-    #         K_bin=1,
-    #     )
-
-    # else:
-
-    #     estimator = estimator_class(
-    #         kernel=kernel,
-    #     )
-
     return cross_validate_pcm(
         n=n,
         method=method,
