@@ -232,6 +232,7 @@ def main():
         n_trials=20,
         t_grid_points=50,
         random_state=42,
+        estimator_name=model_name,
     )
 
     output = save_results(

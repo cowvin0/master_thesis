@@ -53,7 +53,7 @@ def build_experiments():
     experiments = []
     for model_name in DATA_MODEL:
         df = pd.read_csv(
-            f"ggkm/data/experimental_results/" f"experiment_results_em_{model_name}.csv"
+            f"ggkm/data/experimental_results/experiment_results_em_{model_name}.csv"
         )
         best_hp = explode_experimental_data(
             df,
@@ -99,6 +99,7 @@ def run_experiment(model_name, method, sample_size, kernel, best_params):
         n_trials=20,
         t_grid_points=50,
         random_state=42,
+        estimator_name=model_name,
     )
 
 

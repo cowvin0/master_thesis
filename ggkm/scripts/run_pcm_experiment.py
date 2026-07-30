@@ -37,11 +37,8 @@ def build_experiments():
     experiments = []
 
     for model_name in MODELS:
-
         for n in SAMPLE_SIZES:
-
             for method in METHODS:
-
                 for kernel in KERNELS:
 
                     experiments.append(
@@ -71,18 +68,18 @@ def run_experiment(model_name, n, method, kernel):
 
     estimator_class = MODELS[model_name]
 
-    if model_name == "bernoulli":
+    # if model_name == "bernoulli":
 
-        estimator = estimator_class(
-            kernel=kernel,
-            K_bin=1,
-        )
+    #     estimator = estimator_class(
+    #         kernel=kernel,
+    #         K_bin=1,
+    #     )
 
-    else:
+    # else:
 
-        estimator = estimator_class(
-            kernel=kernel,
-        )
+    #     estimator = estimator_class(
+    #         kernel=kernel,
+    #     )
 
     return cross_validate_pcm(
         n=n,
@@ -94,6 +91,7 @@ def run_experiment(model_name, n, method, kernel):
         n_trials=20,
         t_grid_points=50,
         random_state=42,
+        estimator_name=model_name,
     )
 
 
