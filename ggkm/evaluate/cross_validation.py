@@ -4,11 +4,7 @@ import numpy as np
 from tqdm.auto import tqdm
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
-from ggkm.utils.metrics import (
-    uno_c_index_rmst,
-    integrated_brier_score,
-    auc_cure,
-)
+from ggkm.utils.metrics import uno_c_index_rmst, integrated_brier_score, auc_cure
 from ggkm.evaluate.simulated_data import simulate_pcm
 
 
@@ -74,17 +70,8 @@ def cross_validate_pcm(
         def objective(trial):
 
             params = {}
-            # params = {
-            #     "lambda_reg": trial.suggest_float("lambda_reg", 1e-5, 1.0, log=True),
-            # }
-
-            # if estimator_name == "binomial":
-            #     params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
-            # elif estimator_name == "bernoulli":
-            #     params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
 
             if bagging:
-
                 params["n_estimators"] = trial.suggest_int(
                     "n_estimators",
                     50,
@@ -182,7 +169,6 @@ def cross_validate_pcm(
 
         best_params = study.best_params
         all_best_params.append(best_params)
-
         scaler = StandardScaler()
         X_train_s = scaler.fit_transform(X_outer_train)
         X_test_s = scaler.transform(X_test)
