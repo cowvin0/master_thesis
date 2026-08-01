@@ -23,9 +23,7 @@ OUTPUT_DIR = Path("data/melanoma_results")
 
 
 def parse_cell(x):
-
     s = str(x).strip()
-
     s = re.sub(
         r"np\.float64\(([^()]*)\)",
         r"\1",
@@ -55,7 +53,6 @@ def get_experiment(
 ):
 
     if task_id >= len(experiments):
-
         raise ValueError(f"Invalid PBS_ARRAY_INDEX={task_id}")
 
     return experiments[task_id]
@@ -128,9 +125,7 @@ def load_melanoma():
     ]
 
     X = melanoma.drop(columns=y.columns.tolist()).to_numpy()
-
     t = y["time"].to_numpy().astype(float)
-
     delta = y["status"].to_numpy().astype(float)
 
     return X, t, delta
@@ -176,11 +171,8 @@ def save_results(
 def main():
 
     start = time.time()
-
     task_id = int(os.environ["PBS_ARRAY_INDEX"])
-
     experiments = build_experiments()
-
     exp = get_experiment(
         experiments,
         task_id,

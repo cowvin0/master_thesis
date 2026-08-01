@@ -3,7 +3,7 @@ import os
 
 from copy import deepcopy
 from joblib import Parallel, delayed
-from ggkm.models.km_gg import GGPoisson
+from models.km_gg import GGPoisson
 
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
