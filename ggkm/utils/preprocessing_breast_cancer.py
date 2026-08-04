@@ -9,7 +9,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import KFold, train_test_split
-from utils.metrics import uno_c_index_rmst
+from ggkm.utils.metrics import uno_c_index_rmst
 
 
 class MissingIndicatorNumericEncoder(BaseEstimator, TransformerMixin):
@@ -1181,9 +1181,6 @@ class SurvivalModelForwardSelector:
                     )
                 except Exception as e:
                     c_index, secondary = float("nan"), None
-                    # print(f"\nError for columns {trial_columns}:")
-                    # print(type(e).__name__, e)
-                    # raise
                 step_results.append((col, c_index, secondary))
 
             step_results.sort(
