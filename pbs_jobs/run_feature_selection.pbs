@@ -2,7 +2,7 @@
 
 #PBS -N feature_selection
 
-#PBS -l select=1:ncpus=4:mem=16gb
+#PBS -l select=1:ncpus=4:mem=24gb
 #PBS -l walltime=360:00:00
 
 
