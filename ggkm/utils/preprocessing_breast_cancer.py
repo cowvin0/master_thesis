@@ -3,12 +3,13 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from typing import Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 from sklearn.preprocessing import PowerTransformer, TargetEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, train_test_split
+from utils.metrics import uno_c_index_rmst
 
 
 class MissingIndicatorNumericEncoder(BaseEstimator, TransformerMixin):
@@ -23,6 +24,8 @@ class MissingIndicatorNumericEncoder(BaseEstimator, TransformerMixin):
         self.medians_ = {}
 
         for col in self.columns:
+            if col not in X.columns:
+                continue
             self.medians_[col] = X[col].median()
 
         return self
@@ -32,6 +35,8 @@ class MissingIndicatorNumericEncoder(BaseEstimator, TransformerMixin):
         X = X.copy()
 
         for col in self.columns:
+            if col not in X.columns:
+                continue
             missing_name = f"{col}_missing"
             X[missing_name] = (X[col].isna()).astype(int)
             X[col] = X[col].fillna(self.medians_[col])
@@ -49,6 +54,7 @@ class StageTreatmentInteractionEncoder(BaseEstimator, TransformerMixin):
         self.treatment_columns = treatment_columns
 
     def fit(self, X: pd.DataFrame, y=None):
+        self.fitted_ = True
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
@@ -56,10 +62,36 @@ class StageTreatmentInteractionEncoder(BaseEstimator, TransformerMixin):
         X = X.copy()
 
         for stage in self.stage_columns:
+            if stage not in X.columns:
+                continue
             for treatment in self.treatment_columns:
+                if treatment not in X.columns:
+                    continue
                 interaction_name = f"{stage}_{treatment}"
                 X[interaction_name] = X[stage].astype(int) * X[treatment].astype(int)
 
+        return X
+
+
+class ContinuousFlagInteractionEncoder(BaseEstimator, TransformerMixin):
+    def __init__(self, continuous_column: str, flag_columns: List[str]):
+        self.continuous_column = continuous_column
+        self.flag_columns = flag_columns
+
+    def fit(self, X: pd.DataFrame, y=None):
+        self.fitted_ = True
+        return self
+
+    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        if self.continuous_column not in X.columns:
+            return X
+        X = X.copy()
+        for flag in self.flag_columns:
+            if flag not in X.columns:
+                continue
+            X[f"{self.continuous_column}_x_{flag}"] = X[self.continuous_column] * X[
+                flag
+            ].astype(int)
         return X
 
 
@@ -69,9 +101,12 @@ class OrdinalMapEncoder(BaseEstimator, TransformerMixin):
         self.mapping = mapping
 
     def fit(self, X: pd.DataFrame, y=None):
+        self.fitted_ = True
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        if self.column not in X.columns:
+            return X
         X = X.copy()
         X[self.column] = X[self.column].map(self.mapping)
         return X
@@ -91,11 +126,16 @@ class MissingFlagOrdinalEncoder(BaseEstimator, TransformerMixin):
         self.missing_flag_name = missing_flag_name
 
     def fit(self, X: pd.DataFrame, y=None):
+        if self.column not in X.columns:
+            self.median_ = None
+            return self
         mapped = X[self.column].map(self.mapping)
         self.median_ = mapped.median()
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        if self.column not in X.columns:
+            return X
         X = X.copy()
         X[self.missing_flag_name] = (X[self.column] == self.missing_category).astype(
             int
@@ -112,9 +152,12 @@ class CategoryFlagEncoder(BaseEstimator, TransformerMixin):
         self.drop_original = drop_original
 
     def fit(self, X: pd.DataFrame, y=None):
+        self.fitted_ = True
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        if self.column not in X.columns:
+            return X
         X = X.copy()
         for new_col, category in self.flags.items():
             X[new_col] = (X[self.column] == category).astype(int)
@@ -146,6 +189,9 @@ class CategoryTargetEncoder(BaseEstimator, TransformerMixin):
         return self.output_column or f"{self.column}_te"
 
     def fit(self, X: pd.DataFrame, y=None):
+        if self.column not in X.columns:
+            self.encoder_ = None
+            return self
         if y is None:
             raise ValueError(
                 "CategoryTargetEncoder requires y (the target) to fit. "
@@ -161,6 +207,8 @@ class CategoryTargetEncoder(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        if self.column not in X.columns or getattr(self, "encoder_", None) is None:
+            return X
         X = X.copy()
         encoded = self.encoder_.transform(X[[self.column]])
         X[self._out_col()] = encoded.ravel()
@@ -169,6 +217,9 @@ class CategoryTargetEncoder(BaseEstimator, TransformerMixin):
         return X
 
     def fit_transform(self, X: pd.DataFrame, y=None) -> pd.DataFrame:
+        if self.column not in X.columns:
+            self.encoder_ = None
+            return X
         if y is None:
             raise ValueError(
                 "CategoryTargetEncoder requires y (the target) to fit_transform. "
@@ -286,6 +337,9 @@ class SurvivalTargetEncoder(BaseEstimator, TransformerMixin):
         return weight * cat_stats["rmst"] + (1 - weight) * global_rmst
 
     def fit(self, X: pd.DataFrame, y=None):
+        if self.column not in X.columns:
+            self.category_stats_ = None
+            return self
         tau = self.tau if self.tau is not None else X[self.time_column].max()
         self.tau_ = tau
         self.global_rmst_ = self._global_rmst(X, tau)
@@ -293,6 +347,11 @@ class SurvivalTargetEncoder(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        if (
+            self.column not in X.columns
+            or getattr(self, "category_stats_", None) is None
+        ):
+            return X
         X = X.copy()
         X[self._out_col()] = X[self.column].map(
             lambda c: self._encode_from_stats(
@@ -304,6 +363,10 @@ class SurvivalTargetEncoder(BaseEstimator, TransformerMixin):
         return X
 
     def fit_transform(self, X: pd.DataFrame, y=None) -> pd.DataFrame:
+        if self.column not in X.columns:
+            self.category_stats_ = None
+            return X
+
         tau = self.tau if self.tau is not None else X[self.time_column].max()
         self.tau_ = tau
 
@@ -331,13 +394,209 @@ class SurvivalTargetEncoder(BaseEstimator, TransformerMixin):
         return X
 
 
+def harrell_c_index(risk_score, time, event) -> float:
+    risk_score = np.asarray(risk_score, dtype=float)
+    time = np.asarray(time, dtype=float)
+    event = np.asarray(event, dtype=float)
+    n = len(time)
+
+    permissible = 0.0
+    concordant = 0.0
+    tied = 0.0
+
+    for i in range(n - 1):
+        j_idx = np.arange(i + 1, n)
+        t_i, t_j = time[i], time[j_idx]
+        e_i, e_j = event[i], event[j_idx]
+
+        smaller_i = (t_i < t_j) & (e_i == 1)
+        smaller_j = (t_j < t_i) & (e_j == 1)
+        tied_time_both_events = (t_i == t_j) & (e_i == 1) & (e_j == 1)
+
+        comparable = smaller_i | smaller_j | tied_time_both_events
+        if not np.any(comparable):
+            continue
+
+        diff = np.where(
+            smaller_i,
+            risk_score[i] - risk_score[j_idx],
+            np.where(smaller_j, risk_score[j_idx] - risk_score[i], 0.0),
+        )
+        is_tied_pair = tied_time_both_events | (diff == 0)
+
+        permissible += comparable.sum()
+        concordant += np.sum(comparable & ~is_tied_pair & (diff > 0))
+        tied += np.sum(comparable & is_tied_pair)
+
+    if permissible == 0:
+        return float("nan")
+    return (concordant + 0.5 * tied) / permissible
+
+
+class CIndexForwardSelector(BaseEstimator, TransformerMixin):
+    def __init__(
+        self,
+        candidate_columns: List[str],
+        time_column: str,
+        event_column: str,
+        max_features: Optional[int] = None,
+        min_improvement: float = 0.0,
+        cv: int = 5,
+        random_state: Optional[int] = None,
+        log_path: Optional[str] = None,
+    ):
+        self.candidate_columns = candidate_columns
+        self.time_column = time_column
+        self.event_column = event_column
+        self.max_features = max_features
+        self.min_improvement = min_improvement
+        self.cv = cv
+        self.random_state = random_state
+        self.log_path = log_path
+
+    @staticmethod
+    def _numeric_proxy(df: pd.DataFrame, col: str, event_col: str) -> np.ndarray:
+        series = df[col]
+        if pd.api.types.is_numeric_dtype(series):
+            return series.fillna(series.median()).to_numpy(dtype=float)
+        means = df.groupby(col)[event_col].mean()
+        global_mean = df[event_col].mean()
+        return series.map(means).fillna(global_mean).to_numpy(dtype=float)
+
+    def _oof_combined_score(self, df: pd.DataFrame, columns: List[str]) -> np.ndarray:
+        n = len(df)
+        combined = np.zeros(n, dtype=float)
+        kf = KFold(n_splits=self.cv, shuffle=True, random_state=self.random_state)
+        idx = np.arange(n)
+
+        for col in columns:
+            col_scores = np.empty(n, dtype=float)
+            is_numeric = pd.api.types.is_numeric_dtype(df[col])
+
+            for train_idx, holdout_idx in kf.split(idx):
+                train_df = df.iloc[train_idx]
+                proxy_train = self._numeric_proxy(train_df, col, self.event_column)
+
+                c_train = harrell_c_index(
+                    proxy_train,
+                    train_df[self.time_column].to_numpy(),
+                    train_df[self.event_column].to_numpy(),
+                )
+                flip = (not np.isnan(c_train)) and c_train < 0.5
+
+                mean_train = np.nanmean(proxy_train)
+                std_train = np.nanstd(proxy_train)
+                std_train = std_train if std_train > 0 else 1.0
+
+                if is_numeric:
+                    holdout_raw = (
+                        df.iloc[holdout_idx][col]
+                        .fillna(train_df[col].median())
+                        .to_numpy(dtype=float)
+                    )
+                else:
+                    means = train_df.groupby(col)[self.event_column].mean()
+                    global_mean = train_df[self.event_column].mean()
+                    holdout_raw = (
+                        df.iloc[holdout_idx][col]
+                        .map(means)
+                        .fillna(global_mean)
+                        .to_numpy(dtype=float)
+                    )
+
+                z = (holdout_raw - mean_train) / std_train
+                if flip:
+                    z = -z
+                col_scores[holdout_idx] = z
+
+            combined += col_scores
+
+        return combined
+
+    def fit(self, X: pd.DataFrame, y=None):
+        df = X
+        remaining = list(self.candidate_columns)
+        selected: List[str] = []
+        history = []
+
+        max_features = self.max_features or len(remaining)
+        time = df[self.time_column].to_numpy()
+        event = df[self.event_column].to_numpy()
+
+        best_score = -np.inf
+        step = 0
+
+        while remaining and len(selected) < max_features:
+            step += 1
+            step_results = []
+
+            for col in remaining:
+                trial_columns = selected + [col]
+                combined = self._oof_combined_score(df, trial_columns)
+                c_index = harrell_c_index(combined, time, event)
+                step_results.append((col, c_index))
+
+            step_results.sort(
+                key=lambda item: (-np.inf if np.isnan(item[1]) else item[1]),
+                reverse=True,
+            )
+            best_col, best_col_cindex = step_results[0]
+            improvement = (
+                best_col_cindex - best_score
+                if not np.isnan(best_col_cindex)
+                else -np.inf
+            )
+            accepted = improvement >= self.min_improvement
+
+            history.append(
+                {
+                    "step": step,
+                    "candidates_evaluated": [c for c, _ in step_results],
+                    "candidates_c_index": [c_ for _, c_ in step_results],
+                    "selected_feature": best_col,
+                    "cumulative_features": selected + [best_col],
+                    "cv_c_index": best_col_cindex,
+                    "improvement": improvement,
+                    "accepted": accepted,
+                }
+            )
+
+            if self.log_path is not None:
+                pd.DataFrame(history).to_csv(self.log_path, index=False)
+
+            if not accepted:
+                break
+
+            selected.append(best_col)
+            remaining.remove(best_col)
+            best_score = best_col_cindex
+
+        self.history_ = pd.DataFrame(history)
+        self.selected_features_ = selected
+        self.best_cv_c_index_ = best_score if selected else np.nan
+
+        if self.log_path is not None:
+            self.history_.to_csv(self.log_path, index=False)
+
+        return self
+
+    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        return X[self.selected_features_]
+
+    def get_selected_features(self) -> List[str]:
+        return list(self.selected_features_)
+
+
 class BreastCancerSurvivalPreprocessor:
     TIME_COLUMN = "Tempo"
     STATUS_COLUMN = "Status"
     EVENT_LABEL = "Morte por cancer de Mama"
 
     RAW_FEATURES: List[str] = [
-        "SimCausaBasicaCategoria",
+        "Município",
+        "RhcRacaCor",
+        "RhcInstrucao",
+        # "SimCausaBasicaCategoria",
         "RhcLOCTUPRI",
         "CosemsMacrorregiaoSaude",
         "Origem",
@@ -372,16 +631,30 @@ class BreastCancerSurvivalPreprocessor:
         "DiffEmDiasEntreRhcDt1ConsultaEDtDiagnosticoTumor",
         "DiffEmDiasEntreRhcDt1TratamentoTumorEDtDiagnosticoTumor",
         "DiffEmDiasEntreRhcDt1TratamentoTumorERhcDt1Consulta",
+        # Masked-continuous interaction terms (see feature_pipeline_ below).
+        # Yeo-Johnson handles the many exact zeros fine (rows where the
+        # interacting flag is 0).
+        "DiffEmDiasEntreRhcDt1ConsultaEDtDiagnosticoTumor_x_I_II",
+        "DiffEmDiasEntreRhcDt1ConsultaEDtDiagnosticoTumor_x_III_IV",
+        "DiffEmDiasEntreRhcDt1ConsultaEDtDiagnosticoTumor_x_RhcPrimeiroTratamentoRecebidoNoHospitalHormonioterapia",
+        "DiffEmDiasEntreRhcDt1ConsultaEDtDiagnosticoTumor_x_RhcPrimeiroTratamentoRecebidoNoHospitalImunoterapia",
     ]
 
     TARGET_ENCODED_FEATURES: List[str] = [
         # "RhcTipoHistológico_te",
         "RhcTipoHistológico_rmst",
         "RhcLOCTUPRI_rmst",
-        "SimCausaBasicaCategoria_rmst",
+        # "SimCausaBasicaCategoria_rmst",
     ]
 
     DUMMY_FEATURES: List[str] = [
+        "nenhuma_instrucao",
+        "fundamental_ou_medio",
+        "nivel_superior",
+        "instrucao_sem_informacao",
+        "branca",
+        "nao_branca",
+        "ignorado_raca",
         "1_macro",
         "2_macro",
         "3_macro",
@@ -433,6 +706,7 @@ class BreastCancerSurvivalPreprocessor:
         "RhcPrimeiroTratamentoRecebidoNoHospitalImunoterapia",
         "RhcPrimeiroTratamentoRecebidoNoHospitalOutras",
         "RhcPrimeiroTratamentoRecebidoNoHospitalSemInformacao",
+        # Stage x treatment interactions
         "I_II_RhcPrimeiroTratamentoRecebidoNoHospitalNenhum",
         "I_II_RhcPrimeiroTratamentoRecebidoNoHospitalCirurgia",
         "I_II_RhcPrimeiroTratamentoRecebidoNoHospitalRadioterapia",
@@ -449,9 +723,26 @@ class BreastCancerSurvivalPreprocessor:
         "III_IV_RhcPrimeiroTratamentoRecebidoNoHospitalImunoterapia",
         "III_IV_RhcPrimeiroTratamentoRecebidoNoHospitalOutras",
         "III_IV_RhcPrimeiroTratamentoRecebidoNoHospitalSemInformacao",
+        # NEW: Stage x hospital source interactions
+        "I_II_laureano",
+        "I_II_fap",
+        "I_II_hu_cg",
+        "III_IV_laureano",
+        "III_IV_fap",
+        "III_IV_hu_cg",
+        # NEW: Stage x education level interactions
+        "I_II_nenhuma_instrucao",
+        "I_II_fundamental_ou_medio",
+        "I_II_nivel_superior",
+        "I_II_instrucao_sem_informacao",
+        "III_IV_nenhuma_instrucao",
+        "III_IV_fundamental_ou_medio",
+        "III_IV_nivel_superior",
+        "III_IV_instrucao_sem_informacao",
     ]
 
-    def __init__(self):
+    def __init__(self, selected_raw_features: Optional[List[str]] = None):
+        self.selected_raw_features = selected_raw_features
         self.feature_pipeline_ = Pipeline(
             steps=[
                 (
@@ -461,6 +752,40 @@ class BreastCancerSurvivalPreprocessor:
                             "DiffEmDiasEntreRhcDt1TratamentoTumorEDtDiagnosticoTumor",
                             "DiffEmDiasEntreRhcDt1TratamentoTumorERhcDt1Consulta",
                         ]
+                    ),
+                ),
+                (
+                    "municipio",
+                    CategoryFlagEncoder(
+                        column="Município",
+                        flags={
+                            "joao_pessoa": "João Pessoa",
+                            "campina_grande": "Campina Grande",
+                            "outros_municipios": "Outros",
+                        },
+                    ),
+                ),
+                (
+                    "raca",
+                    CategoryFlagEncoder(
+                        column="RhcRacaCor",
+                        flags={
+                            "branca": "Branca",
+                            "nao_branca": "Não Branca",
+                            "ignorado_raca": "Ignorado",
+                        },
+                    ),
+                ),
+                (
+                    "instrucao",
+                    CategoryFlagEncoder(
+                        column="RhcInstrucao",
+                        flags={
+                            "nenhuma_instrucao": "Nenhuma",
+                            "fundamental_ou_medio": "Fundamental ou Médio",
+                            "nivel_superior": "Nível Superior",
+                            "instrucao_sem_informacao": "Sem Informação",
+                        },
                     ),
                 ),
                 (
@@ -506,10 +831,6 @@ class BreastCancerSurvivalPreprocessor:
                         flags={"laureano": "Laureano", "fap": "FAP", "hu_cg": "HU CG"},
                     ),
                 ),
-                # --- Target encoding: histological type ---
-                # Current choice: CategoryTargetEncoder against `delta`
-                # (binary event rate per category). Kept as-is so it's easy
-                # to keep using.
                 # (
                 #     "tipo_histologico",
                 #     CategoryTargetEncoder(
@@ -521,24 +842,6 @@ class BreastCancerSurvivalPreprocessor:
                 #         random_state=42,
                 #     ),
                 # ),
-                # --- Alternative: censoring-aware version ---
-                # Swap the step above for this one to encode against the
-                # per-category Kaplan-Meier RMST instead of the raw event
-                # rate. Remember to also update TARGET_ENCODED_FEATURES to
-                # "RhcTipoHistológico_rmst" if you switch.
-                #
-                (
-                    "causa_morte",
-                    SurvivalTargetEncoder(
-                        column="SimCausaBasicaCategoria",
-                        time_column="Tempo",
-                        event_column="delta",
-                        output_column="SimCausaBasicaCategoria_rmst",
-                        smooth=10.0,
-                        cv=5,
-                        random_state=42,
-                    ),
-                ),
                 (
                     "classificacao_cancer",
                     SurvivalTargetEncoder(
@@ -649,6 +952,42 @@ class BreastCancerSurvivalPreprocessor:
                     ),
                 ),
                 (
+                    "stage_fonte_interactions",
+                    StageTreatmentInteractionEncoder(
+                        stage_columns=["I_II", "III_IV"],
+                        treatment_columns=["laureano", "fap", "hu_cg"],
+                    ),
+                ),
+                (
+                    "stage_instrucao_interactions",
+                    StageTreatmentInteractionEncoder(
+                        stage_columns=["I_II", "III_IV"],
+                        treatment_columns=[
+                            "nenhuma_instrucao",
+                            "fundamental_ou_medio",
+                            "nivel_superior",
+                            "instrucao_sem_informacao",
+                        ],
+                    ),
+                ),
+                (
+                    "diagnostic_delay_stage_interaction",
+                    ContinuousFlagInteractionEncoder(
+                        continuous_column="DiffEmDiasEntreRhcDt1ConsultaEDtDiagnosticoTumor",
+                        flag_columns=["I_II", "III_IV"],
+                    ),
+                ),
+                (
+                    "diagnostic_delay_treatment_interaction",
+                    ContinuousFlagInteractionEncoder(
+                        continuous_column="DiffEmDiasEntreRhcDt1ConsultaEDtDiagnosticoTumor",
+                        flag_columns=[
+                            "RhcPrimeiroTratamentoRecebidoNoHospitalHormonioterapia",
+                            "RhcPrimeiroTratamentoRecebidoNoHospitalImunoterapia",
+                        ],
+                    ),
+                ),
+                (
                     "tabaco",
                     CategoryFlagEncoder(
                         column="RhcHistoricoTabaco",
@@ -683,41 +1022,221 @@ class BreastCancerSurvivalPreprocessor:
             ]
         )
 
-        self.column_transformer_ = ColumnTransformer(
-            transformers=[
-                (
-                    "power",
-                    PowerTransformer(method="yeo-johnson", standardize=True),
-                    self.SCALED_FEATURES,
-                ),
-                ("target_encoded", "passthrough", self.TARGET_ENCODED_FEATURES),
-                ("dummy", "passthrough", self.DUMMY_FEATURES),
-            ]
-        )
-
         self.df_model_: Optional[pd.DataFrame] = None
+        self.column_transformer_: Optional[ColumnTransformer] = None
 
     def _build_delta(self, df: pd.DataFrame) -> pd.Series:
         return (df[self.STATUS_COLUMN] == self.EVENT_LABEL).astype(int)
 
-    def fit_transform(self, df: pd.DataFrame):
+    def _active_raw_features(self) -> List[str]:
+        if self.selected_raw_features is None:
+            return list(self.RAW_FEATURES)
+        return [f for f in self.RAW_FEATURES if f in self.selected_raw_features]
+
+    def fit(self, df: pd.DataFrame):
         df = df.copy()
         df["delta"] = self._build_delta(df)
 
-        cols = self.RAW_FEATURES + [self.TIME_COLUMN, "delta"]
+        cols = self._active_raw_features() + [self.TIME_COLUMN, "delta"]
         df_model = df[cols].copy()
-
         y = df_model["delta"]
-        df_model = self.feature_pipeline_.fit_transform(df_model, y)
+
+        df_model = self.feature_pipeline_.fit_transform(df_model, y=y)
         self.df_model_ = df_model
 
         t = df_model[self.TIME_COLUMN].values
         delta = df_model["delta"].values
 
+        scaled = [c for c in self.SCALED_FEATURES if c in df_model.columns]
+        target_encoded = [
+            c for c in self.TARGET_ENCODED_FEATURES if c in df_model.columns
+        ]
+        dummy = [c for c in self.DUMMY_FEATURES if c in df_model.columns]
+        self._active_scaled = scaled
+        self._active_target_encoded = target_encoded
+        self._active_dummy = dummy
+
+        self.column_transformer_ = ColumnTransformer(
+            transformers=[
+                (
+                    "power",
+                    PowerTransformer(method="yeo-johnson", standardize=True),
+                    scaled,
+                ),
+                ("target_encoded", "passthrough", target_encoded),
+                ("dummy", "passthrough", dummy),
+            ]
+        )
+
         X = self.column_transformer_.fit_transform(df_model)
         X = np.asarray(X, dtype=float)
 
         return X, t, delta
+
+    def transform(self, df: pd.DataFrame):
+        if self.column_transformer_ is None:
+            raise RuntimeError("Call .fit(df) before .transform(df).")
+
+        df = df.copy()
+        df["delta"] = self._build_delta(df)
+        delta = df["delta"].values
+
+        cols = self._active_raw_features() + [self.TIME_COLUMN, "delta"]
+        df_model = df[cols].copy()
+        df_model = self.feature_pipeline_.transform(df_model)
+
+        t = df_model[self.TIME_COLUMN].values
+        delta = df_model["delta"].values
+
+        X = self.column_transformer_.transform(df_model)
+        X = np.asarray(X, dtype=float)
+
+        return X, t, delta
+
+    def fit_transform(self, df: pd.DataFrame):
+        return self.fit(df)
+
+
+class SurvivalModelForwardSelector:
+    def __init__(
+        self,
+        candidate_columns: List[str],
+        model_factory: Callable[[], Any],
+        preprocessor_cls: type = BreastCancerSurvivalPreprocessor,
+        n_times: int = 100,
+        validation_size: float = 0.3,
+        random_state: Optional[int] = 42,
+        max_features: Optional[int] = None,
+        min_improvement: float = 0.0,
+        log_path: Optional[str] = None,
+        secondary_metric: Optional[Callable] = None,
+    ):
+        self.candidate_columns = candidate_columns
+        self.model_factory = model_factory
+        self.preprocessor_cls = preprocessor_cls
+        self.n_times = n_times
+        self.validation_size = validation_size
+        self.random_state = random_state
+        self.max_features = max_features
+        self.min_improvement = min_improvement
+        self.log_path = log_path
+        self.secondary_metric = secondary_metric
+
+    def _split(self, df: pd.DataFrame):
+        delta = (
+            df[self.preprocessor_cls.STATUS_COLUMN] == self.preprocessor_cls.EVENT_LABEL
+        ).astype(int)
+        train_idx, val_idx = train_test_split(
+            np.arange(len(df)),
+            test_size=self.validation_size,
+            random_state=self.random_state,
+            stratify=delta,
+        )
+        return train_idx, val_idx
+
+    def _evaluate(self, df: pd.DataFrame, columns: List[str], train_idx, val_idx):
+        preprocessor = self.preprocessor_cls(selected_raw_features=columns)
+
+        df_train = df.iloc[train_idx].reset_index(drop=True)
+        df_val = df.iloc[val_idx].reset_index(drop=True)
+
+        X_train, t_train, delta_train = preprocessor.fit(df_train)
+        X_val, t_val, delta_val = preprocessor.transform(df_val)
+
+        model = self.model_factory()
+        model.fit(X_train, t_train, delta_train)
+
+        times = np.linspace(np.min(t_train), np.max(t_train), self.n_times)
+        S_pred = model.predict_survival(X_val, times)
+
+        c_index = uno_c_index_rmst(
+            S_pred, t_val, delta_val, t_train, delta_train, times
+        )
+
+        secondary = None
+        if self.secondary_metric is not None:
+            secondary = self.secondary_metric(
+                S_pred, t_val, delta_val, t_train, delta_train, times
+            )
+
+        return c_index, secondary
+
+    def fit(self, df: pd.DataFrame):
+        train_idx, val_idx = self._split(df)
+
+        remaining = list(self.candidate_columns)
+        selected: List[str] = []
+        history = []
+
+        max_features = self.max_features or len(remaining)
+        best_score = -np.inf
+        step = 0
+
+        while remaining and len(selected) < max_features:
+            step += 1
+            step_results = []
+
+            for col in remaining:
+                trial_columns = selected + [col]
+                try:
+                    c_index, secondary = self._evaluate(
+                        df, trial_columns, train_idx, val_idx
+                    )
+                except Exception as e:
+                    c_index, secondary = float("nan"), None
+                    # print(f"\nError for columns {trial_columns}:")
+                    # print(type(e).__name__, e)
+                    # raise
+                step_results.append((col, c_index, secondary))
+
+            step_results.sort(
+                key=lambda item: (-np.inf if np.isnan(item[1]) else item[1]),
+                reverse=True,
+            )
+            best_col, best_col_cindex, best_col_secondary = step_results[0]
+            improvement = (
+                best_col_cindex - best_score
+                if not np.isnan(best_col_cindex)
+                else -np.inf
+            )
+            accepted = improvement >= self.min_improvement
+
+            history.append(
+                {
+                    "step": step,
+                    "candidates_evaluated": [c for c, _, _ in step_results],
+                    "candidates_c_index": [c for _, c, _ in step_results],
+                    "candidates_secondary_metric": [s for _, _, s in step_results],
+                    "selected_feature": best_col,
+                    "cumulative_features": selected + [best_col],
+                    "val_c_index": best_col_cindex,
+                    "val_secondary_metric": best_col_secondary,
+                    "improvement": improvement,
+                    "accepted": accepted,
+                }
+            )
+
+            if self.log_path is not None:
+                pd.DataFrame(history).to_csv(self.log_path, index=False)
+
+            if not accepted:
+                break
+
+            selected.append(best_col)
+            remaining.remove(best_col)
+            best_score = best_col_cindex
+
+        self.history_ = pd.DataFrame(history)
+        self.selected_features_ = selected
+        self.best_val_c_index_ = best_score if selected else float("nan")
+
+        if self.log_path is not None:
+            self.history_.to_csv(self.log_path, index=False)
+
+        return self
+
+    def get_selected_features(self) -> List[str]:
+        return list(self.selected_features_)
 
 
 # from __future__ import annotations
@@ -725,11 +1244,13 @@ class BreastCancerSurvivalPreprocessor:
 # import numpy as np
 # import pandas as pd
 
-# from typing import Dict, List, Optional, Union
+# from typing import Any, Callable, Dict, List, Optional, Union
 # from sklearn.preprocessing import PowerTransformer, TargetEncoder
 # from sklearn.pipeline import Pipeline
 # from sklearn.base import BaseEstimator, TransformerMixin
 # from sklearn.compose import ColumnTransformer
+# from sklearn.model_selection import KFold, train_test_split
+# from utils.metrics import uno_c_index_rmst
 
 
 # class MissingIndicatorNumericEncoder(BaseEstimator, TransformerMixin):
@@ -744,6 +1265,8 @@ class BreastCancerSurvivalPreprocessor:
 #         self.medians_ = {}
 
 #         for col in self.columns:
+#             if col not in X.columns:
+#                 continue
 #             self.medians_[col] = X[col].median()
 
 #         return self
@@ -753,6 +1276,8 @@ class BreastCancerSurvivalPreprocessor:
 #         X = X.copy()
 
 #         for col in self.columns:
+#             if col not in X.columns:
+#                 continue
 #             missing_name = f"{col}_missing"
 #             X[missing_name] = (X[col].isna()).astype(int)
 #             X[col] = X[col].fillna(self.medians_[col])
@@ -777,7 +1302,11 @@ class BreastCancerSurvivalPreprocessor:
 #         X = X.copy()
 
 #         for stage in self.stage_columns:
+#             if stage not in X.columns:
+#                 continue
 #             for treatment in self.treatment_columns:
+#                 if treatment not in X.columns:
+#                     continue
 #                 interaction_name = f"{stage}_{treatment}"
 #                 X[interaction_name] = X[stage].astype(int) * X[treatment].astype(int)
 
@@ -793,6 +1322,8 @@ class BreastCancerSurvivalPreprocessor:
 #         return self
 
 #     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+#         if self.column not in X.columns:
+#             return X
 #         X = X.copy()
 #         X[self.column] = X[self.column].map(self.mapping)
 #         return X
@@ -812,11 +1343,16 @@ class BreastCancerSurvivalPreprocessor:
 #         self.missing_flag_name = missing_flag_name
 
 #     def fit(self, X: pd.DataFrame, y=None):
+#         if self.column not in X.columns:
+#             self.median_ = None
+#             return self
 #         mapped = X[self.column].map(self.mapping)
 #         self.median_ = mapped.median()
 #         return self
 
 #     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+#         if self.column not in X.columns:
+#             return X
 #         X = X.copy()
 #         X[self.missing_flag_name] = (X[self.column] == self.missing_category).astype(
 #             int
@@ -836,6 +1372,8 @@ class BreastCancerSurvivalPreprocessor:
 #         return self
 
 #     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+#         if self.column not in X.columns:
+#             return X
 #         X = X.copy()
 #         for new_col, category in self.flags.items():
 #             X[new_col] = (X[self.column] == category).astype(int)
@@ -845,6 +1383,22 @@ class BreastCancerSurvivalPreprocessor:
 
 
 # class CategoryTargetEncoder(BaseEstimator, TransformerMixin):
+#     """Target-encodes a single categorical column against a scalar target
+#     `y` (e.g. the binary event indicator `delta`), replacing it in-place
+#     with a single continuous column.
+
+#     Needs `y` to fit. `fit_transform(X, y)` uses sklearn's TargetEncoder
+#     cross-fitting (out-of-fold means) to avoid leakage on the data used to
+#     train it; plain `.transform(X)` (no cross-fitting) is for new/held-out
+#     data with an already-fitted encoder.
+
+#     NOTE: this encodes against `y` alone (e.g. `delta`), which ignores
+#     censoring information in `Tempo` -- a censored row's non-event is
+#     treated the same as a "survived to infinity" row. Kept here so you can
+#     keep using it, or switch to `SurvivalTargetEncoder` below, which
+#     accounts for censoring via a per-category Kaplan-Meier RMST instead.
+#     """
+
 #     def __init__(
 #         self,
 #         column: str,
@@ -867,6 +1421,9 @@ class BreastCancerSurvivalPreprocessor:
 #         return self.output_column or f"{self.column}_te"
 
 #     def fit(self, X: pd.DataFrame, y=None):
+#         if self.column not in X.columns:
+#             self.encoder_ = None
+#             return self
 #         if y is None:
 #             raise ValueError(
 #                 "CategoryTargetEncoder requires y (the target) to fit. "
@@ -882,6 +1439,8 @@ class BreastCancerSurvivalPreprocessor:
 #         return self
 
 #     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+#         if self.column not in X.columns or getattr(self, "encoder_", None) is None:
+#             return X
 #         X = X.copy()
 #         encoded = self.encoder_.transform(X[[self.column]])
 #         X[self._out_col()] = encoded.ravel()
@@ -890,6 +1449,9 @@ class BreastCancerSurvivalPreprocessor:
 #         return X
 
 #     def fit_transform(self, X: pd.DataFrame, y=None) -> pd.DataFrame:
+#         if self.column not in X.columns:
+#             self.encoder_ = None
+#             return X
 #         if y is None:
 #             raise ValueError(
 #                 "CategoryTargetEncoder requires y (the target) to fit_transform. "
@@ -909,15 +1471,396 @@ class BreastCancerSurvivalPreprocessor:
 #         return X
 
 
+# class SurvivalTargetEncoder(BaseEstimator, TransformerMixin):
+#     """Censoring-aware target encoder.
+
+#     Instead of averaging a raw scalar target (`CategoryTargetEncoder`),
+#     this replaces a categorical column with the per-category Restricted
+#     Mean Survival Time (RMST): the area under a category-specific
+#     Kaplan-Meier curve, truncated at a shared horizon `tau`. This treats
+#     censored rows correctly through the KM estimator, rather than
+#     averaging their (incomplete) follow-up time as if it were a true
+#     survival time, or collapsing to a binary event rate that ignores
+#     timing altogether.
+
+#     Unlike `CategoryTargetEncoder`, this does not use the Pipeline's `y`.
+#     It instead reads `time_column` and `event_column` directly out of the
+#     DataFrame `X` at fit time -- convenient here since `Tempo` and `delta`
+#     are still present as ordinary columns while the feature pipeline runs
+#     (they're only split off afterward).
+#     """
+
+#     def __init__(
+#         self,
+#         column: str,
+#         time_column: str,
+#         event_column: str,
+#         output_column: Optional[str] = None,
+#         drop_original: bool = True,
+#         tau: Optional[float] = None,
+#         smooth: float = 10.0,
+#         cv: int = 5,
+#         random_state: Optional[int] = None,
+#     ):
+#         self.column = column
+#         self.time_column = time_column
+#         self.event_column = event_column
+#         self.output_column = output_column
+#         self.drop_original = drop_original
+#         self.tau = tau
+#         self.smooth = smooth
+#         self.cv = cv
+#         self.random_state = random_state
+
+#     def _out_col(self) -> str:
+#         return self.output_column or f"{self.column}_rmst"
+
+#     @staticmethod
+#     def _kaplan_meier(times: np.ndarray, events: np.ndarray):
+#         times = np.asarray(times, dtype=float)
+#         events = np.asarray(events, dtype=float)
+
+#         unique_event_times = np.unique(times[events == 1])
+#         if unique_event_times.size == 0:
+#             return np.array([]), np.array([])
+
+#         survival = []
+#         s = 1.0
+#         for t in unique_event_times:
+#             n_at_risk = np.sum(times >= t)
+#             n_events = np.sum((times == t) & (events == 1))
+#             if n_at_risk > 0:
+#                 s *= 1.0 - (n_events / n_at_risk)
+#             survival.append(s)
+#         return unique_event_times, np.array(survival)
+
+#     @staticmethod
+#     def _rmst(
+#         unique_event_times: np.ndarray, survival: np.ndarray, tau: float
+#     ) -> float:
+#         if tau <= 0:
+#             return 0.0
+#         if unique_event_times.size == 0:
+#             return float(tau)
+
+#         t_grid = np.concatenate(([0.0], unique_event_times))
+#         s_grid = np.concatenate(([1.0], survival))
+
+#         mask = t_grid <= tau
+#         t_grid = t_grid[mask]
+#         s_grid = s_grid[mask]
+
+#         if t_grid[-1] < tau:
+#             t_grid = np.concatenate([t_grid, [tau]])
+#             s_grid = np.concatenate([s_grid, [s_grid[-1]]])
+
+#         area = 0.0
+#         for i in range(len(t_grid) - 1):
+#             area += s_grid[i] * (t_grid[i + 1] - t_grid[i])
+#         return float(area)
+
+#     def _category_stats(self, df: pd.DataFrame, tau: float) -> Dict:
+#         stats = {}
+#         for category, group in df.groupby(self.column, dropna=False):
+#             u_times, surv = self._kaplan_meier(
+#                 group[self.time_column].to_numpy(),
+#                 group[self.event_column].to_numpy(),
+#             )
+#             stats[category] = {
+#                 "rmst": self._rmst(u_times, surv, tau),
+#                 "count": len(group),
+#             }
+#         return stats
+
+#     def _global_rmst(self, df: pd.DataFrame, tau: float) -> float:
+#         u_times, surv = self._kaplan_meier(
+#             df[self.time_column].to_numpy(), df[self.event_column].to_numpy()
+#         )
+#         return self._rmst(u_times, surv, tau)
+
+#     def _encode_from_stats(self, category, stats: Dict, global_rmst: float) -> float:
+#         cat_stats = stats.get(category)
+#         if cat_stats is None:
+#             return global_rmst
+#         n = cat_stats["count"]
+#         weight = n / (n + self.smooth)
+#         return weight * cat_stats["rmst"] + (1 - weight) * global_rmst
+
+#     def fit(self, X: pd.DataFrame, y=None):
+#         if self.column not in X.columns:
+#             self.category_stats_ = None
+#             return self
+#         tau = self.tau if self.tau is not None else X[self.time_column].max()
+#         self.tau_ = tau
+#         self.global_rmst_ = self._global_rmst(X, tau)
+#         self.category_stats_ = self._category_stats(X, tau)
+#         return self
+
+#     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+#         if (
+#             self.column not in X.columns
+#             or getattr(self, "category_stats_", None) is None
+#         ):
+#             return X
+#         X = X.copy()
+#         X[self._out_col()] = X[self.column].map(
+#             lambda c: self._encode_from_stats(
+#                 c, self.category_stats_, self.global_rmst_
+#             )
+#         )
+#         if self.drop_original and self.column != self._out_col():
+#             X = X.drop(columns=[self.column])
+#         return X
+
+#     def fit_transform(self, X: pd.DataFrame, y=None) -> pd.DataFrame:
+#         if self.column not in X.columns:
+#             self.category_stats_ = None
+#             return X
+
+#         tau = self.tau if self.tau is not None else X[self.time_column].max()
+#         self.tau_ = tau
+
+#         self.global_rmst_ = self._global_rmst(X, tau)
+#         self.category_stats_ = self._category_stats(X, tau)
+
+#         encoded = np.empty(len(X), dtype=float)
+#         kf = KFold(n_splits=self.cv, shuffle=True, random_state=self.random_state)
+
+#         for train_idx, holdout_idx in kf.split(np.arange(len(X))):
+#             fold_df = X.iloc[train_idx]
+#             fold_global = self._global_rmst(fold_df, tau)
+#             fold_stats = self._category_stats(fold_df, tau)
+
+#             holdout_categories = X.iloc[holdout_idx][self.column].to_numpy()
+#             encoded[holdout_idx] = [
+#                 self._encode_from_stats(c, fold_stats, fold_global)
+#                 for c in holdout_categories
+#             ]
+
+#         X = X.copy()
+#         X[self._out_col()] = encoded
+#         if self.drop_original and self.column != self._out_col():
+#             X = X.drop(columns=[self.column])
+#         return X
+
+
+# def harrell_c_index(risk_score, time, event) -> float:
+#     risk_score = np.asarray(risk_score, dtype=float)
+#     time = np.asarray(time, dtype=float)
+#     event = np.asarray(event, dtype=float)
+#     n = len(time)
+
+#     permissible = 0.0
+#     concordant = 0.0
+#     tied = 0.0
+
+#     for i in range(n - 1):
+#         j_idx = np.arange(i + 1, n)
+#         t_i, t_j = time[i], time[j_idx]
+#         e_i, e_j = event[i], event[j_idx]
+
+#         smaller_i = (t_i < t_j) & (e_i == 1)
+#         smaller_j = (t_j < t_i) & (e_j == 1)
+#         tied_time_both_events = (t_i == t_j) & (e_i == 1) & (e_j == 1)
+
+#         comparable = smaller_i | smaller_j | tied_time_both_events
+#         if not np.any(comparable):
+#             continue
+
+#         diff = np.where(
+#             smaller_i,
+#             risk_score[i] - risk_score[j_idx],
+#             np.where(smaller_j, risk_score[j_idx] - risk_score[i], 0.0),
+#         )
+#         is_tied_pair = tied_time_both_events | (diff == 0)
+
+#         permissible += comparable.sum()
+#         concordant += np.sum(comparable & ~is_tied_pair & (diff > 0))
+#         tied += np.sum(comparable & is_tied_pair)
+
+#     if permissible == 0:
+#         return float("nan")
+#     return (concordant + 0.5 * tied) / permissible
+
+
+# class CIndexForwardSelector(BaseEstimator, TransformerMixin):
+#     """Greedy forward feature selection on RAW columns, guided by a cheap,
+#     cross-validated Harrell's C-index proxy (no model fitting required).
+
+#     Kept for quick screening / comparison. For selection based on your
+#     actual GGBinomial model's predictive performance, use
+#     `SurvivalModelForwardSelector` instead.
+#     """
+
+#     def __init__(
+#         self,
+#         candidate_columns: List[str],
+#         time_column: str,
+#         event_column: str,
+#         max_features: Optional[int] = None,
+#         min_improvement: float = 0.0,
+#         cv: int = 5,
+#         random_state: Optional[int] = None,
+#         log_path: Optional[str] = None,
+#     ):
+#         self.candidate_columns = candidate_columns
+#         self.time_column = time_column
+#         self.event_column = event_column
+#         self.max_features = max_features
+#         self.min_improvement = min_improvement
+#         self.cv = cv
+#         self.random_state = random_state
+#         self.log_path = log_path
+
+#     @staticmethod
+#     def _numeric_proxy(df: pd.DataFrame, col: str, event_col: str) -> np.ndarray:
+#         series = df[col]
+#         if pd.api.types.is_numeric_dtype(series):
+#             return series.fillna(series.median()).to_numpy(dtype=float)
+#         means = df.groupby(col)[event_col].mean()
+#         global_mean = df[event_col].mean()
+#         return series.map(means).fillna(global_mean).to_numpy(dtype=float)
+
+#     def _oof_combined_score(self, df: pd.DataFrame, columns: List[str]) -> np.ndarray:
+#         n = len(df)
+#         combined = np.zeros(n, dtype=float)
+#         kf = KFold(n_splits=self.cv, shuffle=True, random_state=self.random_state)
+#         idx = np.arange(n)
+
+#         for col in columns:
+#             col_scores = np.empty(n, dtype=float)
+#             is_numeric = pd.api.types.is_numeric_dtype(df[col])
+
+#             for train_idx, holdout_idx in kf.split(idx):
+#                 train_df = df.iloc[train_idx]
+#                 proxy_train = self._numeric_proxy(train_df, col, self.event_column)
+
+#                 c_train = harrell_c_index(
+#                     proxy_train,
+#                     train_df[self.time_column].to_numpy(),
+#                     train_df[self.event_column].to_numpy(),
+#                 )
+#                 flip = (not np.isnan(c_train)) and c_train < 0.5
+
+#                 mean_train = np.nanmean(proxy_train)
+#                 std_train = np.nanstd(proxy_train)
+#                 std_train = std_train if std_train > 0 else 1.0
+
+#                 if is_numeric:
+#                     holdout_raw = (
+#                         df.iloc[holdout_idx][col]
+#                         .fillna(train_df[col].median())
+#                         .to_numpy(dtype=float)
+#                     )
+#                 else:
+#                     means = train_df.groupby(col)[self.event_column].mean()
+#                     global_mean = train_df[self.event_column].mean()
+#                     holdout_raw = (
+#                         df.iloc[holdout_idx][col]
+#                         .map(means)
+#                         .fillna(global_mean)
+#                         .to_numpy(dtype=float)
+#                     )
+
+#                 z = (holdout_raw - mean_train) / std_train
+#                 if flip:
+#                     z = -z
+#                 col_scores[holdout_idx] = z
+
+#             combined += col_scores
+
+#         return combined
+
+#     def fit(self, X: pd.DataFrame, y=None):
+#         df = X
+#         remaining = list(self.candidate_columns)
+#         selected: List[str] = []
+#         history = []
+
+#         max_features = self.max_features or len(remaining)
+#         time = df[self.time_column].to_numpy()
+#         event = df[self.event_column].to_numpy()
+
+#         best_score = -np.inf
+#         step = 0
+
+#         while remaining and len(selected) < max_features:
+#             step += 1
+#             step_results = []
+
+#             for col in remaining:
+#                 trial_columns = selected + [col]
+#                 combined = self._oof_combined_score(df, trial_columns)
+#                 c_index = harrell_c_index(combined, time, event)
+#                 step_results.append((col, c_index))
+
+#             step_results.sort(
+#                 key=lambda item: (-np.inf if np.isnan(item[1]) else item[1]),
+#                 reverse=True,
+#             )
+#             best_col, best_col_cindex = step_results[0]
+#             improvement = (
+#                 best_col_cindex - best_score
+#                 if not np.isnan(best_col_cindex)
+#                 else -np.inf
+#             )
+#             accepted = improvement >= self.min_improvement
+
+#             history.append(
+#                 {
+#                     "step": step,
+#                     "candidates_evaluated": [c for c, _ in step_results],
+#                     "candidates_c_index": [c_ for _, c_ in step_results],
+#                     "selected_feature": best_col,
+#                     "cumulative_features": selected + [best_col],
+#                     "cv_c_index": best_col_cindex,
+#                     "improvement": improvement,
+#                     "accepted": accepted,
+#                 }
+#             )
+
+#             if self.log_path is not None:
+#                 pd.DataFrame(history).to_csv(self.log_path, index=False)
+
+#             if not accepted:
+#                 break
+
+#             selected.append(best_col)
+#             remaining.remove(best_col)
+#             best_score = best_col_cindex
+
+#         self.history_ = pd.DataFrame(history)
+#         self.selected_features_ = selected
+#         self.best_cv_c_index_ = best_score if selected else np.nan
+
+#         if self.log_path is not None:
+#             self.history_.to_csv(self.log_path, index=False)
+
+#         return self
+
+#     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+#         return X[self.selected_features_]
+
+#     def get_selected_features(self) -> List[str]:
+#         return list(self.selected_features_)
+
+
 # class BreastCancerSurvivalPreprocessor:
 #     TIME_COLUMN = "Tempo"
 #     STATUS_COLUMN = "Status"
 #     EVENT_LABEL = "Morte por cancer de Mama"
 
 #     RAW_FEATURES: List[str] = [
+#         "Município",
+#         "RhcRacaCor",
+#         "RhcInstrucao",
+#         # "SimCausaBasicaCategoria",
+#         "RhcLOCTUPRI",
+#         "CosemsMacrorregiaoSaude",
 #         "Origem",
 #         "RhcOrigemEncamiamento",
 #         "RhcFonte",
+#         "RhcTipoHistológico",
 #         "DiffEmDiasEntreRhcDt1ConsultaEDtDiagnosticoTumorIntevalo",
 #         "DiffEmDiasEntreRhcDt1TratamentoTumorEDtDiagnosticoTumorIntevalo",
 #         "DiffEmDiasEntreRhcDt1TratamentoTumorERhcDt1ConsultaIntevalo",
@@ -948,7 +1891,25 @@ class BreastCancerSurvivalPreprocessor:
 #         "DiffEmDiasEntreRhcDt1TratamentoTumorERhcDt1Consulta",
 #     ]
 
+#     TARGET_ENCODED_FEATURES: List[str] = [
+#         # "RhcTipoHistológico_te",
+#         "RhcTipoHistológico_rmst",
+#         "RhcLOCTUPRI_rmst",
+#         # "SimCausaBasicaCategoria_rmst",
+#     ]
+
 #     DUMMY_FEATURES: List[str] = [
+#         "nenhuma_instrucao",
+#         "fundamental_ou_medio",
+#         "nivel_superior",
+#         "instrucao_sem_informacao",
+#         "branca",
+#         "nao_branca",
+#         "ignorado_raca",
+#         "1_macro",
+#         "2_macro",
+#         "3_macro",
+#         "macro_regiao_sem_informacao",
 #         "origem_sus",
 #         "origem_nao_sus",
 #         "origem_nenhum",
@@ -996,7 +1957,6 @@ class BreastCancerSurvivalPreprocessor:
 #         "RhcPrimeiroTratamentoRecebidoNoHospitalImunoterapia",
 #         "RhcPrimeiroTratamentoRecebidoNoHospitalOutras",
 #         "RhcPrimeiroTratamentoRecebidoNoHospitalSemInformacao",
-#         # Stage × treatment interactions
 #         "I_II_RhcPrimeiroTratamentoRecebidoNoHospitalNenhum",
 #         "I_II_RhcPrimeiroTratamentoRecebidoNoHospitalCirurgia",
 #         "I_II_RhcPrimeiroTratamentoRecebidoNoHospitalRadioterapia",
@@ -1015,7 +1975,8 @@ class BreastCancerSurvivalPreprocessor:
 #         "III_IV_RhcPrimeiroTratamentoRecebidoNoHospitalSemInformacao",
 #     ]
 
-#     def __init__(self):
+#     def __init__(self, selected_raw_features: Optional[List[str]] = None):
+#         self.selected_raw_features = selected_raw_features
 #         self.feature_pipeline_ = Pipeline(
 #             steps=[
 #                 (
@@ -1025,6 +1986,52 @@ class BreastCancerSurvivalPreprocessor:
 #                             "DiffEmDiasEntreRhcDt1TratamentoTumorEDtDiagnosticoTumor",
 #                             "DiffEmDiasEntreRhcDt1TratamentoTumorERhcDt1Consulta",
 #                         ]
+#                     ),
+#                 ),
+#                 (
+#                     "municipio",
+#                     CategoryFlagEncoder(
+#                         column="Município",
+#                         flags={
+#                             "joao_pessoa": "João Pessoa",
+#                             "campina_grande": "Campina Grande",
+#                             "outros_municipios": "Outros",
+#                         },
+#                     ),
+#                 ),
+#                 (
+#                     "raca",
+#                     CategoryFlagEncoder(
+#                         column="RhcRacaCor",
+#                         flags={
+#                             "branca": "Branca",
+#                             "nao_branca": "Não Branca",
+#                             "ignorado_raca": "Ignorado",
+#                         },
+#                     ),
+#                 ),
+#                 (
+#                     "instrucao",
+#                     CategoryFlagEncoder(
+#                         column="RhcInstrucao",
+#                         flags={
+#                             "nenhuma_instrucao": "Nenhuma",
+#                             "fundamental_ou_medio": "Fundamental ou Médio",
+#                             "nivel_superior": "Nível Superior",
+#                             "instrucao_sem_informacao": "Sem Informação",
+#                         },
+#                     ),
+#                 ),
+#                 (
+#                     "macro_regiao",
+#                     CategoryFlagEncoder(
+#                         column="CosemsMacrorregiaoSaude",
+#                         flags={
+#                             "1_macro": "1ª Macro",
+#                             "2_macro": "2ª Macro",
+#                             "3_macro": "3ª Macro",
+#                             "macro_regiao_sem_informacao": "Sem Informação",
+#                         },
 #                     ),
 #                 ),
 #                 (
@@ -1056,6 +2063,53 @@ class BreastCancerSurvivalPreprocessor:
 #                     CategoryFlagEncoder(
 #                         column="RhcFonte",
 #                         flags={"laureano": "Laureano", "fap": "FAP", "hu_cg": "HU CG"},
+#                     ),
+#                 ),
+#                 # (
+#                 #     "tipo_histologico",
+#                 #     CategoryTargetEncoder(
+#                 #         column="RhcTipoHistológico",
+#                 #         output_column="RhcTipoHistológico_te",
+#                 #         target_type="binary",
+#                 #         smooth="auto",
+#                 #         cv=5,
+#                 #         random_state=42,
+#                 #     ),
+#                 # ),
+#                 # (
+#                 #     "causa_morte",
+#                 #     SurvivalTargetEncoder(
+#                 #         column="SimCausaBasicaCategoria",
+#                 #         time_column="Tempo",
+#                 #         event_column="delta",
+#                 #         output_column="SimCausaBasicaCategoria_rmst",
+#                 #         smooth=10.0,
+#                 #         cv=5,
+#                 #         random_state=42,
+#                 #     ),
+#                 # ),
+#                 (
+#                     "classificacao_cancer",
+#                     SurvivalTargetEncoder(
+#                         column="RhcLOCTUPRI",
+#                         time_column="Tempo",
+#                         event_column="delta",
+#                         output_column="RhcLOCTUPRI_rmst",
+#                         smooth=10.0,
+#                         cv=5,
+#                         random_state=42,
+#                     ),
+#                 ),
+#                 (
+#                     "tipo_histologico",
+#                     SurvivalTargetEncoder(
+#                         column="RhcTipoHistológico",
+#                         time_column="Tempo",
+#                         event_column="delta",
+#                         output_column="RhcTipoHistológico_rmst",
+#                         smooth=10.0,
+#                         cv=5,
+#                         random_state=42,
 #                     ),
 #                 ),
 #                 (
@@ -1178,36 +2232,263 @@ class BreastCancerSurvivalPreprocessor:
 #             ]
 #         )
 
-#         self.column_transformer_ = ColumnTransformer(
-#             transformers=[
-#                 (
-#                     "power",
-#                     PowerTransformer(method="yeo-johnson", standardize=True),
-#                     self.SCALED_FEATURES,
-#                 ),
-#                 ("dummy", "passthrough", self.DUMMY_FEATURES),
-#             ]
-#         )
-
 #         self.df_model_: Optional[pd.DataFrame] = None
+#         self.column_transformer_: Optional[ColumnTransformer] = None
 
 #     def _build_delta(self, df: pd.DataFrame) -> pd.Series:
 #         return (df[self.STATUS_COLUMN] == self.EVENT_LABEL).astype(int)
 
-#     def fit_transform(self, df: pd.DataFrame):
+#     def _active_raw_features(self) -> List[str]:
+#         if self.selected_raw_features is None:
+#             return list(self.RAW_FEATURES)
+#         return [f for f in self.RAW_FEATURES if f in self.selected_raw_features]
+
+#     def fit(self, df: pd.DataFrame):
+#         """Fits the preprocessor on `df` (typically your TRAINING split)
+#         and returns (X, t, delta) for it, exactly like `fit_transform`
+#         used to. Cross-fitted encoders (CategoryTargetEncoder,
+#         SurvivalTargetEncoder) fit here; use `.transform()` afterward for
+#         held-out data so their outcomes never leak into their own
+#         encoding."""
 #         df = df.copy()
 #         df["delta"] = self._build_delta(df)
 
-#         cols = self.RAW_FEATURES + [self.TIME_COLUMN, "delta"]
+#         cols = self._active_raw_features() + [self.TIME_COLUMN, "delta"]
 #         df_model = df[cols].copy()
 
-#         df_model = self.feature_pipeline_.fit_transform(df_model)
+#         y = df_model["delta"]
+#         df_model = self.feature_pipeline_.fit_transform(df_model, y)
 #         self.df_model_ = df_model
 
 #         t = df_model[self.TIME_COLUMN].values
 #         delta = df_model["delta"].values
 
+#         scaled = [c for c in self.SCALED_FEATURES if c in df_model.columns]
+#         target_encoded = [
+#             c for c in self.TARGET_ENCODED_FEATURES if c in df_model.columns
+#         ]
+#         dummy = [c for c in self.DUMMY_FEATURES if c in df_model.columns]
+#         self._active_scaled = scaled
+#         self._active_target_encoded = target_encoded
+#         self._active_dummy = dummy
+
+#         self.column_transformer_ = ColumnTransformer(
+#             transformers=[
+#                 (
+#                     "power",
+#                     PowerTransformer(method="yeo-johnson", standardize=True),
+#                     scaled,
+#                 ),
+#                 ("target_encoded", "passthrough", target_encoded),
+#                 ("dummy", "passthrough", dummy),
+#             ]
+#         )
+
 #         X = self.column_transformer_.fit_transform(df_model)
 #         X = np.asarray(X, dtype=float)
 
 #         return X, t, delta
+
+#     def transform(self, df: pd.DataFrame):
+#         """Applies an already-`fit` preprocessor to new data (e.g. a
+#         validation/test split) using the encoders/scaler fitted during
+#         `fit`, with NO cross-fitting or re-fitting -- so nothing about
+#         `df`'s own outcomes leaks into its own encoded features."""
+#         if self.column_transformer_ is None:
+#             raise RuntimeError("Call .fit(df) before .transform(df).")
+
+#         df = df.copy()
+#         df["delta"] = self._build_delta(df)
+
+#         cols = self._active_raw_features() + [self.TIME_COLUMN, "delta"]
+#         df_model = df[cols].copy()
+
+#         df_model = self.feature_pipeline_.transform(df_model)
+
+#         t = df_model[self.TIME_COLUMN].values
+#         delta = df_model["delta"].values
+
+#         X = self.column_transformer_.transform(df_model)
+#         X = np.asarray(X, dtype=float)
+
+#         return X, t, delta
+
+#     def fit_transform(self, df: pd.DataFrame):
+#         """Back-compat alias: fits on the FULL `df` and returns (X, t,
+#         delta) for it. For a proper train/validation workflow (e.g. inside
+#         SurvivalModelForwardSelector), use `.fit(df_train)` then
+#         `.transform(df_val)` instead."""
+#         return self.fit(df)
+
+
+# class SurvivalModelForwardSelector:
+#     def __init__(
+#         self,
+#         candidate_columns: List[str],
+#         model_factory: Callable[[], Any],
+#         preprocessor_cls: type = BreastCancerSurvivalPreprocessor,
+#         n_times: int = 100,
+#         validation_size: float = 0.3,
+#         random_state: Optional[int] = 42,
+#         max_features: Optional[int] = None,
+#         min_improvement: float = 0.0,
+#         log_path: Optional[str] = None,
+#         secondary_metric: Optional[Callable] = None,
+#     ):
+#         self.candidate_columns = candidate_columns
+#         self.model_factory = model_factory
+#         self.preprocessor_cls = preprocessor_cls
+#         self.n_times = n_times
+#         self.validation_size = validation_size
+#         self.random_state = random_state
+#         self.max_features = max_features
+#         self.min_improvement = min_improvement
+#         self.log_path = log_path
+#         self.secondary_metric = secondary_metric
+
+#     def _split(self, df: pd.DataFrame):
+#         delta = (
+#             df[self.preprocessor_cls.STATUS_COLUMN] == self.preprocessor_cls.EVENT_LABEL
+#         ).astype(int)
+#         train_idx, val_idx = train_test_split(
+#             np.arange(len(df)),
+#             test_size=self.validation_size,
+#             random_state=self.random_state,
+#             stratify=delta,
+#         )
+#         return train_idx, val_idx
+
+#     def _evaluate(self, df: pd.DataFrame, columns: List[str], train_idx, val_idx):
+#         preprocessor = self.preprocessor_cls(selected_raw_features=columns)
+
+#         df_train = df.iloc[train_idx].reset_index(drop=True)
+#         df_val = df.iloc[val_idx].reset_index(drop=True)
+
+#         X_train, t_train, delta_train = preprocessor.fit(df_train)
+#         X_val, t_val, delta_val = preprocessor.transform(df_val)
+
+#         model = self.model_factory()
+#         model.fit(X_train, t_train, delta_train)
+
+#         times = np.linspace(np.min(t_train), np.max(t_train), self.n_times)
+#         S_pred = model.predict_survival(X_val, times)
+
+#         c_index = uno_c_index_rmst(
+#             S_pred, t_val, delta_val, t_train, delta_train, times
+#         )
+
+#         secondary = None
+#         if self.secondary_metric is not None:
+#             secondary = self.secondary_metric(
+#                 S_pred, t_val, delta_val, t_train, delta_train, times
+#             )
+
+#         return c_index, secondary
+
+#     def fit(self, df: pd.DataFrame):
+#         train_idx, val_idx = self._split(df)
+
+#         remaining = list(self.candidate_columns)
+#         selected: List[str] = []
+#         history = []
+
+#         max_features = self.max_features or len(remaining)
+#         best_score = -np.inf
+#         step = 0
+
+#         while remaining and len(selected) < max_features:
+#             step += 1
+#             step_results = []
+
+#             for col in remaining:
+#                 trial_columns = selected + [col]
+#                 try:
+#                     c_index, secondary = self._evaluate(
+#                         df, trial_columns, train_idx, val_idx
+#                     )
+#                 except Exception:
+#                     c_index, secondary = float("nan"), None
+#                 step_results.append((col, c_index, secondary))
+
+#             step_results.sort(
+#                 key=lambda item: (-np.inf if np.isnan(item[1]) else item[1]),
+#                 reverse=True,
+#             )
+#             best_col, best_col_cindex, best_col_secondary = step_results[0]
+#             improvement = (
+#                 best_col_cindex - best_score
+#                 if not np.isnan(best_col_cindex)
+#                 else -np.inf
+#             )
+#             accepted = improvement >= self.min_improvement
+
+#             history.append(
+#                 {
+#                     "step": step,
+#                     "candidates_evaluated": [c for c, _, _ in step_results],
+#                     "candidates_c_index": [c for _, c, _ in step_results],
+#                     "candidates_secondary_metric": [s for _, _, s in step_results],
+#                     "selected_feature": best_col,
+#                     "cumulative_features": selected + [best_col],
+#                     "val_c_index": best_col_cindex,
+#                     "val_secondary_metric": best_col_secondary,
+#                     "improvement": improvement,
+#                     "accepted": accepted,
+#                 }
+#             )
+
+#             if self.log_path is not None:
+#                 pd.DataFrame(history).to_csv(self.log_path, index=False)
+
+#             if not accepted:
+#                 break
+
+#             selected.append(best_col)
+#             remaining.remove(best_col)
+#             best_score = best_col_cindex
+
+#         self.history_ = pd.DataFrame(history)
+#         self.selected_features_ = selected
+#         self.best_val_c_index_ = best_score if selected else float("nan")
+
+#         if self.log_path is not None:
+#             self.history_.to_csv(self.log_path, index=False)
+
+#         return self
+
+#     def get_selected_features(self) -> List[str]:
+#         return list(self.selected_features_)
+
+
+# ==========================================================
+# Example usage
+# ==========================================================
+
+# candidate_columns = [
+#     f for f in BreastCancerSurvivalPreprocessor.RAW_FEATURES
+#     if f != "SimCausaBasicaCategoria"  # leaks the target -- excluded
+# ]
+
+# selector = SurvivalModelForwardSelector(
+#     candidate_columns=candidate_columns,
+#     model_factory=lambda: GGBinomial(
+#         kernel="rbf", gamma=0.002, lambda_reg=2.4362917997548086e-05, K_bin=113
+#     ),
+#     validation_size=0.3,
+#     random_state=42,
+#     max_features=15,
+#     min_improvement=0.001,
+#     log_path="/mnt/user-data/outputs/ggbinomial_feature_selection_history.csv",
+#     secondary_metric=integrated_brier_score,  # optional, for inspection
+# )
+# selector.fit(cancer_mama)
+
+# print(selector.selected_features_)
+# print(selector.history_)
+
+# # Final model: preprocess the FULL data with the chosen raw features,
+# # then train/test split + fit exactly as in your original workflow.
+# preprocessor = BreastCancerSurvivalPreprocessor(
+#     selected_raw_features=selector.selected_features_
+# )
+# X, t, delta = preprocessor.fit_transform(cancer_mama)
