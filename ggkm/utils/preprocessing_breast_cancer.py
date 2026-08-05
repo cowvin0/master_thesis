@@ -9,7 +9,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import KFold, train_test_split
-from ggkm.utils.metrics import uno_c_index_rmst
+from utils.metrics import uno_c_index_rmst, harrell_c_index
 
 
 class MissingIndicatorNumericEncoder(BaseEstimator, TransformerMixin):
@@ -392,45 +392,6 @@ class SurvivalTargetEncoder(BaseEstimator, TransformerMixin):
         if self.drop_original and self.column != self._out_col():
             X = X.drop(columns=[self.column])
         return X
-
-
-def harrell_c_index(risk_score, time, event) -> float:
-    risk_score = np.asarray(risk_score, dtype=float)
-    time = np.asarray(time, dtype=float)
-    event = np.asarray(event, dtype=float)
-    n = len(time)
-
-    permissible = 0.0
-    concordant = 0.0
-    tied = 0.0
-
-    for i in range(n - 1):
-        j_idx = np.arange(i + 1, n)
-        t_i, t_j = time[i], time[j_idx]
-        e_i, e_j = event[i], event[j_idx]
-
-        smaller_i = (t_i < t_j) & (e_i == 1)
-        smaller_j = (t_j < t_i) & (e_j == 1)
-        tied_time_both_events = (t_i == t_j) & (e_i == 1) & (e_j == 1)
-
-        comparable = smaller_i | smaller_j | tied_time_both_events
-        if not np.any(comparable):
-            continue
-
-        diff = np.where(
-            smaller_i,
-            risk_score[i] - risk_score[j_idx],
-            np.where(smaller_j, risk_score[j_idx] - risk_score[i], 0.0),
-        )
-        is_tied_pair = tied_time_both_events | (diff == 0)
-
-        permissible += comparable.sum()
-        concordant += np.sum(comparable & ~is_tied_pair & (diff > 0))
-        tied += np.sum(comparable & is_tied_pair)
-
-    if permissible == 0:
-        return float("nan")
-    return (concordant + 0.5 * tied) / permissible
 
 
 class CIndexForwardSelector(BaseEstimator, TransformerMixin):

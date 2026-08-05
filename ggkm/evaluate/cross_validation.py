@@ -5,7 +5,7 @@ from tqdm.auto import tqdm
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 from ggkm.utils.metrics import uno_c_index_rmst, integrated_brier_score, auc_cure
-from ggkm.evaluate.simulated_data import simulate_pcm
+from evaluate.simulated_data import simulate_pcm
 
 
 def cross_validate_pcm(
