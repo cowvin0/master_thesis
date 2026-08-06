@@ -4,6 +4,7 @@ import numpy as np
 from tqdm.auto import tqdm
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
+from ggkm.utils.preprocessing_breast_cancer import BreastCancerSurvivalPreprocessor
 from ggkm.utils.metrics import uno_c_index_rmst, integrated_brier_score, auc_cure
 from ggkm.evaluate.simulated_data import simulate_pcm
 
@@ -560,6 +561,322 @@ def cross_validate_gg_km(
         )
 
         p_cure_hat = final_model.predict_cure_probability(X_test_s)
+        test_auc, test_tpr, test_fpr, _ = auc_cure(p_cure_hat)
+
+        all_test_ibs.append(test_ibs)
+        all_test_cindex.append(test_cindex)
+        all_test_auc.append(test_auc)
+        all_test_tpr.append(test_tpr)
+        all_test_fpr.append(test_fpr)
+        all_best_params.append(best_params)
+
+    return {
+        "test_ibs": all_test_ibs,
+        "mean_ibs": float(np.mean(all_test_ibs)),
+        "std_ibs": float(np.std(all_test_ibs)),
+        "test_cindex": all_test_cindex,
+        "mean_cindex": float(np.nanmean(all_test_cindex)),
+        "std_cindex": float(np.nanstd(all_test_cindex)),
+        "test_auc": all_test_auc,
+        "mean_auc": float(np.nanmean(all_test_auc)),
+        "std_auc": float(np.nanstd(all_test_auc)),
+        "test_tpr": all_test_tpr,
+        "test_fpr": all_test_fpr,
+        "best_params": all_best_params,
+    }
+
+
+def cross_validate_gg_km_breast_cancer(
+    df,
+    estimator,
+    preprocessor_factory,
+    kernel="rbf",
+    n_outer_splits=5,
+    n_inner_splits=4,
+    n_trials=50,
+    t_grid_points=50,
+    random_state=42,
+    bagging=False,
+    bagging_estimator=None,
+    kernels=None,
+    estimator_name=None,
+):
+
+    df = df.reset_index(drop=True)
+
+    outer_cv = KFold(
+        n_splits=n_outer_splits,
+        shuffle=True,
+        random_state=random_state,
+    )
+
+    all_test_ibs = []
+    all_test_cindex = []
+    all_test_auc = []
+    all_test_tpr = []
+    all_test_fpr = []
+    all_best_params = []
+
+    model_name = "Bagging" if bagging else kernel
+
+    outer_pbar = tqdm(
+        outer_cv.split(df),
+        total=n_outer_splits,
+        desc=f"{model_name} folds",
+    )
+
+    for fold, (train_idx, test_idx) in enumerate(outer_pbar):
+
+        df_outer_train = df.iloc[train_idx].reset_index(drop=True)
+        df_test = df.iloc[test_idx].reset_index(drop=True)
+
+        outer_preprocessor = preprocessor_factory()
+        X_outer_train, t_outer_train, d_outer_train = outer_preprocessor.fit(
+            df_outer_train
+        )
+        X_test, t_test, d_test = outer_preprocessor.transform(df_test)
+
+        t_lo = np.percentile(t_outer_train, 5)
+        t_hi = np.percentile(t_outer_train, 95)
+        t_grid = np.linspace(t_lo, t_hi, t_grid_points)
+
+        inner_cv = KFold(
+            n_splits=n_inner_splits,
+            shuffle=True,
+            random_state=random_state,
+        )
+
+        inner_splits = []
+        for tr_idx, val_idx in inner_cv.split(df_outer_train):
+            df_tr = df_outer_train.iloc[tr_idx].reset_index(drop=True)
+            df_val = df_outer_train.iloc[val_idx].reset_index(drop=True)
+
+            inner_preprocessor = preprocessor_factory()
+            X_tr, t_tr, d_tr = inner_preprocessor.fit(df_tr)
+            X_val, t_val, d_val = inner_preprocessor.transform(df_val)
+
+            t_grid_inner = np.linspace(
+                np.percentile(t_tr, 5),
+                np.percentile(t_tr, 95),
+                t_grid_points,
+            )
+            inner_splits.append((X_tr, t_tr, d_tr, X_val, t_val, d_val, t_grid_inner))
+
+        def objective(trial):
+
+            params = {}
+
+            if bagging:
+                params["n_estimators"] = trial.suggest_int(
+                    "n_estimators",
+                    50,
+                    1000,
+                )
+
+            else:
+                params = {
+                    "lambda_reg": trial.suggest_float(
+                        "lambda_reg",
+                        1e-5,
+                        1.0,
+                        log=True,
+                    ),
+                }
+
+                if estimator_name == "binomial":
+                    params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
+                elif estimator_name == "bernoulli":
+                    params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
+
+                if kernel in {
+                    "rbf",
+                    "gaussian",
+                    "laplacian",
+                    "exponential",
+                    "cauchy",
+                    "sigmoid",
+                }:
+                    params["gamma"] = trial.suggest_float(
+                        "gamma",
+                        1e-3,
+                        10.0,
+                        log=True,
+                    )
+
+                if kernel == "polynomial":
+                    params["gamma"] = trial.suggest_float(
+                        "gamma",
+                        1e-3,
+                        10.0,
+                        log=True,
+                    )
+
+                    params["degree"] = trial.suggest_int(
+                        "degree",
+                        2,
+                        6,
+                    )
+
+                    params["coef0"] = trial.suggest_float(
+                        "coef0",
+                        0.0,
+                        5.0,
+                    )
+
+                if kernel == "sigmoid":
+                    params["coef0"] = trial.suggest_float(
+                        "coef0",
+                        -5.0,
+                        5.0,
+                    )
+
+            val_scores = []
+
+            for (
+                X_tr,
+                t_tr,
+                d_tr,
+                X_val,
+                t_val,
+                d_val,
+                t_grid_inner,
+            ) in inner_splits:
+
+                try:
+
+                    if bagging:
+
+                        if bagging_estimator is None:
+                            model = estimator(
+                                kernels=kernels,
+                                random_state=random_state,
+                                **params,
+                            )
+                        else:
+                            model = estimator(
+                                estimator=bagging_estimator,
+                                kernels=kernels,
+                                random_state=random_state,
+                                **params,
+                            )
+
+                    else:
+
+                        model = estimator(
+                            kernel=kernel,
+                            **params,
+                        )
+
+                    model.fit(
+                        X_tr,
+                        t_tr,
+                        d_tr,
+                    )
+
+                    S_pred = model.predict_survival(
+                        X_val,
+                        t_grid_inner,
+                    )
+
+                    ibs = integrated_brier_score(
+                        S_pred,
+                        t_val,
+                        d_val,
+                        t_tr,
+                        d_tr,
+                        t_grid_inner,
+                    )
+
+                    val_scores.append(ibs)
+
+                except Exception:
+
+                    return 1.0
+
+            return float(np.mean(val_scores))
+
+        trial_pbar = tqdm(
+            total=n_trials,
+            desc=f"Fold {fold + 1}",
+            leave=False,
+        )
+
+        callback = lambda study, trial: trial_pbar.update(1)
+
+        study = optuna.create_study(
+            direction="minimize",
+            sampler=optuna.samplers.TPESampler(seed=random_state),
+        )
+
+        try:
+
+            study.optimize(
+                objective,
+                n_trials=n_trials,
+                show_progress_bar=False,
+                callbacks=[callback],
+            )
+
+        finally:
+
+            trial_pbar.close()
+
+        best_params = study.best_params
+
+        if bagging:
+
+            if bagging_estimator is None:
+                final_model = estimator(
+                    kernels=kernels,
+                    random_state=random_state,
+                    **best_params,
+                )
+            else:
+                final_model = estimator(
+                    estimator=bagging_estimator,
+                    kernels=kernels,
+                    random_state=random_state,
+                    **best_params,
+                )
+
+        else:
+
+            final_model = estimator(
+                kernel=kernel,
+                **best_params,
+            )
+
+        final_model.fit(
+            X_outer_train,
+            t_outer_train,
+            d_outer_train,
+        )
+
+        S_test = final_model.predict_survival(
+            X_test,
+            t_grid,
+        )
+
+        test_ibs = integrated_brier_score(
+            S_test,
+            t_test,
+            d_test,
+            t_outer_train,
+            d_outer_train,
+            t_grid,
+        )
+
+        test_cindex = uno_c_index_rmst(
+            S_pred=S_test,
+            t_eval=t_test,
+            delta_eval=d_test,
+            t_train=t_outer_train,
+            delta_train=d_outer_train,
+            t_grid=t_grid,
+            tau=t_grid[-1],
+        )
+
+        p_cure_hat = final_model.predict_cure_probability(X_test)
         test_auc, test_tpr, test_fpr, _ = auc_cure(p_cure_hat)
 
         all_test_ibs.append(test_ibs)
