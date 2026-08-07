@@ -9,7 +9,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import KFold, train_test_split
-from utils.metrics import uno_c_index_rmst, harrell_c_index
+from ggkm.utils.metrics import uno_c_index_rmst, harrell_c_index
 
 
 class MissingIndicatorNumericEncoder(BaseEstimator, TransformerMixin):
