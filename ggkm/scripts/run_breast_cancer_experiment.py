@@ -126,7 +126,7 @@ def main():
     municipality = exp["municipality"]
     kernel = exp["kernel"]
 
-    ModelClass, extra_args = MODELS[model_name]
+    ModelClass, _ = MODELS[model_name]
 
     print(
         f"Model={model_name} " f"Municipality={municipality} " f"Kernel={kernel}",
@@ -143,7 +143,6 @@ def main():
         n_outer_splits=5,
         n_inner_splits=4,
         n_trials=20,
-        **extra_args,
     )
 
     OUTPUT_DIR.mkdir(
