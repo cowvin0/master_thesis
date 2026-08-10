@@ -67,34 +67,38 @@ def load_melanoma():
         .fillna(0)
     )
 
-    y = melanoma[
-        [
-            "time",
-            "status",
-        ]
-    ]
+    return melanoma
 
-    X = melanoma.drop(columns=y.columns.tolist()).to_numpy()
-    t = y["time"].to_numpy().astype(float)
-    delta = y["status"].to_numpy().astype(float)
+    # y = melanoma[
+    #     [
+    #         "time",
+    #         "status",
+    #     ]
+    # ]
 
-    return X, t, delta
+    # X = melanoma.drop(columns=y.columns.tolist()).to_numpy()
+    # t = y["time"].to_numpy().astype(float)
+    # delta = y["status"].to_numpy().astype(float)
+
+    # return X, t, delta
 
 
 def run_experiment(
+    df,
     model_name,
     kernel,
-    X,
-    t,
-    delta,
+    # X,
+    # t,
+    # delta,
 ):
 
     estimator = MODELS[model_name]
 
     results = cross_validate_gg_km(
-        X,
-        t,
-        delta,
+        # X,
+        # t,
+        # delta,
+        df=df,
         estimator=estimator,
         kernel=kernel,
         n_outer_splits=5,
@@ -155,14 +159,12 @@ def main():
         flush=True,
     )
 
-    X, t, delta = load_melanoma()
+    df = load_melanoma()
 
     results = run_experiment(
-        model_name,
-        kernel,
-        X,
-        t,
-        delta,
+        df=df,
+        model_name=model_name,
+        kernel=kernel,
     )
 
     output_file = save_results(
@@ -171,6 +173,13 @@ def main():
         model_name,
         kernel,
     )
+
+    # output_file = save_results(
+    #     results,
+    #     task_id,
+    #     model_name,
+    #     kernel,
+    # )
 
     elapsed = time.time() - start
 
