@@ -20,6 +20,7 @@ from ggkm.utils.preprocessing import (
 MODELS = {
     "bernoulli": (
         GGBinomial,
+        {},
         # {"K_bin": 1},
     ),
     "binomial": (
