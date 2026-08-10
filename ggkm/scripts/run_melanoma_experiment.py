@@ -7,6 +7,7 @@ from ggkm.models.km_gg_bin import GGBinomial
 from ggkm.models.km_gg import GGPoisson
 from ggkm.models.km_gg_bn import GGNB
 from ggkm.evaluate.cross_validation import cross_validate_gg_km
+from ggkm.utils.preprocessing import MelanomaSurvivalPreprocessor
 
 KERNELS = [
     "linear",
@@ -99,6 +100,7 @@ def run_experiment(
         # t,
         # delta,
         df=df,
+        preprocessor_factory=lambda: MelanomaSurvivalPreprocessor(),
         estimator=estimator,
         kernel=kernel,
         n_outer_splits=5,
