@@ -12,6 +12,36 @@ from sklearn.model_selection import KFold, train_test_split
 from utils.metrics import uno_c_index_rmst, harrell_c_index
 
 
+class PassthroughPreprocessor:
+
+    def __init__(self, time_col="time", status_col="status", feature_cols=None):
+        self.time_col = time_col
+        self.status_col = status_col
+        self.feature_cols = feature_cols
+        self.feature_cols_ = None
+
+    def _split(self, df):
+        X = df[self.feature_cols_].to_numpy()
+        t = df[self.time_col].to_numpy().astype(float)
+        delta = df[self.status_col].to_numpy().astype(float)
+        return X, t, delta
+
+    def fit(self, df):
+        if self.feature_cols is not None:
+            self.feature_cols_ = list(self.feature_cols)
+        else:
+            y_cols = [self.time_col, self.status_col]
+            self.feature_cols_ = df.drop(columns=y_cols).columns.tolist()
+
+        return self._split(df)
+
+    def transform(self, df):
+        if self.feature_cols_ is None:
+            raise RuntimeError("Call .fit(df) before .transform(df).")
+
+        return self._split(df)
+
+
 class MissingIndicatorNumericEncoder(BaseEstimator, TransformerMixin):
     def __init__(
         self,
@@ -1192,37 +1222,3 @@ class SurvivalModelForwardSelector:
 
     def get_selected_features(self) -> List[str]:
         return list(self.selected_features_)
-
-
-# ==========================================================
-# Example usage
-# ==========================================================
-
-# candidate_columns = [
-#     f for f in BreastCancerSurvivalPreprocessor.RAW_FEATURES
-#     if f != "SimCausaBasicaCategoria"  # leaks the target -- excluded
-# ]
-
-# selector = SurvivalModelForwardSelector(
-#     candidate_columns=candidate_columns,
-#     model_factory=lambda: GGBinomial(
-#         kernel="rbf", gamma=0.002, lambda_reg=2.4362917997548086e-05, K_bin=113
-#     ),
-#     validation_size=0.3,
-#     random_state=42,
-#     max_features=15,
-#     min_improvement=0.001,
-#     log_path="/mnt/user-data/outputs/ggbinomial_feature_selection_history.csv",
-#     secondary_metric=integrated_brier_score,  # optional, for inspection
-# )
-# selector.fit(cancer_mama)
-
-# print(selector.selected_features_)
-# print(selector.history_)
-
-# # Final model: preprocess the FULL data with the chosen raw features,
-# # then train/test split + fit exactly as in your original workflow.
-# preprocessor = BreastCancerSurvivalPreprocessor(
-#     selected_raw_features=selector.selected_features_
-# )
-# X, t, delta = preprocessor.fit_transform(cancer_mama)

@@ -7,7 +7,7 @@ from ggkm.models.km_gg_bin import GGBinomial
 from ggkm.models.km_gg import GGPoisson
 from ggkm.models.km_gg_bn import GGNB
 from ggkm.evaluate.cross_validation import cross_validate_gg_km_breast_cancer
-from ggkm.utils.preprocessing_breast_cancer import BreastCancerSurvivalPreprocessor
+from ggkm.utils.preprocessing import BreastCancerSurvivalPreprocessor
 
 MODELS = {
     "bernoulli": (

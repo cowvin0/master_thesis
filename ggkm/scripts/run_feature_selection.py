@@ -5,7 +5,7 @@ import pandas as pd
 
 from ggkm.models.km_gg_bin import GGBinomial
 from ggkm.utils.metrics import integrated_brier_score
-from ggkm.utils.preprocessing_breast_cancer import (
+from ggkm.utils.preprocessing import (
     BreastCancerSurvivalPreprocessor,
     SurvivalModelForwardSelector,
 )
