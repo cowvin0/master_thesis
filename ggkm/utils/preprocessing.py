@@ -4,12 +4,54 @@ import numpy as np
 import pandas as pd
 
 from typing import Any, Callable, Dict, List, Optional, Union
-from sklearn.preprocessing import PowerTransformer, TargetEncoder
+from sklearn.preprocessing import PowerTransformer, TargetEncoder, StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import KFold, train_test_split
-from utils.metrics import uno_c_index_rmst, harrell_c_index
+from ggkm.utils.metrics import uno_c_index_rmst, harrell_c_index
+
+
+class MelanomaSurvivalPreprocessor:
+
+    def __init__(self, time_col="time", status_col="status", feature_cols=None):
+        self.time_col = time_col
+        self.status_col = status_col
+        self.feature_cols = feature_cols
+        self.feature_cols_ = None
+        self.scaler_ = None
+
+    def _split(self, df):
+        X = df[self.feature_cols_].to_numpy()
+        t = df[self.time_col].to_numpy().astype(float)
+        delta = df[self.status_col].to_numpy().astype(float)
+        return X, t, delta
+
+    def fit(self, df):
+        if self.feature_cols is not None:
+            self.feature_cols_ = list(self.feature_cols)
+        else:
+            y_cols = [self.time_col, self.status_col]
+            self.feature_cols_ = df.drop(columns=y_cols).columns.tolist()
+
+        X_features = df[self.feature_cols_].to_numpy()
+        self.scaler_ = StandardScaler()
+        self.scaler_.fit(X_features)
+
+        return self._split(df)
+
+    def transform(self, df):
+        if self.feature_cols_ is None:
+            raise RuntimeError("Call .fit(df) before .transform(df).")
+
+        if self.scaler_ is None:
+            raise RuntimeError("Call .fit(df) before .transform(df).")
+
+        X = df[self.feature_cols_].to_numpy()
+        X = self.scaler_.transform(X)
+        t = df[self.time_col].to_numpy().astype(float)
+        delta = df[self.status_col].to_numpy().astype(float)
+        return X, t, delta
 
 
 class PassthroughPreprocessor:

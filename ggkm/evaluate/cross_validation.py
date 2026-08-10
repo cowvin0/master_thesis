@@ -3,9 +3,12 @@ import numpy as np
 
 from tqdm.auto import tqdm
 from sklearn.model_selection import KFold
-from utils.metrics import uno_c_index_rmst, integrated_brier_score, auc_cure
-from utils.optuna_utils import _suggest_kernel_ranges, _kernel_ranges_from_best_params
-from evaluate.simulated_data import simulate_pcm
+from ggkm.utils.metrics import uno_c_index_rmst, integrated_brier_score, auc_cure
+from ggkm.utils.optuna_utils import (
+    _suggest_kernel_ranges,
+    _kernel_ranges_from_best_params,
+)
+from ggkm.evaluate.simulated_data import simulate_pcm
 
 
 def cross_validate_pcm(
@@ -77,6 +80,12 @@ def cross_validate_pcm(
 
             params = {}
 
+            # added this part because bagging must not be using the best results from model optimization
+            if estimator_name == "binomial":
+                params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
+            elif estimator_name == "bernoulli":
+                params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
+
             if bagging:
                 params["n_estimators"] = trial.suggest_int(
                     "n_estimators",
@@ -103,10 +112,10 @@ def cross_validate_pcm(
                     ),
                 }
 
-                if estimator_name == "binomial":
-                    params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
-                elif estimator_name == "bernoulli":
-                    params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
+                # if estimator_name == "binomial":
+                #     params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
+                # elif estimator_name == "bernoulli":
+                #     params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
 
                 if kernel != "linear":
                     params["gamma"] = trial.suggest_float("gamma", 1e-3, 10.0, log=True)
@@ -346,6 +355,12 @@ def cross_validate_gg_km_breast_cancer(
 
             params = {}
 
+            # added this part because bagging must not be using the best results from model optimization
+            if estimator_name == "binomial":
+                params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
+            elif estimator_name == "bernoulli":
+                params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
+
             if bagging:
                 params["n_estimators"] = trial.suggest_int(
                     "n_estimators",
@@ -375,10 +390,10 @@ def cross_validate_gg_km_breast_cancer(
                     ),
                 }
 
-                if estimator_name == "binomial":
-                    params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
-                elif estimator_name == "bernoulli":
-                    params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
+                # if estimator_name == "binomial":
+                #     params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
+                # elif estimator_name == "bernoulli":
+                #     params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
 
                 if kernel in {
                     "rbf",
