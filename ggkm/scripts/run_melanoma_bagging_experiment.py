@@ -10,6 +10,7 @@ from ggkm.models.km_gg import GGPoisson
 from ggkm.models.km_gg_bn import GGNB
 from ggkm.models.bagging import GGKMKernelBagging
 from ggkm.evaluate.cross_validation import cross_validate_gg_km
+from ggkm.utils.preprocessing import MelanomaSurvivalPreprocessor
 
 MODELS = {
     "bernoulli": GGBinomial,
@@ -117,18 +118,20 @@ def load_melanoma():
         .fillna(0)
     )
 
-    y = melanoma[
-        [
-            "time",
-            "status",
-        ]
-    ]
+    return melanoma
 
-    X = melanoma.drop(columns=y.columns.tolist()).to_numpy()
-    t = y["time"].to_numpy().astype(float)
-    delta = y["status"].to_numpy().astype(float)
+    # y = melanoma[
+    #     [
+    #         "time",
+    #         "status",
+    #     ]
+    # ]
 
-    return X, t, delta
+    # X = melanoma.drop(columns=y.columns.tolist()).to_numpy()
+    # t = y["time"].to_numpy().astype(float)
+    # delta = y["status"].to_numpy().astype(float)
+
+    # return X, t, delta
 
 
 def build_estimator(
@@ -198,12 +201,11 @@ def main():
         best_params,
     )
 
-    X, t, delta = load_melanoma()
+    df = load_melanoma()
 
     results = cross_validate_gg_km(
-        X,
-        t,
-        delta,
+        df=df,
+        preprocessor_factory=MelanomaSurvivalPreprocessor,
         estimator=GGKMKernelBagging,
         bagging=True,
         bagging_estimator=base_estimator,
