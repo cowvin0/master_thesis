@@ -10,7 +10,7 @@ from ggkm.models.km_gg_bn import GGNB
 from ggkm.models.bagging import GGKMKernelBagging
 
 from ggkm.evaluate.cross_validation import (
-    cross_validate_gg_km_breast_cancer,
+    cross_validate_gg_km,
 )
 
 from ggkm.utils.preprocessing import (
@@ -112,7 +112,7 @@ def main():
         flush=True,
     )
 
-    results = cross_validate_gg_km_breast_cancer(
+    results = cross_validate_gg_km(
         df=melanoma,
         estimator=GGKMKernelBagging,
         preprocessor_factory=lambda: MelanomaSurvivalPreprocessor(),

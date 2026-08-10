@@ -269,7 +269,7 @@ def cross_validate_pcm(
     }
 
 
-def cross_validate_gg_km_breast_cancer(
+def cross_validate_gg_km(
     df,
     estimator,
     preprocessor_factory,

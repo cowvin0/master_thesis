@@ -6,7 +6,7 @@ from pathlib import Path
 from ggkm.models.km_gg_bin import GGBinomial
 from ggkm.models.km_gg import GGPoisson
 from ggkm.models.km_gg_bn import GGNB
-from ggkm.evaluate.cross_validation import cross_validate_gg_km_breast_cancer
+from ggkm.evaluate.cross_validation import cross_validate_gg_km
 from ggkm.utils.preprocessing import BreastCancerSurvivalPreprocessor
 
 MODELS = {
@@ -134,7 +134,7 @@ def main():
     )
 
     cancer_mama = load_data(municipality)
-    results = cross_validate_gg_km_breast_cancer(
+    results = cross_validate_gg_km(
         df=cancer_mama,
         estimator=ModelClass,
         estimator_name=model_name,
