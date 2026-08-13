@@ -1264,3 +1264,177 @@ class SurvivalModelForwardSelector:
 
     def get_selected_features(self) -> List[str]:
         return list(self.selected_features_)
+
+
+class DefaultSurvivalPreprocessor:
+    TIME_COLUMN = "t"
+    STATUS_COLUMN = "delta"
+    EVENT_LABEL = 1
+
+    RAW_FEATURES: List[str] = [
+        "classic_fico",
+        "first_time_homebuyer_indicator",
+        "mortgage_insurance_percentage(mi%)",
+        "original_combined_loan_to_value_(cltv)",
+        "original_debt_to_income_(dti)_ratio",
+        "original_upb",
+        "original_loan_to_value(ltv)",
+        "original_interest_rate",
+        "channel",
+        "property_type",
+        "postal_code",
+        "original_loan_term",
+        "number_of_borrowers",
+        "seller_name",
+        "harp_indicator",
+    ]
+
+    SCALED_FEATURES: List[str] = [
+        "classic_fico",
+        "mortgage_insurance_percentage(mi%)",
+        "original_combined_loan_to_value_(cltv)",
+        "original_debt_to_income_(dti)_ratio",
+        "original_upb",
+        "original_loan_to_value(ltv)",
+        "original_interest_rate",
+        "original_loan_term",
+        "number_of_borrowers",
+    ]
+
+    TARGET_ENCODED_FEATURES: List[str] = [
+        "postal_code",
+    ]
+
+    DUMMY_FEATURES: List[str] = [
+        "channel_r",
+        "channel_c",
+        "channel_b",
+    ]
+
+    def __init__(self, selected_raw_features: Optional[List[str]] = None):
+        self.selected_raw_features = selected_raw_features
+        self.feature_pipeline_ = Pipeline(
+            steps=[
+                (
+                    "channel",
+                    CategoryFlagEncoder(
+                        column="channel",
+                        flags={
+                            "channel_r": "R",
+                            "channel_c": "C",
+                            "channel_b": "B",
+                        },
+                    ),
+                ),
+                (
+                    "property_type",
+                    SurvivalTargetEncoder(
+                        column="property_type",
+                        time_column="t",
+                        event_column="delta",
+                        output_column="property_type_rmst",
+                        smooth=10.0,
+                        cv=5,
+                        random_state=42,
+                    ),
+                ),
+                (
+                    "seller_name",
+                    SurvivalTargetEncoder(
+                        column="seller_name",
+                        time_column="t",
+                        event_column="delta",
+                        output_column="seller_name_rmst",
+                        smooth=10.0,
+                        cv=5,
+                        random_state=42,
+                    ),
+                ),
+                (
+                    "postal_code",
+                    SurvivalTargetEncoder(
+                        column="postal_code",
+                        time_column="t",
+                        event_column="delta",
+                        output_column="postal_code_rmst",
+                        smooth=10.0,
+                        cv=5,
+                        random_state=42,
+                    ),
+                ),
+            ]
+        )
+
+        self.df_model_: Optional[pd.DataFrame] = None
+        self.column_transformer_: Optional[ColumnTransformer] = None
+
+    def _build_delta(self, df: pd.DataFrame) -> pd.Series:
+        return (df[self.STATUS_COLUMN] == self.EVENT_LABEL).astype(int)
+
+    def _active_raw_features(self) -> List[str]:
+        if self.selected_raw_features is None:
+            return list(self.RAW_FEATURES)
+        return [f for f in self.RAW_FEATURES if f in self.selected_raw_features]
+
+    def fit(self, df: pd.DataFrame):
+        df = df.copy()
+        df["delta"] = self._build_delta(df)
+
+        cols = self._active_raw_features() + [self.TIME_COLUMN, "delta"]
+        df_model = df[cols].copy()
+        y = df_model["delta"]
+
+        df_model = self.feature_pipeline_.fit_transform(df_model, y=y)
+        self.df_model_ = df_model
+
+        t = df_model[self.TIME_COLUMN].values
+        delta = df_model["delta"].values
+
+        scaled = [c for c in self.SCALED_FEATURES if c in df_model.columns]
+        target_encoded = [
+            c for c in self.TARGET_ENCODED_FEATURES if c in df_model.columns
+        ]
+        dummy = [c for c in self.DUMMY_FEATURES if c in df_model.columns]
+        self._active_scaled = scaled
+        self._active_target_encoded = target_encoded
+        self._active_dummy = dummy
+
+        self.column_transformer_ = ColumnTransformer(
+            transformers=[
+                (
+                    "power",
+                    PowerTransformer(method="yeo-johnson", standardize=True),
+                    scaled,
+                ),
+                ("target_encoded", "passthrough", target_encoded),
+                ("dummy", "passthrough", dummy),
+            ]
+        )
+
+        X = self.column_transformer_.fit_transform(df_model)
+        X = np.asarray(X, dtype=float)
+
+        return X, t, delta
+
+    def transform(self, df: pd.DataFrame):
+        if self.column_transformer_ is None:
+            raise RuntimeError("Call .fit(df) before .transform(df).")
+
+        df = df.copy()
+        df["delta"] = self._build_delta(df)
+        delta = df["delta"].values
+
+        cols = self._active_raw_features() + [self.TIME_COLUMN, "delta"]
+        df_model = df[cols].copy()
+        df_model = self.feature_pipeline_.transform(df_model)
+
+        t = df_model[self.TIME_COLUMN].values
+        delta = df_model["delta"].values
+
+        X = self.column_transformer_.transform(df_model)
+        X = np.asarray(X, dtype=float)
+
+        return X, t, delta
+
+    def fit_transform(self, df: pd.DataFrame):
+        return self.fit(df)
