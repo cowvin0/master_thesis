@@ -71,7 +71,7 @@ def load_default():
         "|loan_identifier"
     )
 
-    performance = pd.read_csv("data/sample_perf_2024.txt", sep="|").filter(
+    performance = pd.read_csv("ggkm/data/sample_perf_2024.txt", sep="|").filter(
         regex="loan_identifier|current_loan_deliquency_status|^period|loan_age"
     )
 
