@@ -2,6 +2,7 @@ import os
 import time
 import pandas as pd
 
+from sklearn.model_selection import train_test_split
 from pathlib import Path
 from ggkm.models.km_gg_bin import GGBinomial
 from ggkm.models.km_gg import GGPoisson
@@ -134,7 +135,12 @@ def load_default():
         )
     )
 
-    return df
+    df_sample, _ = train_test_split(
+        df, train_size=35_000, stratify=df["delta"], random_state=42
+    )
+
+    # return df
+    return df_sample.reset_index(drop=True)
 
 
 def run_experiment(
