@@ -61,7 +61,7 @@ def get_experiment(
 
 
 def load_default():
-    origination = pd.read_csv("data/sample_orig_2024.txt", sep="|").filter(
+    origination = pd.read_csv("ggkm/data/sample_orig_2024.txt", sep="|").filter(
         items=[
             "classic_fico",
             "first_time_homebuyer_indicator",
@@ -82,7 +82,7 @@ def load_default():
         ]
     )
 
-    performance = pd.read_csv("data/sample_perf_2024.txt", sep="|").filter(
+    performance = pd.read_csv("ggkm/data/sample_perf_2024.txt", sep="|").filter(
         items=[
             "loan_identifier",
             "current_loan_deliquency_status",
