@@ -61,7 +61,7 @@ def get_experiment(
 
 
 def load_default():
-    origination = pd.read_csv("ggkm/data/sample_orig_2024.txt", sep="|").filter(
+    origination = pd.read_csv("ggkm/data/sample_orig_2024.csv").filter(
         items=[
             "classic_fico",
             "first_time_homebuyer_indicator",
@@ -82,7 +82,7 @@ def load_default():
         ]
     )
 
-    performance = pd.read_csv("ggkm/data/sample_perf_2024.txt", sep="|").filter(
+    performance = pd.read_csv("ggkm/data/sample_perf_2024.csv").filter(
         items=[
             "loan_identifier",
             "current_loan_deliquency_status",
@@ -103,12 +103,12 @@ def load_default():
 
     print("loan_identifier in performance:", "loan_identifier" in performance.columns)
 
-    print("origination exists:", os.path.exists("ggkm/data/sample_orig_2024.txt"))
-    print("performance exists:", os.path.exists("ggkm/data/sample_perf_2024.txt"))
+    print("origination exists:", os.path.exists("ggkm/data/sample_orig_2024.csv"))
+    print("performance exists:", os.path.exists("ggkm/data/sample_perf_2024.csv"))
 
-    print("origination absolute:", os.path.abspath("ggkm/data/sample_orig_2024.txt"))
+    print("origination absolute:", os.path.abspath("ggkm/data/sample_orig_2024.csv"))
 
-    print("performance absolute:", os.path.abspath("ggkm/data/sample_perf_2024.txt"))
+    print("performance absolute:", os.path.abspath("ggkm/data/sample_perf_2024.csv"))
 
     df_long = pd.merge(
         origination, performance, on="loan_identifier", how="inner"
