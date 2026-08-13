@@ -91,6 +91,25 @@ def load_default():
         ]
     )
 
+    print("CWD:", os.getcwd())
+
+    print("\nOrigination columns:")
+    print(origination.columns.tolist())
+
+    print("\nPerformance columns:")
+    print(performance.columns.tolist())
+
+    print("\nloan_identifier in origination:", "loan_identifier" in origination.columns)
+
+    print("loan_identifier in performance:", "loan_identifier" in performance.columns)
+
+    print("origination exists:", os.path.exists("ggkm/data/sample_orig_2024.txt"))
+    print("performance exists:", os.path.exists("ggkm/data/sample_perf_2024.txt"))
+
+    print("origination absolute:", os.path.abspath("ggkm/data/sample_orig_2024.txt"))
+
+    print("performance absolute:", os.path.abspath("ggkm/data/sample_perf_2024.txt"))
+
     df_long = pd.merge(
         origination, performance, on="loan_identifier", how="inner"
     ).assign(
@@ -222,13 +241,6 @@ def main():
         model_name,
         kernel,
     )
-
-    # output_file = save_results(
-    #     results,
-    #     task_id,
-    #     model_name,
-    #     kernel,
-    # )
 
     elapsed = time.time() - start
 
