@@ -61,18 +61,34 @@ def get_experiment(
 
 
 def load_default():
-
-    origination = pd.read_csv("ggkm/data/sample_orig_2024.txt", sep="|").filter(
-        regex="channel|number_of_borrowers"
-        "|dti|first_time_homebuyer_indicator"
-        "|postal_code|property_type|harp_indicator"
-        "|seller_name|cltv|ltv|fico|original_interest_rate"
-        "|mortgage_insurance_percentage|original_loan_term|original_upb"
-        "|loan_identifier"
+    origination = pd.read_csv("data/sample_orig_2024.txt", sep="|").filter(
+        items=[
+            "classic_fico",
+            "first_time_homebuyer_indicator",
+            "mortgage_insurance_percentage(mi%)",
+            "original_combined_loan_to_value_(cltv)",
+            "original_debt_to_income_(dti)_ratio",
+            "original_upb",
+            "original_loan_to_value(ltv)",
+            "original_interest_rate",
+            "channel",
+            "property_type",
+            "postal_code",
+            "loan_identifier",
+            "original_loan_term",
+            "number_of_borrowers",
+            "seller_name",
+            "harp_indicator(relief_refinance)",
+        ]
     )
 
-    performance = pd.read_csv("ggkm/data/sample_perf_2024.txt", sep="|").filter(
-        regex="loan_identifier|current_loan_deliquency_status|^period|loan_age"
+    performance = pd.read_csv("data/sample_perf_2024.txt", sep="|").filter(
+        items=[
+            "loan_identifier",
+            "current_loan_deliquency_status",
+            "period",
+            "loan_age",
+        ]
     )
 
     df_long = pd.merge(
