@@ -14,7 +14,7 @@ from ggkm.utils.metrics import uno_c_index_rmst, harrell_c_index
 
 class MelanomaSurvivalPreprocessor:
 
-    def __init__(self, time_col="time", status_col="status", feature_cols=None):
+    def __init__(self, time_col="time", status_col="delta", feature_cols=None):
         self.time_col = time_col
         self.status_col = status_col
         self.feature_cols = feature_cols

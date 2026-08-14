@@ -2,8 +2,8 @@ import optuna
 import numpy as np
 
 from tqdm.auto import tqdm
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import KFold
+
+from sklearn.model_selection import KFold, StratifiedKFold
 from ggkm.utils.metrics import uno_c_index_rmst, integrated_brier_score, auc_cure
 from ggkm.utils.optuna_utils import (
     _suggest_kernel_ranges,
@@ -173,7 +173,8 @@ def cross_validate_pcm(
                     )
                     val_scores.append(ibs)
 
-                except Exception:
+                except Exception as e:
+                    print(f"Trial failed: {e}")
                     return 1.0
 
             return float(np.mean(val_scores))
@@ -294,11 +295,14 @@ def cross_validate_gg_km(
 
     df = df.reset_index(drop=True)
 
-    outer_cv = KFold(
-        n_splits=n_outer_splits,
-        shuffle=True,
-        random_state=random_state,
+    outer_cv = StratifiedKFold(
+        n_splits=n_outer_splits, shuffle=True, random_state=random_state
     )
+    # outer_cv = KFold(
+    #     n_splits=n_outer_splits,
+    #     shuffle=True,
+    #     random_state=random_state,
+    # )
 
     all_test_ibs = []
     all_test_cindex = []
@@ -309,11 +313,14 @@ def cross_validate_gg_km(
 
     model_name = "Bagging" if bagging else kernel
 
-    outer_pbar = tqdm(
-        outer_cv.split(df),
-        total=n_outer_splits,
-        desc=f"{model_name} folds",
-    )
+    outer_splits = outer_cv.split(df, df["delta"])
+
+    outer_pbar = tqdm(outer_splits, total=n_outer_splits, desc=f"{model_name} folds")
+    # outer_pbar = tqdm(
+    #     outer_cv.split(df),
+    #     total=n_outer_splits,
+    #     desc=f"{model_name} folds",
+    # )
 
     for fold, (train_idx, test_idx) in enumerate(outer_pbar):
 
@@ -330,14 +337,23 @@ def cross_validate_gg_km(
         t_hi = np.percentile(t_outer_train, 95)
         t_grid = np.linspace(t_lo, t_hi, t_grid_points)
 
-        inner_cv = KFold(
+        # inner_cv = KFold(
+        #     n_splits=n_inner_splits,
+        #     shuffle=True,
+        #     random_state=random_state,
+        # )
+
+        # inner_splits = []
+        inner_cv = StratifiedKFold(
             n_splits=n_inner_splits,
             shuffle=True,
             random_state=random_state,
         )
 
         inner_splits = []
-        for tr_idx, val_idx in inner_cv.split(df_outer_train):
+
+        # for tr_idx, val_idx in inner_cv.split(df_outer_train):
+        for tr_idx, val_idx in inner_cv.split(df_outer_train, df_outer_train["delta"]):
             df_tr = df_outer_train.iloc[tr_idx].reset_index(drop=True)
             df_val = df_outer_train.iloc[val_idx].reset_index(drop=True)
 
@@ -357,10 +373,10 @@ def cross_validate_gg_km(
             params = {}
 
             # added this part because bagging must not be using the best results from model optimization
-            if estimator_name == "binomial":
-                params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
-            elif estimator_name == "bernoulli":
-                params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
+            # if estimator_name == "binomial":
+            #     params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
+            # elif estimator_name == "bernoulli":
+            #     params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
 
             if bagging:
                 params["n_estimators"] = trial.suggest_int(
@@ -391,10 +407,10 @@ def cross_validate_gg_km(
                     ),
                 }
 
-                # if estimator_name == "binomial":
-                #     params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
-                # elif estimator_name == "bernoulli":
-                #     params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
+                if estimator_name == "binomial":
+                    params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
+                elif estimator_name == "bernoulli":
+                    params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
 
                 if kernel in {
                     "rbf",

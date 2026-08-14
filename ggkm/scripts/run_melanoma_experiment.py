@@ -66,6 +66,7 @@ def load_melanoma():
         pd.read_csv("ggkm/data/melanoma.csv")
         .assign(status=lambda x: (x.status == 1).astype(int))
         .fillna(0)
+        .rename(columns={"status": "delta"})
     )
 
     return melanoma
