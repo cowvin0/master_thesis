@@ -63,7 +63,7 @@ def cross_validate_pcm(
 
     optuna_callback = lambda study, trial: pbar.update(1)
 
-    for _, (train_idx, test_idx) in enumerate(outer_cv.split(X, delta["event"])):
+    for _, (train_idx, test_idx) in enumerate(outer_cv.split(X, delta)):
 
         X_outer_train, X_test = (X[train_idx], X[test_idx])
         t_outer_train, t_test = (t[train_idx], t[test_idx])
