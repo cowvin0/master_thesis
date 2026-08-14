@@ -136,7 +136,7 @@ def load_default():
     )
 
     df_sample, _ = train_test_split(
-        df, train_size=35_000, stratify=df["delta"], random_state=42
+        df, train_size=10_000, stratify=df["delta"], random_state=42
     )
 
     # return df
