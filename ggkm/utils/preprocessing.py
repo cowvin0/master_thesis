@@ -626,8 +626,8 @@ class CIndexForwardSelector(BaseEstimator, TransformerMixin):
 
 class BreastCancerSurvivalPreprocessor:
     TIME_COLUMN = "Tempo"
-    STATUS_COLUMN = "Status"
-    EVENT_LABEL = "Morte por cancer de Mama"
+    STATUS_COLUMN = "delta"
+    EVENT_LABEL = 1
 
     RAW_FEATURES: List[str] = [
         "Município",

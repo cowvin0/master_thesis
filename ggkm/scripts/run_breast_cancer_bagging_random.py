@@ -113,6 +113,8 @@ def main():
     breast_cancer = (
         pd.read_csv("ggkm/data/cancer_de_mama_rhc_e_fap.csv")
         .query("Município == @city")
+        .rename(columns={"Status": "delta"})
+        .assign(delta=lambda x: (x.delta == "Morte por cancer de Mama").astype(int))
         .drop_duplicates()
     )
 

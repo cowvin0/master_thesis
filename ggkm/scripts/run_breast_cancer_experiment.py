@@ -103,6 +103,8 @@ def load_data(municipality):
                 "SimCausaBasica": "vivo",
             }
         )
+        .rename(columns={"Status": "delta"})
+        .assign(delta=lambda x: (x.delta == "Morte por cancer de Mama").astype(int))
     )
 
     if municipality != "Outros":
