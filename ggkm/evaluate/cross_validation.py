@@ -513,8 +513,8 @@ def cross_validate_gg_km(
 
                     val_scores.append(ibs)
 
-                except Exception:
-
+                except Exception as e:
+                    print(f"Error in optuna trial {e}")
                     return 1.0
 
             return float(np.mean(val_scores))
