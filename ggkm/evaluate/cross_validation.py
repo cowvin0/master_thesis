@@ -3,7 +3,7 @@ import numpy as np
 
 from tqdm.auto import tqdm
 
-from sklearn.model_selection import KFold, StratifiedKFold
+from sklearn.model_selection import StratifiedKFold
 from ggkm.utils.metrics import uno_c_index_rmst, integrated_brier_score, auc_cure
 from ggkm.utils.optuna_utils import (
     _suggest_kernel_ranges,
@@ -42,7 +42,10 @@ def cross_validate_pcm(
 
     p_cure_true = 1 - df["pi_x"].to_numpy()
 
-    outer_cv = KFold(n_splits=n_outer_splits, shuffle=True, random_state=random_state)
+    # outer_cv = KFold(n_splits=n_outer_splits, shuffle=True, random_state=random_state)
+    outer_cv = StratifiedKFold(
+        n_splits=n_outer_splits, shuffle=True, random_state=random_state
+    )
     total_trials = n_outer_splits * n_trials
 
     model_name = "Bagging" if bagging else kernel
@@ -60,7 +63,7 @@ def cross_validate_pcm(
 
     optuna_callback = lambda study, trial: pbar.update(1)
 
-    for _, (train_idx, test_idx) in enumerate(outer_cv.split(X)):
+    for _, (train_idx, test_idx) in enumerate(outer_cv.split(X, delta["event"])):
 
         X_outer_train, X_test = (X[train_idx], X[test_idx])
         t_outer_train, t_test = (t[train_idx], t[test_idx])
@@ -73,7 +76,7 @@ def cross_validate_pcm(
             t_grid_points,
         )
 
-        inner_cv = KFold(
+        inner_cv = StratifiedKFold(
             n_splits=n_inner_splits, shuffle=True, random_state=random_state
         )
 
@@ -130,7 +133,7 @@ def cross_validate_pcm(
 
             val_scores = []
 
-            for tr_idx, val_idx in inner_cv.split(X_outer_train):
+            for tr_idx, val_idx in inner_cv.split(X_outer_train, d_outer_train):
 
                 X_tr = X_outer_train[tr_idx]
                 X_val = X_outer_train[val_idx]

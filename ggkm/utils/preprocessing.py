@@ -43,7 +43,6 @@ class MelanomaSurvivalPreprocessor:
             df[self.time_col].to_numpy().astype(float),
             df[self.status_col].to_numpy().astype(float),
         )
-        # return self._split(df)
 
     def transform(self, df):
         if self.feature_cols_ is None:
