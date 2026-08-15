@@ -358,11 +358,11 @@ def cross_validate_gg_km(
 
             params = {}
 
-            # added this part because bagging must not be using the best results from model optimization
-            # if estimator_name == "binomial":
-            #     params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
-            # elif estimator_name == "bernoulli":
-            #     params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
+            # added this part because bagging might not be using the best results from model optimization
+            if estimator_name == "binomial":
+                params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
+            elif estimator_name == "bernoulli":
+                params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
 
             if bagging:
                 params["n_estimators"] = trial.suggest_int(
@@ -393,10 +393,10 @@ def cross_validate_gg_km(
                     ),
                 }
 
-                if estimator_name == "binomial":
-                    params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
-                elif estimator_name == "bernoulli":
-                    params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
+                # if estimator_name == "binomial":
+                #     params["K_bin"] = trial.suggest_int("K_bin", 2, 1000)
+                # elif estimator_name == "bernoulli":
+                #     params["K_bin"] = trial.suggest_int("K_bin", 1, 1)
 
                 if kernel in {
                     "rbf",
