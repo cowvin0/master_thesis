@@ -71,35 +71,16 @@ def load_melanoma():
 
     return melanoma
 
-    # y = melanoma[
-    #     [
-    #         "time",
-    #         "status",
-    #     ]
-    # ]
-
-    # X = melanoma.drop(columns=y.columns.tolist()).to_numpy()
-    # t = y["time"].to_numpy().astype(float)
-    # delta = y["status"].to_numpy().astype(float)
-
-    # return X, t, delta
-
 
 def run_experiment(
     df,
     model_name,
     kernel,
-    # X,
-    # t,
-    # delta,
 ):
 
     estimator = MODELS[model_name]
 
     results = cross_validate_gg_km(
-        # X,
-        # t,
-        # delta,
         df=df,
         preprocessor_factory=lambda: MelanomaSurvivalPreprocessor(),
         estimator=estimator,
@@ -176,13 +157,6 @@ def main():
         model_name,
         kernel,
     )
-
-    # output_file = save_results(
-    #     results,
-    #     task_id,
-    #     model_name,
-    #     kernel,
-    # )
 
     elapsed = time.time() - start
 
