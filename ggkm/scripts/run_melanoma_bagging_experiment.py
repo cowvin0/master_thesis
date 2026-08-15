@@ -116,22 +116,10 @@ def load_melanoma():
         pd.read_csv("ggkm/data/melanoma.csv")
         .assign(status=lambda x: (x.status == 1).astype(int))
         .fillna(0)
+        .rename(columns={"status": "delta"})
     )
 
     return melanoma
-
-    # y = melanoma[
-    #     [
-    #         "time",
-    #         "status",
-    #     ]
-    # ]
-
-    # X = melanoma.drop(columns=y.columns.tolist()).to_numpy()
-    # t = y["time"].to_numpy().astype(float)
-    # delta = y["status"].to_numpy().astype(float)
-
-    # return X, t, delta
 
 
 def build_estimator(
