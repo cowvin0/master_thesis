@@ -62,34 +62,205 @@ between these functions.
 
 \section{Survival and hazard rate functions}
 
-Survival analysis methods depend on the survival distribution, and the two main ways of specifying it are
-the survival function and the hazard rate function \cite{moore2016applied}. The survival function gives the expected proportion
-of individuals for which the event has not yet happened by time $t$. Formally, let $T$ denotes the
-survival time, the survival function is given by:
+Survival analysis is concerned with the study of the time until the occurrence of an event of interest. A survival distribution can be characterized through several equivalent functions, among which the survival function and the hazard rate function are fundamental \cite{moore2016applied}. The survival function describes the probability that the event has not occurred by a given time $t$. Formally, let $T$ denote the nonnegative random variable representing the survival time. The survival function is defined as
 \begin{equation}
 \label{eq:surv_function}
-S\left(t\right) = P\left(T>t\right)\text{,}\quad t \in \left(0, +\infty\right)\text{.}
+S(t) = P(T > t), \qquad t \geq 0.
 \end{equation}
 
-The survival curve is a function that starts at 1 and declines over time or remains constant over time.
-It will often tend to zero as $t$ increases because, intuitivelly, over time more individuals
-will experience the event of interest. Nonetheless, it might not happen, and, when this happen,
-it is said to be an improper survival function and proper, otherwise. It will be discussed in
-the next section.
+Thus, $S(t)$ represents the probability that an individual survives beyond time $t$, or,
+equivalently, that the event of interest has not occurred by that time. The survival
+function is a non-increasing function satisfying $S(0)=1$ and $\lim_{t\to\infty} S(t) \geq 0$.
 
-The hazard rate function $h\left(t\right)$ specifies a conditional probability. Assuming $T$ is absolutely
-continuous, i.e., that it has probability density, one looks at those individuals who have not yet experienced
-the event of interest by time $t$ and considers the probability of experiencing the event in the small
-time interval $\left[t, t + dt\right)$, giving $h\left(t\right)dt$ \cite{aalen2008survival}. Therefore,
-the hazard rate function is defined as:
+In the usual setting, the survival function decreases as $t$ increases, reflecting the
+accumulation of events over time. However, it need not converge to zero. In particular,
+if $\lim_{t\to\infty} S(t) = 0$, the corresponding distribution is said to be proper.
+Conversely, when $\lim_{t\to\infty} S(t) > 0$, the distribution is said to be
+improper. The latter case is of particular relevance in cure-rate models, where
+the positive limiting value of the survival function can be interpreted as the
+probability of an individual belonging to a cured fraction. This distinction will be
+discussed in greater detail in the next section.
+
+The hazard rate function, denoted by $h(t)$, characterizes the instantaneous risk of experiencing the event of interest, conditional on survival up to time $t$. More precisely, assuming that $T$ is an absolutely continuous random variable with probability density function $f(t)$, the hazard rate at time $t$ is defined as
 \begin{equation}
-	h\left(t\right) = \lim_{\Delta t \to 0} \frac{1}{\Delta t} P \left(t \le T < t + \Delta t | T \ge t\right)
+\label{eq:hazard_function}
+h(t)
+=
+\lim_{\Delta t \to 0}
+\frac{1}{\Delta t}
+P\left(t \leq T < t+\Delta t \mid T \geq t\right).
 \end{equation}
 
-% The survival function is often defined in terms of the hazard rate function. Assuming $T$ is absolutely
-% continous, i.e, that it has a probability density, one looks at those individuals who have not yet
-% experienced the event of interest by time $t$ and considers the probability of experiencing the event
-% in the small time interval $\left[t, \right]$
+Thus, for a sufficiently small time interval $\Delta t$, the quantity
+\[
+h(t)\Delta t
+\]
+provides a first-order approximation to the conditional probability of experiencing the
+event during the interval $[t,t+\Delta t)$, given that the individual has survived up
+to time $t$. It is important to note that the hazard rate itself is not a probability
+and, consequently, is not restricted to the interval $[0,1]$.
+
+Under the assumption of absolute continuity, the hazard rate can be expressed in terms
+of the probability density function and the survival function as
+\begin{equation}
+\label{eq:hazard_density_survival}
+h(t)
+=
+\frac{f(t)}{S(t)}\text{.}
+\end{equation}
+Conversely, the survival function can be recovered from the hazard rate through the
+cumulative hazard function, defined as
+\begin{equation}
+\label{eq:cumulative_hazard}
+H(t)
+=
+\int_0^t h(u)\,du.
+\end{equation}
+Consequently,
+\begin{equation}
+\label{eq:survival_hazard}
+S(t)
+=
+\exp\left\{-H(t)\right\}
+=
+\exp\left\{-\int_0^t h(u)\,du\right\}.
+\end{equation}
+
+Equation \eqref{eq:survival_hazard} establishes the fundamental relationship between the hazard
+rate and the survival function. In particular, the survival function is determined
+by the cumulative hazard over time. Consequently, different hazard profiles may lead to
+substantially different survival patterns, even when they are defined on the same time
+scale.
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/relation_between_harzard_and_survival_function.png}
+	\caption{Illustration of observed events and censoring types in survival analysis: observed event, right censoring, left censoring, and interval censoring.}
+    \label{fig:relation_survival_hazard}
+\end{figure}
+
+Figure \ref{fig:relation_survival_hazard} illustrates this relationship. In panels (a)
+and (b), the hazard rate is relatively high at early times, resulting in a more pronounced
+decline in the corresponding survival function. Such a pattern may arise, for example,
+in populations characterized by a high risk of death shortly after entering the study.
+In contrast, panels (c) and (d) illustrate a hazard with a lower initial risk,
+leading to a slower decline in the corresponding survival function. These examples emphasize that
+the shape of the survival function is directly determined by the evolution of the
+hazard rate over time.
+
+Although the survival and hazard rate functions provide two fundamental ways of
+characterizing a survival distribution, other distributional functions are also useful,
+particularly when deriving likelihoods and establishing relationships among different
+representations of the survival distribution. Among these, the cumulative distribution
+function and the probability density function are of particular importance.
+
+The cumulative distribution function (CDF) of the survival time $T$ is defined by
+\begin{equation}
+\label{eq:cdf}
+F(t) = P(T \leq t),
+\end{equation}
+and, for a nonnegative random variable, is related to the survival function through
+\begin{equation}
+\label{eq:cdf_survival}
+F(t) = 1-S(t).
+\end{equation}
+
+When $T$ is absolutely continuous, its probability density function (PDF) is given by
+the derivative of the CDF,
+\begin{equation}
+\label{eq:pdf}
+f(t) = \frac{d}{dt}F(t)
+     = -\frac{d}{dt}S(t).
+\end{equation}
+Consequently, the principal functions associated with an absolutely continuous survival
+distribution are connected through
+\[
+f(t) = h(t)S(t),
+\]
+which follows directly from the definition of the hazard rate.
+
+These relationships provide equivalent representations of the same underlying survival
+distribution. In particular, knowledge of any one of the functions, under the appropriate
+regularity conditions, allows the others to be obtained. The relationships among these
+functions will be used throughout the subsequent development of the survival and cure-rate
+models considered in this work.
+
+\subsection{Likelihood for censored survival times}
+
+In the absence of censoring, suppose that the survival times $T_1^*,\ldots,T_n^*$
+are independent and identically distributed with probability density function
+$f(t;\boldsymbol{\theta})$ and survival function $S(t;\boldsymbol{\theta})$, where
+$\boldsymbol{\theta}$ denotes the vector of model parameters. The likelihood function
+based on the complete survival times is then given by
+\begin{equation}
+\label{eq:complete_likelihood}
+L(\boldsymbol{\theta})
+=
+\prod_{i=1}^{n} f(t_i^*;\boldsymbol{\theta}).
+\end{equation}
+
+In practice, however, survival times are frequently subject to right censoring. As defined
+previously, let $T^*$ denote the time to failure and $U$ the censoring time. The observed
+time and censoring indicator are given by $T=\min(T^*,U) \text{ and } \delta=I[T^*\leq U]$,
+respectively. Thus, $\delta=1$ indicates that the event of interest was observed, whereas
+$\delta=0$ indicates that the observation was right-censored.
+
+Accordingly, the observed survival data considered throughout this work are represented
+by the triplet $\left\{(\boldsymbol{x}_i,t_i,\delta_i)\right\}_{i=1}^{n}$,
+where $\boldsymbol{x}_i\in\mathbb{R}^{p}$ denotes the vector of covariates for the
+$i$th individual, $t_i$ is the observed time, and $\delta_i$ is the corresponding event
+indicator.
+
+For an individual with $\delta_i=1$, the event is observed at time $t_i$, and the
+likelihood contribution is given by the density $f(t_i;\boldsymbol{\theta})$. In
+contrast, when $\delta_i=0$, the event has not occurred by time $t_i$, and the available
+information is that $T_i^*>t_i$. Consequently, the likelihood contribution is given by
+the survival probability $S(t_i;\boldsymbol{\theta})$. These two cases can be combined
+into the single expression
+\begin{equation}
+\label{eq:individual_likelihood}
+L_i(\boldsymbol{\theta})
+=
+f(t_i;\boldsymbol{\theta})^{\delta_i}
+S(t_i;\boldsymbol{\theta})^{1-\delta_i}.
+\end{equation}
+
+Assuming independence among individuals, the likelihood function based on the observed survival data is therefore
+\begin{equation}
+\label{eq:observed_likelihood}
+L(\boldsymbol{\theta})
+=
+\prod_{i=1}^{n}
+f(t_i;\boldsymbol{\theta})^{\delta_i}
+S(t_i;\boldsymbol{\theta})^{1-\delta_i}.
+\end{equation}
+
+Using the relationship $f(t;\boldsymbol{\theta})=h(t;\boldsymbol{\theta})S(t;\boldsymbol{\theta})$, the likelihood can equivalently be expressed in terms of the hazard rate as
+\begin{equation}
+\label{eq:hazard_likelihood}
+L(\boldsymbol{\theta})
+=
+\prod_{i=1}^{n}
+h(t_i;\boldsymbol{\theta})^{\delta_i}
+S(t_i;\boldsymbol{\theta}).
+\end{equation}
+
+This formulation is fundamental in survival analysis because it accounts simultaneously for observed failures and right-censored observations. It will also provide the basis for the likelihood formulations considered later for the long-term survival and cure-rate models developed in this work.
+
+In conventional survival models, it is typically assumed that every individual is
+eventually susceptible to the event, implying that $\lim_{t\to\infty}S(t)=0$. However,
+this assumption may be inappropriate in settings where a subset of individuals is
+considered effectively immune to the event of interest. In such cases, the survival
+function may converge to a positive limiting value, $\lim_{t\to\infty}S(t)=\pi>0$, where
+$\pi$ represents the asymptotic probability of remaining event free.
+This behavior is characteristic of cure-rate models and provides a natural framework
+for explicitly modeling a cured fraction within the population. The distinction between
+these two settings is central to the development of cure-rate models and will be
+considered in the following section.
+
+\section{Long-Term Survival Analysis}
+
+
 
 % Os métodos de análise de sobrevivência são fundamentados na caracterização da distribuição
 % do tempo até a ocorrência de um evento aleatório. As principais formas de descrever essa
@@ -232,27 +403,27 @@ the hazard rate function is defined as:
 % entre covariáveis e o risco de ocorrência do evento, especialmente em cenários de alta
 % dimensionalidade.
 
-\section{Modelos de Longa Duração}
+% \section{Modelos de Longa Duração}
 
-Existem dados de sobrevivência em que uma porcentagem dos indivíduos não apresentará a ocorrência de um evento,
-mesmo se acompanhados por um longo período de tempo. Neste caso, diz-se que os indivíduos são imunes, ou curados,
-ao evento de interesse. Tem-se assim a análise de sobrevivência com dados de longa duração.
+% Existem dados de sobrevivência em que uma porcentagem dos indivíduos não apresentará a ocorrência de um evento,
+% mesmo se acompanhados por um longo período de tempo. Neste caso, diz-se que os indivíduos são imunes, ou curados,
+% ao evento de interesse. Tem-se assim a análise de sobrevivência com dados de longa duração.
 
-Diferentemente dos modelos tradicionais de sobrevivência, em que se assume que todos os indivíduos eventualmente
-experimentarão o evento de interesse, nos modelos de longa duração admite-se a existência de uma fração da população
-para a qual o evento nunca ocorrerá. Essa característica é usualmente denominada fração de cura.
+% Diferentemente dos modelos tradicionais de sobrevivência, em que se assume que todos os indivíduos eventualmente
+% experimentarão o evento de interesse, nos modelos de longa duração admite-se a existência de uma fração da população
+% para a qual o evento nunca ocorrerá. Essa característica é usualmente denominada fração de cura.
 
-Seja $T$ uma variável aleatória representando o tempo até a ocorrência do evento. Em modelos clássicos de sobrevivência,
-a função de sobrevivência é definida por
-\[
-S(t)=P(T>t), \quad t\geq 0,
-\]
-satisfazendo $\lim_{t\to\infty}S(t)=0$. Entretanto, em modelos com fração de cura, essa condição deixa de valer, pois
-há uma probabilidade positiva de o evento nunca ocorrer. Assim, a função de sobrevivência torna-se imprópria, isto é,
-\[
-\lim_{t\to\infty}S(t)=p_0 > 0,
-\]
-em que $p_0$ representa a fração de indivíduos curados.
+% Seja $T$ uma variável aleatória representando o tempo até a ocorrência do evento. Em modelos clássicos de sobrevivência,
+% a função de sobrevivência é definida por
+% \[
+% S(t)=P(T>t), \quad t\geq 0,
+% \]
+% satisfazendo $\lim_{t\to\infty}S(t)=0$. Entretanto, em modelos com fração de cura, essa condição deixa de valer, pois
+% há uma probabilidade positiva de o evento nunca ocorrer. Assim, a função de sobrevivência torna-se imprópria, isto é,
+% \[
+% \lim_{t\to\infty}S(t)=p_0 > 0,
+% \]
+% em que $p_0$ representa a fração de indivíduos curados.
 
 % Equivalentemente, pode-se escrever a função de sobrevivência populacional como
 % \[
@@ -261,226 +432,226 @@ em que $p_0$ representa a fração de indivíduos curados.
 % em que $S_0(t)$ representa a função de sobrevivência dos indivíduos suscetíveis ao evento. Nessa formulação,
 % a população é vista como uma mistura entre indivíduos curados e suscetíveis.
 
-Os modelos de fração de cura podem ser classificados em duas abordagens principais. Isto é, os modelos de mistura e os modelos de não mistura. Nos modelos de mistura,
-a fração de cura é modelada explicitamente como uma combinação entre curados e suscetíveis. Já nos modelos de não mistura,
-a estrutura da função de sobrevivência incorpora a fração de cura de forma implícita.
+% Os modelos de fração de cura podem ser classificados em duas abordagens principais. Isto é, os modelos de mistura e os modelos de não mistura. Nos modelos de mistura,
+% a fração de cura é modelada explicitamente como uma combinação entre curados e suscetíveis. Já nos modelos de não mistura,
+% a estrutura da função de sobrevivência incorpora a fração de cura de forma implícita.
 
-Entre os modelos de não mistura, destaca-se o modelo de tempo de promoção,
-também conhecido como modelo de risco acumulado limitado.
+% Entre os modelos de não mistura, destaca-se o modelo de tempo de promoção,
+% também conhecido como modelo de risco acumulado limitado.
 
-\subsection{Modelo de Tempo de Promoção}
+% \subsection{Modelo de Tempo de Promoção}
 
-De uma forma geral a ideia básica do modelo unificado de fração de cura está baseada na noção de ocorrência do evento de interesse em um processo em dois estágios:
+% De uma forma geral a ideia básica do modelo unificado de fração de cura está baseada na noção de ocorrência do evento de interesse em um processo em dois estágios:
 
-Estágio de iniciação. Seja $N$ uma variável aleatória representando o número de causas ou riscos competitivos da ocorrência do evento de interesse. A causa de ocorrência do evento é desconhecida, e a variável $N$ não é observada, com distribuição de probabilidade $p_n$ e sua cauda dadas, respectivamente, por
-\begin{eqnarray}
-p_n=P[N=n] \quad \text{e} \quad q_n=P[N>n],
-\end{eqnarray}
-com $n=0,1,2,...$.
+% Estágio de iniciação. Seja $N$ uma variável aleatória representando o número de causas ou riscos competitivos da ocorrência do evento de interesse. A causa de ocorrência do evento é desconhecida, e a variável $N$ não é observada, com distribuição de probabilidade $p_n$ e sua cauda dadas, respectivamente, por
+% \begin{eqnarray}
+% p_n=P[N=n] \quad \text{e} \quad q_n=P[N>n],
+% \end{eqnarray}
+% com $n=0,1,2,...$.
 
-Estágio de maturação. Dado $N=n$, sejam $Z_k$, $k=1,...,n$, variáveis aleatórias contínuas (não-negativas) independentes com função distribuição acumulada $F(z)=1-S(z)$ e independentes de $N$, que representam o tempo de ocorrência do evento de interesse devido à $k$-ésima causa.
-Afim de incluir os indivíduos que não são suscetíveis ao evento de interesse, seu tempo de ocorrência é definido como
-\begin{eqnarray}
-T = \min(Z_0,Z_1,Z_2, ...,Z_N)
-\end{eqnarray}
-em que $P[Z_0 = \infty] = 1$, admitindo a possibilidade que uma proporção $p_0$ da população não apresenta a ocorrência do evento de interesse, $T$ é uma variável aleatória observável ou censurada e $Z_j$ e $N$ são variáveis latentes.
+% Estágio de maturação. Dado $N=n$, sejam $Z_k$, $k=1,...,n$, variáveis aleatórias contínuas (não-negativas) independentes com função distribuição acumulada $F(z)=1-S(z)$ e independentes de $N$, que representam o tempo de ocorrência do evento de interesse devido à $k$-ésima causa.
+% Afim de incluir os indivíduos que não são suscetíveis ao evento de interesse, seu tempo de ocorrência é definido como
+% \begin{eqnarray}
+% T = \min(Z_0,Z_1,Z_2, ...,Z_N)
+% \end{eqnarray}
+% em que $P[Z_0 = \infty] = 1$, admitindo a possibilidade que uma proporção $p_0$ da população não apresenta a ocorrência do evento de interesse, $T$ é uma variável aleatória observável ou censurada e $Z_j$ e $N$ são variáveis latentes.
 
-Seja $\{a_n\}$ uma sequência de números reais. Se $s$ pertence ao intervalo $[0, 1]$
-\begin{eqnarray}
-A(s) = a_0 + a_1s + a_2s^2 + \cdots
-\end{eqnarray}
-converge, então $A(s)$ é definida como a função geradora da sequência $\{a_n\}$.
+% Seja $\{a_n\}$ uma sequência de números reais. Se $s$ pertence ao intervalo $[0, 1]$
+% \begin{eqnarray}
+% A(s) = a_0 + a_1s + a_2s^2 + \cdots
+% \end{eqnarray}
+% converge, então $A(s)$ é definida como a função geradora da sequência $\{a_n\}$.
 
 %Se $a = a_n = p_n = p$, temos que $A_p(s) = E[s^N]$. Observe que a função geradora de probabilidades é a funçãao geradora de momentos da variável aleatória $N$ calculada no ponto $\log(s)$, isto é, $A_p(s) = E[\exp{\log(s)N}]$.
 
-A função de sobrevivência da variável aleatória $T$ (função de sobrevivência da população) será indicada por
-\begin{eqnarray}
-S_{pop}(t) &=& P[N = 0] + P[Z_1 > t,Z_2 > t, ...,Z_N > t,N \geq 1] \nonumber \\
-&=& P[N = 0] + \sum_{n=1}^{\infty} P[N = n]P[Z_1 > t,Z_2 > t, ...,Z_N > t] \nonumber \\
-&=& p_0 + \sum_{n=1}^{\infty} p_n{S(t)}^n \nonumber \\
-&=& A(S(t)),
-\end{eqnarray}
-sendo que $A(\cdot)$ é a função geradora da sequência $p_n$. Ou seja, a função de sobrevivência da variável aleatória $T$, correspondente a um modelo de longa duração em dois estágios, é uma composição da função geradora de probabilidades e a função de sobrevivência. A função de sobrevivência de longa duração em dois estágios $S_{pop}(t)$ não é uma função de sobrevivência própria.
+% A função de sobrevivência da variável aleatória $T$ (função de sobrevivência da população) será indicada por
+% \begin{eqnarray}
+% S_{pop}(t) &=& P[N = 0] + P[Z_1 > t,Z_2 > t, ...,Z_N > t,N \geq 1] \nonumber \\
+% &=& P[N = 0] + \sum_{n=1}^{\infty} P[N = n]P[Z_1 > t,Z_2 > t, ...,Z_N > t] \nonumber \\
+% &=& p_0 + \sum_{n=1}^{\infty} p_n{S(t)}^n \nonumber \\
+% &=& A(S(t)),
+% \end{eqnarray}
+% sendo que $A(\cdot)$ é a função geradora da sequência $p_n$. Ou seja, a função de sobrevivência da variável aleatória $T$, correspondente a um modelo de longa duração em dois estágios, é uma composição da função geradora de probabilidades e a função de sobrevivência. A função de sobrevivência de longa duração em dois estágios $S_{pop}(t)$ não é uma função de sobrevivência própria.
 
-Observe que, para a função de sobrevivência própria, $\lim_{t\rightarrow 0}S(t) = 1$ e $\lim_{t\rightarrow \infty}S(t) = 0$. Já para a função de sobrevivência imprópria, $\lim_{t\rightarrow 0}S(t) = 1$ e $\lim_{t\rightarrow \infty}S_{pop}(t) = P[N = 0] = p_0$. Dessa forma, $p_0$ é a proporção de não ocorrências do evento de interesse na população, ou seja, a fração de cura.
+% Observe que, para a função de sobrevivência própria, $\lim_{t\rightarrow 0}S(t) = 1$ e $\lim_{t\rightarrow \infty}S(t) = 0$. Já para a função de sobrevivência imprópria, $\lim_{t\rightarrow 0}S(t) = 1$ e $\lim_{t\rightarrow \infty}S_{pop}(t) = P[N = 0] = p_0$. Dessa forma, $p_0$ é a proporção de não ocorrências do evento de interesse na população, ou seja, a fração de cura.
 
-A função de sobrevivência populacional possui as seguintes propriedades:
-\vspace{0.5cm}
+% A função de sobrevivência populacional possui as seguintes propriedades:
+% \vspace{0.5cm}
 
-$\bullet$ Se $p_0=1$, então $S_{pop}(t) = S(t)$;
+% $\bullet$ Se $p_0=1$, então $S_{pop}(t) = S(t)$;
 
-$\bullet$ $S_{pop}(0) = 1$;
+% $\bullet$ $S_{pop}(0) = 1$;
 
-$\bullet$ $S_{pop}(t)$ é não crescente;
+% $\bullet$ $S_{pop}(t)$ é não crescente;
 
-$\bullet$ $\lim_{t \rightarrow \infty}S_{pop}(t) = p_0$
+% $\bullet$ $\lim_{t \rightarrow \infty}S_{pop}(t) = p_0$
 
-\vspace{0.5cm}
+% \vspace{0.5cm}
 
-As funções de densidade e de risco associadas à função de sobrevivência de longa duração são dadas, respectivamente, por
-\begin{eqnarray}
-f_{pop}(t) = f(t)\frac{dA(s)}{ds}|_{s=S(t)}
-\end{eqnarray}
-e
-\begin{eqnarray}
-h_{pop}(t) = \frac{f_{pop}(t)}{S_{pop}(t)}=f(t)\frac{\frac{dA(s)}{ds}|_{s=S(t)}}{S_{pop}(t)}.
-\end{eqnarray}
+% As funções de densidade e de risco associadas à função de sobrevivência de longa duração são dadas, respectivamente, por
+% \begin{eqnarray}
+% f_{pop}(t) = f(t)\frac{dA(s)}{ds}|_{s=S(t)}
+% \end{eqnarray}
+% e
+% \begin{eqnarray}
+% h_{pop}(t) = \frac{f_{pop}(t)}{S_{pop}(t)}=f(t)\frac{\frac{dA(s)}{ds}|_{s=S(t)}}{S_{pop}(t)}.
+% \end{eqnarray}
 
-Algumas distribuições são muito utilizadas para as funções geradoras de probabilidade, tais como Bernoulli, Binomial, Poisson, Binomial Negativa e Geométrica e contemplam diferentes modalidades de dispersão. Falaremos de cada uma delas a seguir.
-%\clearpage
+% Algumas distribuições são muito utilizadas para as funções geradoras de probabilidade, tais como Bernoulli, Binomial, Poisson, Binomial Negativa e Geométrica e contemplam diferentes modalidades de dispersão. Falaremos de cada uma delas a seguir.
+% %\clearpage
 
-\textbf{Bernoulli}
+% \textbf{Bernoulli}
 
-Seja $N$ uma variável aleatória que representa o número de causas competitivas latentes necessárias para a ocorrência de um determinado evento de interesse, que segue uma distribuição Bernoulli, com parâmetro $\theta$. Sua função de probabilidade de massa dada por
-\begin{eqnarray}
-P[N=n]=\theta^n(1-\theta)^{1-n},\text{ }n=0,1,..., \text{ e }0<\theta<1.
-\end{eqnarray}
+% Seja $N$ uma variável aleatória que representa o número de causas competitivas latentes necessárias para a ocorrência de um determinado evento de interesse, que segue uma distribuição Bernoulli, com parâmetro $\theta$. Sua função de probabilidade de massa dada por
+% \begin{eqnarray}
+% P[N=n]=\theta^n(1-\theta)^{1-n},\text{ }n=0,1,..., \text{ e }0<\theta<1.
+% \end{eqnarray}
 
-A função geradora de probabilidade de $N$ é dada por
-\begin{eqnarray}
-A(s) = 1 - \theta + \theta s, \text{ }0 \leq s \leq 1.
-\end{eqnarray}
+% A função geradora de probabilidade de $N$ é dada por
+% \begin{eqnarray}
+% A(s) = 1 - \theta + \theta s, \text{ }0 \leq s \leq 1.
+% \end{eqnarray}
 
-E a função de função de sobrevivência de longa duração é dada por
-\begin{eqnarray}
-S_{pop}(t) = A(S(t)) = 1 - \theta + \theta S(t),
-\end{eqnarray}
-obtendo, assim, o modelo conhecido como modelo de mistura padrão \cite{berkson1952survival}, que é um dos mais utilizados na análise de sobrevivência para ajustar dados de longa duração. Ele recebe esse nome, pois consiste de uma mistura de distribuições paramétricas, sendo uma função de sobrevivência própria para a parte da população formada pelos não curados e uma função para os curados, em que a proporção de curados é
-\begin{align}\label{p0}
-	 p_{0} = \lim_{t\rightarrow \infty}{S_{pop}(t)} = 1-\theta.
-\end{align}
+% E a função de função de sobrevivência de longa duração é dada por
+% \begin{eqnarray}
+% S_{pop}(t) = A(S(t)) = 1 - \theta + \theta S(t),
+% \end{eqnarray}
+% obtendo, assim, o modelo conhecido como modelo de mistura padrão \cite{berkson1952survival}, que é um dos mais utilizados na análise de sobrevivência para ajustar dados de longa duração. Ele recebe esse nome, pois consiste de uma mistura de distribuições paramétricas, sendo uma função de sobrevivência própria para a parte da população formada pelos não curados e uma função para os curados, em que a proporção de curados é
+% \begin{align}\label{p0}
+% 	 p_{0} = \lim_{t\rightarrow \infty}{S_{pop}(t)} = 1-\theta.
+% \end{align}
 
-A função de densidade e de risco são dadas respectivamente por
-\begin{eqnarray}
-f_{pop}(t) = \theta f(t)
-\end{eqnarray}
-e
-\begin{eqnarray}
-h_{pop}(t) = \frac{\theta f(t)}{1 - \theta + \theta S(t)}.
-\end{eqnarray}
-
-
-$\bullet$ \textbf{Binomial}
-
-Seja o número $N$ de riscos latentes com distribuição binomial. Uma motivação biológica é, supondo-se que existe um número $K$ de potenciais lugares para a mutação de tumores focalizados numa região do corpo de um indivíduo afetada por uma doença, tem-se que $N$ lugares chegam a sofrer mutações.
-
-Adotamos uma reparametrização do modelo binomial: ${\theta^{*}} = \theta/(1+\theta)$. Assim, seja $N$ uma variável aleatória que representa o número de causas competitivas latentes necessárias para a ocorrência de um determinado evento de interesse com distribuição binomial, sua função de probabilidade de massa é dada por
-\begin{align}\label{distbn}
-P[ N = n^{*}] = {K \choose n^{*}}{\theta^{*}}^{n^{*}}(1-{\theta^{*}})^{K-n^{*}},\ \ n^{*} = 0,1,\ldots,K, \ \ \ 0<\theta^{*}<1,
-\end{align}
-com  $\mbox{E}[N]=K\theta^{*}$ e $\mbox{Var}[N]= K\theta(1-\theta^{*}) $, em que $K$ é um número inteiro positivo. A função geradora de probabilidade de $N$ é dada por
-\begin{align}
-	A(s) = (1 - \theta^{*} + \theta^{*} s)^K, \ \ \ 0\leq s\leq1.
-\end{align}
-
-A função de função de sobrevivência de longa duração é dada por
-\begin{align}\label{Spop_Bi}
-S_{pop}(t) = A(S(t))	=	S_{pop}(t) = \left[1-\theta^{*}	+ \theta^{*} S(t) \right]^{K} ,
-\end{align}
-sendo que a fração de cura $p_{0}$ é dada por
-\begin{align}\label{p0}
-	 p_{0} = \lim_{t\rightarrow \infty}{S_{pop}(t)} = (1-\theta^{*})^{K}>0.
-\end{align}
-
-As funções de densidade e de risco associadas à função de sobrevivência de longa duração binomial  são dadas respectivamente por
-\begin{align}
-f_{pop}(t)	=	K\theta^{*} f(t)(1-\theta^{*}	+ \theta^{*} S(t))^{(K-1)} \  \  \mbox{e} \  \  h_{pop}(t)	=		\frac{K\theta^{*} f(t)}{\left\{1-\theta^{*}	+ \theta^{*} S(t)\right\}},
-\end{align}
-em que $f(t) = -S'(t)$ é uma função de densidade própria.% do tempo $Z$, sendo que $Z \sim\mbox{We}i(\alpha,\lambda)$.
-
-Observa-se que, no caso em que $K$ cresce a fração de cura $p_{0}$ decresce.
-
-% \clearpage
-$\bullet$ \textbf{Poisson}
-
-Seja o número $N$ de causas do evento de interesse com distribuição de probabilidade de Poisson. Assim, considerando a função geradora de probabilidade da distribuição de Poisson $A(s) = \exp[\theta(1-s)]$, obtemos as funções de sobrevivência, densidade e de risco da população, dadas respectivamente por
-\begin{align}\label{Spop_Poi}
-S_{pop}(t)=	A(S(t))=\exp\left[-\theta F(t)\right],
-\end{align}
-
-\begin{align}
-f_{pop}(t) = -\frac{dS_{pop}(t)}{dt} = \theta f(t)\exp\left[-\theta F(t)\right] \label{fpop_Poi}
-\end{align}
-e
-\begin{align}
-h_{pop}(t)= \theta f(t). \label{hpop_Poi}
-\end{align}
-
-Dessa forma, de (\ref{Spop_Poi}) tem-se a fração de cura dada por $p_{0}=\displaystyle \lim_{t\rightarrow \infty}{S_{pop}(t)} = \exp(-\theta)$.
-
-%As funções de sobrevivência, densidade e de risco para a população em risco são dadas respectivamente, por
-%\begin{align}
-%	S^{*}(t) = \frac{\exp(-\theta F(t)) - \exp(-\theta)}{1- \exp(-\theta) }, \label{c5}
-%\end{align}
-%\[
-%	f^{*}(t) =  \frac{\exp(-\theta F(t))}{1- \exp(-\theta)}\theta f(t)\label{c6}
-%\]
-%e
-%\[
-%	h^{*}(t) = \frac{\exp(-\theta F(t)) }{  \exp(-\theta F(t))- \exp(\theta) }h_{pop}(t). \label{c7}
-%\]
+% A função de densidade e de risco são dadas respectivamente por
+% \begin{eqnarray}
+% f_{pop}(t) = \theta f(t)
+% \end{eqnarray}
+% e
+% \begin{eqnarray}
+% h_{pop}(t) = \frac{\theta f(t)}{1 - \theta + \theta S(t)}.
+% \end{eqnarray}
 
 
+% $\bullet$ \textbf{Binomial}
 
-% O modelo de tempo de promoção possui motivação biológica e foi proposto para situações em que o evento de interesse
-% é desencadeado por múltiplos fatores latentes. Considere que cada indivíduo esteja exposto a $N$ riscos latentes,
-% por exemplo, células cancerígenas residuais após um tratamento.
+% Seja o número $N$ de riscos latentes com distribuição binomial. Uma motivação biológica é, supondo-se que existe um número $K$ de potenciais lugares para a mutação de tumores focalizados numa região do corpo de um indivíduo afetada por uma doença, tem-se que $N$ lugares chegam a sofrer mutações.
 
-% Assume-se que o número de riscos latentes segue uma distribuição de Poisson com média $\theta(\mathbf{x})>0$, isto é,
+% Adotamos uma reparametrização do modelo binomial: ${\theta^{*}} = \theta/(1+\theta)$. Assim, seja $N$ uma variável aleatória que representa o número de causas competitivas latentes necessárias para a ocorrência de um determinado evento de interesse com distribuição binomial, sua função de probabilidade de massa é dada por
+% \begin{align}\label{distbn}
+% P[ N = n^{*}] = {K \choose n^{*}}{\theta^{*}}^{n^{*}}(1-{\theta^{*}})^{K-n^{*}},\ \ n^{*} = 0,1,\ldots,K, \ \ \ 0<\theta^{*}<1,
+% \end{align}
+% com  $\mbox{E}[N]=K\theta^{*}$ e $\mbox{Var}[N]= K\theta(1-\theta^{*}) $, em que $K$ é um número inteiro positivo. A função geradora de probabilidade de $N$ é dada por
+% \begin{align}
+% 	A(s) = (1 - \theta^{*} + \theta^{*} s)^K, \ \ \ 0\leq s\leq1.
+% \end{align}
+
+% A função de função de sobrevivência de longa duração é dada por
+% \begin{align}\label{Spop_Bi}
+% S_{pop}(t) = A(S(t))	=	S_{pop}(t) = \left[1-\theta^{*}	+ \theta^{*} S(t) \right]^{K} ,
+% \end{align}
+% sendo que a fração de cura $p_{0}$ é dada por
+% \begin{align}\label{p0}
+% 	 p_{0} = \lim_{t\rightarrow \infty}{S_{pop}(t)} = (1-\theta^{*})^{K}>0.
+% \end{align}
+
+% As funções de densidade e de risco associadas à função de sobrevivência de longa duração binomial  são dadas respectivamente por
+% \begin{align}
+% f_{pop}(t)	=	K\theta^{*} f(t)(1-\theta^{*}	+ \theta^{*} S(t))^{(K-1)} \  \  \mbox{e} \  \  h_{pop}(t)	=		\frac{K\theta^{*} f(t)}{\left\{1-\theta^{*}	+ \theta^{*} S(t)\right\}},
+% \end{align}
+% em que $f(t) = -S'(t)$ é uma função de densidade própria.% do tempo $Z$, sendo que $Z \sim\mbox{We}i(\alpha,\lambda)$.
+
+% Observa-se que, no caso em que $K$ cresce a fração de cura $p_{0}$ decresce.
+
+% % \clearpage
+% $\bullet$ \textbf{Poisson}
+
+% Seja o número $N$ de causas do evento de interesse com distribuição de probabilidade de Poisson. Assim, considerando a função geradora de probabilidade da distribuição de Poisson $A(s) = \exp[\theta(1-s)]$, obtemos as funções de sobrevivência, densidade e de risco da população, dadas respectivamente por
+% \begin{align}\label{Spop_Poi}
+% S_{pop}(t)=	A(S(t))=\exp\left[-\theta F(t)\right],
+% \end{align}
+
+% \begin{align}
+% f_{pop}(t) = -\frac{dS_{pop}(t)}{dt} = \theta f(t)\exp\left[-\theta F(t)\right] \label{fpop_Poi}
+% \end{align}
+% e
+% \begin{align}
+% h_{pop}(t)= \theta f(t). \label{hpop_Poi}
+% \end{align}
+
+% Dessa forma, de (\ref{Spop_Poi}) tem-se a fração de cura dada por $p_{0}=\displaystyle \lim_{t\rightarrow \infty}{S_{pop}(t)} = \exp(-\theta)$.
+
+% %As funções de sobrevivência, densidade e de risco para a população em risco são dadas respectivamente, por
+% %\begin{align}
+% %	S^{*}(t) = \frac{\exp(-\theta F(t)) - \exp(-\theta)}{1- \exp(-\theta) }, \label{c5}
+% %\end{align}
+% %\[
+% %	f^{*}(t) =  \frac{\exp(-\theta F(t))}{1- \exp(-\theta)}\theta f(t)\label{c6}
+% %\]
+% %e
+% %\[
+% %	h^{*}(t) = \frac{\exp(-\theta F(t)) }{  \exp(-\theta F(t))- \exp(\theta) }h_{pop}(t). \label{c7}
+% %\]
+
+
+
+% % O modelo de tempo de promoção possui motivação biológica e foi proposto para situações em que o evento de interesse
+% % é desencadeado por múltiplos fatores latentes. Considere que cada indivíduo esteja exposto a $N$ riscos latentes,
+% % por exemplo, células cancerígenas residuais após um tratamento.
+
+% % Assume-se que o número de riscos latentes segue uma distribuição de Poisson com média $\theta(\mathbf{x})>0$, isto é,
+% % \[
+% % N \sim \text{Poisson}(\theta(\mathbf{x})),
+% % \]
+% % em que $\mathbf{x}$ representa o vetor de covariáveis.
+
+% % Seja $T_j$ o tempo necessário para que o $j$-ésimo risco latente produza o evento clínico, com função de distribuição
+% % acumulada $F(t)$. O tempo observado até a ocorrência do evento é definido pelo mínimo entre os tempos latentes:
+% % \[
+% % T=\min(T_1,\ldots,T_N).
+% % \]
+% % Dessa forma, a função de sobrevivência populacional corresponde à probabilidade de que nenhum dos riscos latentes
+% % tenha promovido o evento até o tempo $t$, dada por
+% % \[
+% % S_{pop}(t|\mathbf{x})=P(N=0)+P(N>0,T_1>t,\ldots,T_N>t) = \exp\{-\theta(\mathbf{x})F(t)\}.
+% % \]
+
+% % Observa-se que, quando $t \to \infty$, tem-se $F(t)\to 1$, de modo que
+% % \[
+% % \lim_{t\to\infty}S_{pop}(t|\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
+% % \]
+
+% % Portanto, a fração de cura é dada por
+% % \[
+% % p_0(\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
+% % \]
+
+% % Uma característica importante desse modelo é que a probabilidade de cura está diretamente associada ao número esperado
+% % de riscos latentes. Quanto maior $\theta(\mathbf{x})$, menor a probabilidade de cura. Essa formulação torna o modelo
+% % particularmente atrativo por fornecer interpretação biológica clara e permitir a incorporação de covariáveis na modelagem
+% % da fração de cura.
+
+
+% \subsection{Distribuição Gama Generalizada}
+
+% Em relação a distribuição dos tempos de falha dos indíviduos suscetíveis, propõe-se o uso da distribuição
+% Gama Generalizada (GG), devido à sua elevada flexibilidade e capacidade de acomodar diferentes formatos da
+% função de risco.
+
+% A função densidade de probabilidade da distribuição GG é dada por
 % \[
-% N \sim \text{Poisson}(\theta(\mathbf{x})),
+% f_{GG}(t;a,d,p)=
+% \frac{pt^{d-1}\exp\left(-(t/a)^p\right)}
+% {a^d\Gamma(d/p)},
 % \]
-% em que $\mathbf{x}$ representa o vetor de covariáveis.
-
-% Seja $T_j$ o tempo necessário para que o $j$-ésimo risco latente produza o evento clínico, com função de distribuição
-% acumulada $F(t)$. O tempo observado até a ocorrência do evento é definido pelo mínimo entre os tempos latentes:
+% e sua função de distribuição acumulada é definida como
 % \[
-% T=\min(T_1,\ldots,T_N).
+% F_{GG}(t;a,d,p)=
+% \frac{\gamma\left(d/p,(t/a)^p\right)}
+% {\Gamma(d/p)},
 % \]
-% Dessa forma, a função de sobrevivência populacional corresponde à probabilidade de que nenhum dos riscos latentes
-% tenha promovido o evento até o tempo $t$, dada por
-% \[
-% S_{pop}(t|\mathbf{x})=P(N=0)+P(N>0,T_1>t,\ldots,T_N>t) = \exp\{-\theta(\mathbf{x})F(t)\}.
-% \]
+% onde $a>0$ é o parâmetro de escala, $d>0$ e $p>0$ são parâmetros de forma, $\Gamma(\cdot)$ é a função gama e $\gamma(\cdot,\cdot)$ denota a função gama incompleta inferior.
 
-% Observa-se que, quando $t \to \infty$, tem-se $F(t)\to 1$, de modo que
-% \[
-% \lim_{t\to\infty}S_{pop}(t|\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
-% \]
-
-% Portanto, a fração de cura é dada por
-% \[
-% p_0(\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
-% \]
-
-% Uma característica importante desse modelo é que a probabilidade de cura está diretamente associada ao número esperado
-% de riscos latentes. Quanto maior $\theta(\mathbf{x})$, menor a probabilidade de cura. Essa formulação torna o modelo
-% particularmente atrativo por fornecer interpretação biológica clara e permitir a incorporação de covariáveis na modelagem
-% da fração de cura.
-
-
-\subsection{Distribuição Gama Generalizada}
-
-Em relação a distribuição dos tempos de falha dos indíviduos suscetíveis, propõe-se o uso da distribuição
-Gama Generalizada (GG), devido à sua elevada flexibilidade e capacidade de acomodar diferentes formatos da
-função de risco.
-
-A função densidade de probabilidade da distribuição GG é dada por
-\[
-f_{GG}(t;a,d,p)=
-\frac{pt^{d-1}\exp\left(-(t/a)^p\right)}
-{a^d\Gamma(d/p)},
-\]
-e sua função de distribuição acumulada é definida como
-\[
-F_{GG}(t;a,d,p)=
-\frac{\gamma\left(d/p,(t/a)^p\right)}
-{\Gamma(d/p)},
-\]
-onde $a>0$ é o parâmetro de escala, $d>0$ e $p>0$ são parâmetros de forma, $\Gamma(\cdot)$ é a função gama e $\gamma(\cdot,\cdot)$ denota a função gama incompleta inferior.
-
-A escolha dessa distribuição se justifica pelo fato de incluir importantes modelos clássicos como casos particulares. Por exemplo, quando $d=p$, $p=1$ ou $d/p \to \infty$, tem-se uma
-distribuição Weibull, Gama ou converge para uma Log-Normal
+% A escolha dessa distribuição se justifica pelo fato de incluir importantes modelos clássicos como casos particulares. Por exemplo, quando $d=p$, $p=1$ ou $d/p \to \infty$, tem-se uma
+% distribuição Weibull, Gama ou converge para uma Log-Normal
 
 % \subsection{Estimação e verossimilhança penalizada}
 
