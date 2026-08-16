@@ -245,7 +245,10 @@ h(t_i;\boldsymbol{\theta})^{\delta_i}
 S(t_i;\boldsymbol{\theta}).
 \end{equation}
 
-This formulation is fundamental in survival analysis because it accounts simultaneously for observed failures and right-censored observations. It will also provide the basis for the likelihood formulations considered later for the long-term survival and cure-rate models developed in this work.
+This formulation is fundamental in survival analysis because it accounts simultaneously
+for observed failures and right-censored observations. It will also provide the basis
+for the likelihood formulations considered later for the long-term survival and
+cure-rate models developed in this work.
 
 In conventional survival models, it is typically assumed that every individual is
 eventually susceptible to the event, implying that $\lim_{t\to\infty}S(t)=0$. However,
@@ -258,150 +261,86 @@ for explicitly modeling a cured fraction within the population. The distinction 
 these two settings is central to the development of cure-rate models and will be
 considered in the following section.
 
-\section{Long-Term Survival}
+\section{Long-term survival models}
 
+In some survival studies, a non-negligible proportion of individuals may never experience
+the event of interest, even when followed for an arbitrarily long period of time. Such
+individuals are commonly referred to as \emph{cured} or \emph{immune} with respect to
+the event under consideration \cite{maller1996survival}. The presence of such individuals gives
+rise to the class of models commonly referred to as \emph{long-term survival models} or
+\emph{cure-rate models}.
 
+This setting differs fundamentally from that of conventional survival models, which
+generally assume that every individual is susceptible to the event of interest and that
+the event will eventually occur with probability one. Under this assumption, the
+survival function satisfies
+\begin{equation}
+\lim_{t\rightarrow\infty} S(t)=0.
+\end{equation}
+In contrast, when a proportion of the population is not susceptible to the event, the
+population survival function may converge to a positive value,
+\begin{equation}
+\lim_{t\rightarrow\infty} S(t)=\pi,
+\qquad 0<\pi<1,
+\end{equation}
+where $\pi$ represents the long-term survival probability, commonly interpreted as the
+population cure fraction.
 
-% Os métodos de análise de sobrevivência são fundamentados na caracterização da distribuição
-% do tempo até a ocorrência de um evento aleatório. As principais formas de descrever essa
-% distribuição são por meio da função de sobrevivência e da função de risco, que oferecem
-% interpretações complementares e desempenham papel central tanto na formulação teórica
-% quanto na modelagem estatística.
+The formulation of long-term survival models considered in this work follows the
+extension of the framework originally proposed by \citeonline{chen1999new} and
+developed in a general form by \citeonline{rodrigues2009unification}. In this framework,
+the occurrence of the event of interest is represented through a collection of latent
+competing causes. Let $N$ denote the unobserved number of latent causes associated with
+the occurrence of the event, with probability mass function
+\begin{equation}
+\label{eq:N_distribution}
+p_n=P(N=n), \qquad n=0,1,2,\ldots.
+\end{equation}
+Conditional on $N=n$, let $Z_1,\ldots,Z_n$ denote the latent times to the event
+associated with these causes, assumed to be independent and identically distributed with
+proper survival function $S(t)$. The observed event time is then defined as the minimum
+among the latent times,
+\begin{equation}
+\label{eq:latent_event_time}
+Y=\min\{Z_1,\ldots,Z_N\},
+\end{equation}
+with the convention that $Y=\infty$ when $N=0$.
 
-% A função de sobrevivência descreve a probabilidade de o evento de interesse não ter ocorrido
-% até um instante \( t \), sendo definida por:
-% \begin{equation}
-% \mathit{S}\left(\mathit{t}\right) = \mathit{P}\left(\mathit{T} > \mathit{t}\right), \quad 0 < \mathit{t} < \infty\text{.}
-% \label{eq:survival_function}
-% \end{equation}
+The variables $N$ and $Z_1,\ldots,Z_N$ are latent and therefore unobserved; only the
+resulting event time $Y$ is observed, subject to censoring. The case $N=0$ plays a
+fundamental role in the long-term survival framework. When $N=0$, no latent cause
+capable of producing the event is present, and the individual is consequently not
+susceptible to the event. Thus, the probability $p_0=P(N=0)$ represents the long-term
+proportion of cured or immune individuals in the population.
 
-% Sob condições usuais, tem-se que \( \mathit{S}(0) = 1 \) e \( \lim_{t \to \infty} \mathit{S}(t) = 0 \). Além disso, a função de sobrevivência é não crescente e contínua à direita, propriedades que decorrem diretamente de sua definição probabilística.
+The survival function of $Y$ is obtained by conditioning on the unobserved number of competing causes. Specifically,
+\begin{equation}
+\label{eq:long_term_survival}
+S_p(t)
+=
+P(Y>t)
+=
+\sum_{n=0}^{\infty}p_n\{S(t)\}^n.
+\end{equation}
+Therefore, if $A(s)=\sum_{n=0}^{\infty}p_ns^n$ denotes the probability generating
+function of $N$, the long-term survival function can be written compactly as
+\begin{equation}
+\label{eq:long_term_survival_pgf}
+S_p(t)=A\{S(t)\}.
+\end{equation}
 
-% Outra quantidade fundamental é a função de risco, que descreve a taxa instantânea de
-% ocorrência do evento no tempo \( t \), condicionada à sobrevivência até esse instante.
-% Formalmente, a função de risco é definida por:
-% \begin{equation}
-% \mathit{h}\left(\mathit{t}\right) = \lim_{\delta \to 0} \frac{\mathit{P}\left(\mathit{t} < \mathit{T} \leq \mathit{t} + \delta \mid \mathit{T} > \mathit{t}\right)}{\delta}\text{.}
-% \end{equation}
-
-% Essa definição evidencia que \( \mathit{h}(t) \) não é uma probabilidade, mas sim uma taxa,
-% podendo assumir valores maiores que 1. Intuitivamente, ela quantifica a propensão instantânea
-% de ocorrência do evento em torno de \( t \), dado que o indivíduo sobreviveu até esse
-% momento.
-
-% A partir dessas definições, podem ser estabelecidas diversas relações que caracterizam completamente
-% a distribuição de \( T \). Em particular, a função de distribuição acumulada é dada por:
-% \begin{equation}
-% \mathit{F}\left(\mathit{t}\right) = \mathit{P}\left(\mathit{T} \leq \mathit{t}\right) = 1 - \mathit{S}\left(\mathit{t}\right), \quad 0 < \mathit{t} < \infty\text{.}
-% \end{equation}
-
-% Assim como \( \mathit{S}(t) \), a função \( \mathit{F}(t) \) é contínua à direita e não
-% decrescente. No contexto da análise de sobrevivência, \( \mathit{F}(t) \) pode ser
-% interpretada como a probabilidade acumulada de ocorrência do evento até o tempo \( t \),
-% não devendo ser confundida com a função de risco acumulado definida adiante.
-
-% Quando a distribuição de \( T \) admite densidade, a função densidade de probabilidade é
-% obtida como:
-% \begin{equation}
-% \mathit{f}(t) = \frac{d}{dt}\mathit{F}(t) = -\frac{d}{dt}\mathit{S}(t)\text{.}
-% \end{equation}
-
-% A função de risco pode então ser expressa em termos da densidade e da função de sobrevivência
-% como:
-% \begin{equation}
-% \mathit{h}(t) = \frac{\mathit{f}(t)}{\mathit{S}(t)}\text{,}
-% \end{equation}
-% o que explicita sua interpretação como uma taxa condicional: trata-se da densidade de
-% ocorrência do evento em \( t \), ponderada pela probabilidade de sobrevivência até esse
-% instante.
-
-% A integral da função de risco ao longo do tempo define a função de risco acumulado:
-% \begin{equation}
-% \mathit{H}(t) = \int_{0}^{t} \mathit{h}(u)\,du\text{.}
-% \end{equation}
-
-% Essa função é não decrescente e desempenha papel central na teoria da sobrevivência, uma
-% vez que estabelece uma relação direta e particularmente conveniente com a função de
-% sobrevivência. De fato, pode-se demonstrar que:
-% \begin{equation}
-% \mathit{S}(t) = \exp\left(- \int_{0}^{t} \mathit{h}(u)\,du \right) = \exp\left(-\mathit{H}(t)\right)\text{.}
-% \end{equation}
-
-% Essa expressão evidencia que a função de sobrevivência é completamente determinada pela
-% função de risco, e vice-versa. Do ponto de vista prático, essa relação é de grande
-% relevância, pois muitos modelos em análise de sobrevivência são especificados diretamente
-% em termos da função de risco, como é o caso do modelo de riscos proporcionais de Cox. Além
-% disso, a representação exponencial garante que \( \mathit{S}(t) \) permaneça no intervalo
-% unitário e preserve suas propriedades fundamentais.
-
-% Em conjunto, essas funções e suas inter-relações fornecem um arcabouço matemático consistente
-% para a modelagem de dados de sobrevivência, permitindo diferentes formas de especificação
-% de modelos conforme as características do problema e dos dados disponíveis.
-
-% \section{Estimador de Kaplan-Meier}
-
-% \section{Modelo de Riscos Proporcionais de Cox}
-
-% O modelo de riscos proporcionais de Cox, proposto por \cite{cox1972regression}, constitui
-% uma das abordagens mais influentes e amplamente empregadas na análise de sobrevivência.
-% Sua principal característica reside na natureza semiparamétrica da modelagem, na qual a
-% função de risco é decomposta em um componente basal arbitrário e um componente paramétrico
-% associado às covariáveis, sem a necessidade de especificação explícita da forma funcional
-% do risco basal ao longo do tempo.
-
-% Formalmente, seja $\mathbf{x}_i \in \mathbb{R}^p$ o vetor de covariáveis associado ao
-% $i$-ésimo indivíduo. O modelo de Cox é definido por:
-% \begin{equation}
-% h(t \mid \mathbf{x}_i) = h_0(t)\exp\left(\mathbf{x}_i^\top \bm{\beta}\right),
-% \end{equation}
-% em que $h_0(t)$ é a função de risco basal, comum a todos os indivíduos, e
-% $\bm{\beta} \in \mathbb{R}^p$ é o vetor de parâmetros que quantifica o efeito das
-% covariáveis sobre o risco.
-
-% A hipótese central do modelo é a de riscos proporcionais, segundo a qual a razão entre as
-% funções de risco de quaisquer dois indivíduos permanece constante ao longo do tempo. Mais
-% precisamente, para dois indivíduos com vetores de covariáveis $\mathbf{x}_i$ e $\mathbf{x}_j$,
-% tem-se:
-% \begin{equation}
-% \frac{h(t \mid \mathbf{x}_i)}{h(t \mid \mathbf{x}_j)} = \exp\left((\mathbf{x}_i - \mathbf{x}_j)^\top \bm{\beta}\right),
-% \end{equation}
-% o que evidencia que essa razão independe do tempo $t$. Essa propriedade confere ao modelo
-% uma interpretação particularmente conveniente, pois o termo $\exp(\beta_k)$ pode ser
-% interpretado como o efeito multiplicativo associado a um aumento unitário na $k$-ésima
-% covariável sobre o risco instantâneo, mantendo as demais fixas.
-
-% Uma das principais vantagens do modelo de Cox é que a estimação do vetor de parâmetros
-% $\bm{\beta}$ pode ser realizada sem a necessidade de especificar a função de risco basal
-% $h_0(t)$. Esse resultado é obtido por meio da verossimilhança parcial, que explora apenas
-% a informação contida na ordenação dos tempos de falha observados. Seja
-% $t_{(1)} < \cdots < t_{(D)}$ a sequência dos tempos de falha distintos e
-% $\mathcal{R}(t_{(d)})$ o conjunto de risco imediatamente antes de $t_{(d)}$.
-% A verossimilhança parcial é definida por:
-% \begin{equation}
-% L(\bm{\beta}) = \prod_{d=1}^{D} \frac{\exp\left(\mathbf{x}_{(d)}^\top \bm{\beta}\right)}{\sum_{j \in \mathcal{R}(t_{(d)})} \exp\left(\mathbf{x}_j^\top \bm{\beta}\right)}.
-% \end{equation}
-
-% Sob condições de regularidade, a maximização dessa função conduz a estimativas consistentes
-% e assintoticamente normais para $\bm{\beta}$, mesmo na presença de censura à direita.
-% Uma vez obtidas as estimativas dos parâmetros, é possível recuperar a função de risco basal,
-% tipicamente por meio do estimador de Breslow, e, consequentemente, a função de sobrevivência.
-
-% A função de sobrevivência condicional associada ao indivíduo $i$ pode ser expressa como:
-% \begin{equation}
-% S(t \mid \mathbf{x}_i) = S_0(t)^{\exp\left(\mathbf{x}_i^\top \bm{\beta}\right)},
-% \end{equation}
-% em que $S_0(t)$ denota a função de sobrevivência basal correspondente a $h_0(t)$. Essa
-% expressão evidencia que o efeito das covariáveis atua de forma multiplicativa sobre o risco
-% e, de maneira equivalente, exponencial sobre a função de sobrevivência.
-
-% Apesar de sua ampla aplicabilidade e interpretabilidade, o modelo de Cox depende
-% criticamente da validade da hipótese de riscos proporcionais. Violações dessa suposição
-% podem resultar em estimativas viesadas e comprometer a interpretação dos coeficientes.
-% Nesse contexto, diversas extensões têm sido propostas na literatura, incluindo modelos
-% com coeficientes dependentes do tempo, abordagens estratificadas e métodos baseados em
-% aprendizado de máquina, que buscam maior flexibilidade na modelagem de relações complexas
-% entre covariáveis e o risco de ocorrência do evento, especialmente em cenários de alta
-% dimensionalidade.
+An important consequence of this formulation is obtained by considering the limit as
+$t\rightarrow\infty$. Since $S(t)$ is a proper survival function, $\lim_{t\rightarrow\infty}S(t)=0$,
+and hence
+\begin{equation}
+\label{eq:long_term_limit}
+\lim_{t\rightarrow\infty}S_p(t)
+=
+A(0)
+=
+p_0.
+\end{equation}
+Thus, $p_0$ is precisely the long-term survival probability and provides a direct interpretation of the proportion of individuals who are not susceptible to the event of interest.
 
 % \section{Modelos de Longa Duração}
 
@@ -462,7 +401,7 @@ considered in the following section.
 % \end{eqnarray}
 % converge, então $A(s)$ é definida como a função geradora da sequência $\{a_n\}$.
 
-%Se $a = a_n = p_n = p$, temos que $A_p(s) = E[s^N]$. Observe que a função geradora de probabilidades é a funçãao geradora de momentos da variável aleatória $N$ calculada no ponto $\log(s)$, isto é, $A_p(s) = E[\exp{\log(s)N}]$.
+% Se $a = a_n = p_n = p$, temos que $A_p(s) = E[s^N]$. Observe que a função geradora de probabilidades é a funçãao geradora de momentos da variável aleatória $N$ calculada no ponto $\log(s)$, isto é, $A_p(s) = E[\exp{\log(s)N}]$.
 
 % A função de sobrevivência da variável aleatória $T$ (função de sobrevivência da população) será indicada por
 % \begin{eqnarray}
@@ -579,55 +518,55 @@ considered in the following section.
 
 % Dessa forma, de (\ref{Spop_Poi}) tem-se a fração de cura dada por $p_{0}=\displaystyle \lim_{t\rightarrow \infty}{S_{pop}(t)} = \exp(-\theta)$.
 
-% %As funções de sobrevivência, densidade e de risco para a população em risco são dadas respectivamente, por
-% %\begin{align}
-% %	S^{*}(t) = \frac{\exp(-\theta F(t)) - \exp(-\theta)}{1- \exp(-\theta) }, \label{c5}
-% %\end{align}
-% %\[
-% %	f^{*}(t) =  \frac{\exp(-\theta F(t))}{1- \exp(-\theta)}\theta f(t)\label{c6}
-% %\]
-% %e
-% %\[
-% %	h^{*}(t) = \frac{\exp(-\theta F(t)) }{  \exp(-\theta F(t))- \exp(\theta) }h_{pop}(t). \label{c7}
-% %\]
+%As funções de sobrevivência, densidade e de risco para a população em risco são dadas respectivamente, por
+%\begin{align}
+%	S^{*}(t) = \frac{\exp(-\theta F(t)) - \exp(-\theta)}{1- \exp(-\theta) }, \label{c5}
+%\end{align}
+%\[
+%	f^{*}(t) =  \frac{\exp(-\theta F(t))}{1- \exp(-\theta)}\theta f(t)\label{c6}
+%\]
+%e
+%\[
+%	h^{*}(t) = \frac{\exp(-\theta F(t)) }{  \exp(-\theta F(t))- \exp(\theta) }h_{pop}(t). \label{c7}
+%\]
 
 
 
-% % O modelo de tempo de promoção possui motivação biológica e foi proposto para situações em que o evento de interesse
-% % é desencadeado por múltiplos fatores latentes. Considere que cada indivíduo esteja exposto a $N$ riscos latentes,
-% % por exemplo, células cancerígenas residuais após um tratamento.
+% O modelo de tempo de promoção possui motivação biológica e foi proposto para situações em que o evento de interesse
+% é desencadeado por múltiplos fatores latentes. Considere que cada indivíduo esteja exposto a $N$ riscos latentes,
+% por exemplo, células cancerígenas residuais após um tratamento.
 
-% % Assume-se que o número de riscos latentes segue uma distribuição de Poisson com média $\theta(\mathbf{x})>0$, isto é,
-% % \[
-% % N \sim \text{Poisson}(\theta(\mathbf{x})),
-% % \]
-% % em que $\mathbf{x}$ representa o vetor de covariáveis.
+% Assume-se que o número de riscos latentes segue uma distribuição de Poisson com média $\theta(\mathbf{x})>0$, isto é,
+% \[
+% N \sim \text{Poisson}(\theta(\mathbf{x})),
+% \]
+% em que $\mathbf{x}$ representa o vetor de covariáveis.
 
-% % Seja $T_j$ o tempo necessário para que o $j$-ésimo risco latente produza o evento clínico, com função de distribuição
-% % acumulada $F(t)$. O tempo observado até a ocorrência do evento é definido pelo mínimo entre os tempos latentes:
-% % \[
-% % T=\min(T_1,\ldots,T_N).
-% % \]
-% % Dessa forma, a função de sobrevivência populacional corresponde à probabilidade de que nenhum dos riscos latentes
-% % tenha promovido o evento até o tempo $t$, dada por
-% % \[
-% % S_{pop}(t|\mathbf{x})=P(N=0)+P(N>0,T_1>t,\ldots,T_N>t) = \exp\{-\theta(\mathbf{x})F(t)\}.
-% % \]
+% Seja $T_j$ o tempo necessário para que o $j$-ésimo risco latente produza o evento clínico, com função de distribuição
+% acumulada $F(t)$. O tempo observado até a ocorrência do evento é definido pelo mínimo entre os tempos latentes:
+% \[
+% T=\min(T_1,\ldots,T_N).
+% \]
+% Dessa forma, a função de sobrevivência populacional corresponde à probabilidade de que nenhum dos riscos latentes
+% tenha promovido o evento até o tempo $t$, dada por
+% \[
+% S_{pop}(t|\mathbf{x})=P(N=0)+P(N>0,T_1>t,\ldots,T_N>t) = \exp\{-\theta(\mathbf{x})F(t)\}.
+% \]
 
-% % Observa-se que, quando $t \to \infty$, tem-se $F(t)\to 1$, de modo que
-% % \[
-% % \lim_{t\to\infty}S_{pop}(t|\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
-% % \]
+% Observa-se que, quando $t \to \infty$, tem-se $F(t)\to 1$, de modo que
+% \[
+% \lim_{t\to\infty}S_{pop}(t|\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
+% \]
 
-% % Portanto, a fração de cura é dada por
-% % \[
-% % p_0(\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
-% % \]
+% Portanto, a fração de cura é dada por
+% \[
+% p_0(\mathbf{x})=\exp\{-\theta(\mathbf{x})\}.
+% \]
 
-% % Uma característica importante desse modelo é que a probabilidade de cura está diretamente associada ao número esperado
-% % de riscos latentes. Quanto maior $\theta(\mathbf{x})$, menor a probabilidade de cura. Essa formulação torna o modelo
-% % particularmente atrativo por fornecer interpretação biológica clara e permitir a incorporação de covariáveis na modelagem
-% % da fração de cura.
+% Uma característica importante desse modelo é que a probabilidade de cura está diretamente associada ao número esperado
+% de riscos latentes. Quanto maior $\theta(\mathbf{x})$, menor a probabilidade de cura. Essa formulação torna o modelo
+% particularmente atrativo por fornecer interpretação biológica clara e permitir a incorporação de covariáveis na modelagem
+% da fração de cura.
 
 
 % \subsection{Distribuição Gama Generalizada}

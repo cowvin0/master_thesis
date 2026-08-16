@@ -1,50 +1,50 @@
-A análise de sobrevivência constitui um dos principais ramos da estatística aplicada voltado ao estudo do
-tempo até a ocorrência de um evento de interesse, como falha de um sistema, recorrência de uma doença ou
-morte de um indivíduo. Uma característica central desse tipo de dado é a presença de censura, isto é,
-situações nas quais o tempo exato do evento não é completamente observado. Esse aspecto impõe desafios
-metodológicos relevantes, exigindo o desenvolvimento de modelos capazes de lidar adequadamente com
-informações incompletas.
+% A análise de sobrevivência constitui um dos principais ramos da estatística aplicada voltado ao estudo do
+% tempo até a ocorrência de um evento de interesse, como falha de um sistema, recorrência de uma doença ou
+% morte de um indivíduo. Uma característica central desse tipo de dado é a presença de censura, isto é,
+% situações nas quais o tempo exato do evento não é completamente observado. Esse aspecto impõe desafios
+% metodológicos relevantes, exigindo o desenvolvimento de modelos capazes de lidar adequadamente com
+% informações incompletas.
 
-Além da presença de censura, em diversos contextos práticos observa-se a existência de uma fração de
-indivíduos que não experimentará o evento de interesse, mesmo sob longos períodos de acompanhamento.
-Essa característica motivou o desenvolvimento dos chamados modelos de fração de cura, que buscam representar
-explicitamente essa parcela da população.
+% Além da presença de censura, em diversos contextos práticos observa-se a existência de uma fração de
+% indivíduos que não experimentará o evento de interesse, mesmo sob longos períodos de acompanhamento.
+% Essa característica motivou o desenvolvimento dos chamados modelos de fração de cura, que buscam representar
+% explicitamente essa parcela da população.
 
-Tradicionalmente, modelos como o de Cox têm sido amplamente utilizados nesse contexto, devido à sua
-flexibilidade semiparamétrica e interpretabilidade. No entanto, tais abordagens assumem, em geral, uma
-estrutura linear no preditor do risco, o que pode ser inadequado em cenários nos quais a relação entre as
-covariáveis e o tempo de sobrevivência apresenta padrões não lineares ou de maior complexidade.
+% Tradicionalmente, modelos como o de Cox têm sido amplamente utilizados nesse contexto, devido à sua
+% flexibilidade semiparamétrica e interpretabilidade. No entanto, tais abordagens assumem, em geral, uma
+% estrutura linear no preditor do risco, o que pode ser inadequado em cenários nos quais a relação entre as
+% covariáveis e o tempo de sobrevivência apresenta padrões não lineares ou de maior complexidade.
 
-Nesse cenário, métodos baseados em kernels surgem como alternativas promissoras, pois permitem incorporar
-flexibilidade ao processo de modelagem por meio de mapeamentos implícitos para espaços de maior dimensão.
-Essa abordagem possibilita capturar estruturas não lineares sem a necessidade de especificar explicitamente
-a forma funcional da relação entre covariáveis e sobrevivência.
+% Nesse cenário, métodos baseados em kernels surgem como alternativas promissoras, pois permitem incorporar
+% flexibilidade ao processo de modelagem por meio de mapeamentos implícitos para espaços de maior dimensão.
+% Essa abordagem possibilita capturar estruturas não lineares sem a necessidade de especificar explicitamente
+% a forma funcional da relação entre covariáveis e sobrevivência.
 
-O presente trabalho propõe um novo modelo semiparamétrico para dados de sobrevivência com fração de cura,
-denominado GG-KM, que combina a flexibilidade de métodos baseados em kernel com a estrutura do modelo de
-tempo de promoção. O objetivo principal é investigar o desempenho do modelo sob diferentes especificações
-de kernel, avaliando sua capacidade preditiva e sua adequação em cenários com diferentes graus de
-complexidade.
+% O presente trabalho propõe um novo modelo semiparamétrico para dados de sobrevivência com fração de cura,
+% denominado GG-KM, que combina a flexibilidade de métodos baseados em kernel com a estrutura do modelo de
+% tempo de promoção. O objetivo principal é investigar o desempenho do modelo sob diferentes especificações
+% de kernel, avaliando sua capacidade preditiva e sua adequação em cenários com diferentes graus de
+% complexidade.
 
-Para isso, são conduzidos experimentos em dados simulados, nos quais é possível controlar a estrutura geradora,
-e em bases de dados reais amplamente utilizadas na literatura. A avaliação é realizada principalmente por
-meio do Integrated Brier Score (IBS), permitindo analisar a qualidade preditiva do modelo e a influência
-da escolha do kernel sob diferentes cenários.
+% Para isso, são conduzidos experimentos em dados simulados, nos quais é possível controlar a estrutura geradora,
+% e em bases de dados reais amplamente utilizadas na literatura. A avaliação é realizada principalmente por
+% meio do Integrated Brier Score (IBS), permitindo analisar a qualidade preditiva do modelo e a influência
+% da escolha do kernel sob diferentes cenários.
 
-\section{Objetivo do Trabalho}
+% \section{Objetivo do Trabalho}
 
-O objetivo deste trabalho é apresentar os fundamentos teóricos e os principais resultados relacionados
-à proposta de uma extensão do modelo de tempo de promoção, de modo que seja possível a incorporação de funções
-kernel na modelagem da fração de cura.
+% O objetivo deste trabalho é apresentar os fundamentos teóricos e os principais resultados relacionados
+% à proposta de uma extensão do modelo de tempo de promoção, de modo que seja possível a incorporação de funções
+% kernel na modelagem da fração de cura.
 
-\section{Organização do Trabalho}
+% \section{Organização do Trabalho}
 
-Este trabalho está estruturado da seguinte forma. No Capítulo 2 são apresentados fundamentos de análise de sobrevivência,
-incluindo noções de censura, funções de sobrevivência, modelo de Cox, além de descrever brevemente modelos com
-fração de cura. No Capítulo 3, são introduzidos alguns conceitos que fundamentam métodos baseados em kernel. Dessa forma,
-são apresentadas definições como espaços de Hilbert, kernels positivos definidos e alguns kernels principais.
+% Este trabalho está estruturado da seguinte forma. No Capítulo 2 são apresentados fundamentos de análise de sobrevivência,
+% incluindo noções de censura, funções de sobrevivência, modelo de Cox, além de descrever brevemente modelos com
+% fração de cura. No Capítulo 3, são introduzidos alguns conceitos que fundamentam métodos baseados em kernel. Dessa forma,
+% são apresentadas definições como espaços de Hilbert, kernels positivos definidos e alguns kernels principais.
 
-No Capítulo 4, é detalhada a metodologia adotada, abrangendo os recursos computacionais utilizados,
-particionamento dos dados, a geração de dados simulados com fração de cura. O Capítulo 5 apresenta
-e discute os resultados obtidos tanto em dados simulados quanto em dados reais. Por fim, o Capítulo 6
-apresenta as conclusões do trabalho.
+% No Capítulo 4, é detalhada a metodologia adotada, abrangendo os recursos computacionais utilizados,
+% particionamento dos dados, a geração de dados simulados com fração de cura. O Capítulo 5 apresenta
+% e discute os resultados obtidos tanto em dados simulados quanto em dados reais. Por fim, o Capítulo 6
+% apresenta as conclusões do trabalho.
