@@ -288,147 +288,147 @@ population cure fraction.
 
 The formulation of long-term survival models considered in this work follows the
 extension proposed by \citeonline{rodrigues2009unification}.
-In this extrension, the occurrence of the event of interest is represented through a
+In this extension, the occurrence of the event of interest is represented through a
 collection of competing causes. Let $N$ be a random variable denoting the number of
-competing causes related to the occurrence of an interesting event with the following
-probability distribution
+competing causes related to the occurrence of the event of interest, with probability
+distribution
 \begin{equation}
 \label{eq:N_distribution}
 p_n=P(N=n), \qquad n=0,1,2,\ldots.
 \end{equation}
 
 Conditional on $N=n$, let $Z_1,\ldots,Z_n$ denote the latent times to the event
-associated with these causes, assumed to be independent random variables with
-proper survival function $S(t)$ and does not depend of N. In order to include those
-individuals that are not susceptible to the event occurrence, the observed event time
-is then defined as the minimum among the latent times,
+associated with these causes. Assume that these random variables are independent and
+identically distributed, with proper survival function $S(t)$ that does not depend on
+$N$. In order to include individuals who are not susceptible to the event, the event
+time is defined as the minimum among the latent times,
 \begin{equation}
 \label{eq:latent_event_time}
 T=\min\{Z_1,\ldots,Z_N\},
 \end{equation}
-with $P\left(Z_{0} = \infty\right) = 1$.
+with the convention that $T=\infty$ when $N=0$.
 
-Given the previous definitions, let $\{a_n\}$ be a real number sequence and
-$s \in \left[0,1\right]$. Therefore, the generating function \cite{feller1971introduction} $A\left(s\right)$ of the
-sequence $\{a_n\}$ is given by
+Given the previous definitions, let $\{a_n\}$ be a real-valued sequence and
+$s\in[0,1]$. The generating function \cite{feller1971introduction}, denoted by
+$A(s)$, of the sequence $\{a_n\}$ is given by
 \begin{equation}
-A\left(s\right) = a_{0} + a_{1} s + a_{2} s^2 + \ldots \text{.}
+\label{eq:generating_function}
+A(s)=a_0+a_1s+a_2s^2+\ldots.
 \end{equation}
 
-The survival function of the random variable $T$ is then obtained by,
+The survival function of the random variable $T$ is then obtained as
 \begin{eqnarray}
 \label{eq:long_term_survival}
-S_{p}(t) &=& P[N = 0] + P[Z_1 > t,Z_2 > t, ...,Z_N > t,N \geq 1] \nonumber \\
-&=& P[N = 0] + \sum_{n=1}^{\infty} P[N = n]P[Z_1 > t,Z_2 > t, ...,Z_N > t] \nonumber \\
-&=& p_0 + \sum_{n=1}^{\infty} p_n{S(t)}^n \nonumber \\
-&=& A(S(t)),
+S_p(t) &=& P(N=0) + P(Z_1>t,Z_2>t,\ldots,Z_N>t,N\geq1) \nonumber \\
+&=& P(N=0) + \sum_{n=1}^{\infty}P(N=n)
+P(Z_1>t,Z_2>t,\ldots,Z_n>t) \nonumber \\
+&=& p_0+\sum_{n=1}^{\infty}p_n\{S(t)\}^n \nonumber \\
+&=& A\left(S(t)\right),
 \end{eqnarray}
-Therefore, if $A(s)=\sum_{n=0}^{\infty}p_ns^n$ denotes the probability generating
-function of $N$, the long-term survival function can be written compactly as
-\begin{equation}
-\label{eq:long_term_survival_pgf}
-S_p(t)=A\{S(t)\}.
-\end{equation}
+where $A(\cdot)$ is the generating function associated with the probability
+mass function $\{p_n\}$, as defined in Equation \eqref{eq:generating_function},
+and $S(t)$ is a proper survival function. Since $\lim_{t\rightarrow0}S(t)=1$ and
+$\lim_{t\rightarrow\infty}S(t)=0$, it follows that $\lim_{t\rightarrow\infty}S_p(t) = A(0) = P(N=0) = p_0$.
 
-An important consequence of this formulation is obtained by considering the limit as
-$t\rightarrow\infty$. Since $S(t)$ is a proper survival function, $\lim_{t\rightarrow\infty}S(t)=0$,
-and hence
-\begin{equation}
-\label{eq:long_term_limit}
-\lim_{t\rightarrow\infty}S_p(t)
-=
-A(0)
-=
-p_0.
-\end{equation}
-Thus, $p_0$ is precisely the long-term survival probability and provides a direct
-interpretation of the proportion of individuals who are not susceptible to the event of
-interest.
+Thus, when $p_0>0$, the long-term survival function has a positive limiting value,
+which can be interpreted as the proportion of individuals in the population who are
+not susceptible to the event of interest, i.e., the cure fraction. Consequently,
+$S_p(t)$ is an improper survival function. It is a non-increasing function and satisfies
+$S_p(0)=1$.
 
-\section{Modelos de Longa Duração}
-
-Existem dados de sobrevivência em que uma porcentagem dos indivíduos não apresentará a ocorrência de um evento,
-mesmo se acompanhados por um longo período de tempo. Neste caso, diz-se que os indivíduos são imunes, ou curados,
-ao evento de interesse. Tem-se assim a análise de sobrevivência com dados de longa duração.
-
-Diferentemente dos modelos tradicionais de sobrevivência, em que se assume que todos os indivíduos eventualmente
-experimentarão o evento de interesse, nos modelos de longa duração admite-se a existência de uma fração da população
-para a qual o evento nunca ocorrerá. Essa característica é usualmente denominada fração de cura.
-
-Seja $T$ uma variável aleatória representando o tempo até a ocorrência do evento. Em modelos clássicos de sobrevivência,
-a função de sobrevivência é definida por
-\[
-S(t)=P(T>t), \quad t\geq 0,
-\]
-satisfazendo $\lim_{t\to\infty}S(t)=0$. Entretanto, em modelos com fração de cura, essa condição deixa de valer, pois
-há uma probabilidade positiva de o evento nunca ocorrer. Assim, a função de sobrevivência torna-se imprópria, isto é,
-\[
-\lim_{t\to\infty}S(t)=p_0 > 0,
-\]
-em que $p_0$ representa a fração de indivíduos curados.
-
-Equivalentemente, pode-se escrever a função de sobrevivência populacional como
-\[
-S_{pop}(t)=p_0+(1-p_0)S_0(t),
-\]
-em que $S_0(t)$ representa a função de sobrevivência dos indivíduos suscetíveis ao evento. Nessa formulação,
-a população é vista como uma mistura entre indivíduos curados e suscetíveis.
-
-Os modelos de fração de cura podem ser classificados em duas abordagens principais. Isto é, os modelos de mistura e os modelos de não mistura. Nos modelos de mistura,
-a fração de cura é modelada explicitamente como uma combinação entre curados e suscetíveis. Já nos modelos de não mistura,
-a estrutura da função de sobrevivência incorpora a fração de cura de forma implícita.
-
-Entre os modelos de não mistura, destaca-se o modelo de tempo de promoção,
-também conhecido como modelo de risco acumulado limitado.
-
-\subsection{Modelo de Tempo de Promoção}
-
-De uma forma geral a ideia básica do modelo unificado de fração de cura está baseada na noção de ocorrência do evento de interesse em um processo em dois estágios:
-
-Estágio de iniciação. Seja $N$ uma variável aleatória representando o número de causas ou riscos competitivos da ocorrência do evento de interesse. A causa de ocorrência do evento é desconhecida, e a variável $N$ não é observada, com distribuição de probabilidade $p_n$ e sua cauda dadas, respectivamente, por
+The probability density function and the hazard rate function associated with the long-term
+survival function are given, respectively, by
 \begin{eqnarray}
-p_n=P[N=n] \quad \text{e} \quad q_n=P[N>n],
+f_{pop}(t) = f(t)\frac{dA(s)}{ds}|_{s=S(t)}\text{,}
 \end{eqnarray}
-com $n=0,1,2,...$.
-
-Estágio de maturação. Dado $N=n$, sejam $Z_k$, $k=1,...,n$, variáveis aleatórias contínuas (não-negativas) independentes com função distribuição acumulada $F(z)=1-S(z)$ e independentes de $N$, que representam o tempo de ocorrência do evento de interesse devido à $k$-ésima causa.
-Afim de incluir os indivíduos que não são suscetíveis ao evento de interesse, seu tempo de ocorrência é definido como
 \begin{eqnarray}
-T = \min(Z_0,Z_1,Z_2, ...,Z_N)
+h_{pop}(t) = \frac{f_{pop}(t)}{S_{pop}(t)}=f(t)\frac{\frac{dA(s)}{ds}|_{s=S(t)}}{S_{pop}(t)}.
 \end{eqnarray}
-em que $P[Z_0 = \infty] = 1$, admitindo a possibilidade que uma proporção $p_0$ da população não apresenta a ocorrência do evento de interesse, $T$ é uma variável aleatória observável ou censurada e $Z_j$ e $N$ são variáveis latentes.
 
-Seja $\{a_n\}$ uma sequência de números reais. Se $s$ pertence ao intervalo $[0, 1]$
-\begin{eqnarray}
-A(s) = a_0 + a_1s + a_2s^2 + \cdots
-\end{eqnarray}
-converge, então $A(s)$ é definida como a função geradora da sequência $\{a_n\}$.
+% \section{Modelos de Longa Duração}
 
-Se $a = a_n = p_n = p$, temos que $A_p(s) = E[s^N]$. Observe que a função geradora de probabilidades é a funçãao geradora de momentos da variável aleatória $N$ calculada no ponto $\log(s)$, isto é, $A_p(s) = E[\exp{\log(s)N}]$.
+% Existem dados de sobrevivência em que uma porcentagem dos indivíduos não apresentará a ocorrência de um evento,
+% mesmo se acompanhados por um longo período de tempo. Neste caso, diz-se que os indivíduos são imunes, ou curados,
+% ao evento de interesse. Tem-se assim a análise de sobrevivência com dados de longa duração.
 
-A função de sobrevivência da variável aleatória $T$ (função de sobrevivência da população) será indicada por
-\begin{eqnarray}
-S_{pop}(t) &=& P[N = 0] + P[Z_1 > t,Z_2 > t, ...,Z_N > t,N \geq 1] \nonumber \\
-&=& P[N = 0] + \sum_{n=1}^{\infty} P[N = n]P[Z_1 > t,Z_2 > t, ...,Z_N > t] \nonumber \\
-&=& p_0 + \sum_{n=1}^{\infty} p_n{S(t)}^n \nonumber \\
-&=& A(S(t)),
-\end{eqnarray}
-sendo que $A(\cdot)$ é a função geradora da sequência $p_n$. Ou seja, a função de sobrevivência da variável aleatória $T$, correspondente a um modelo de longa duração em dois estágios, é uma composição da função geradora de probabilidades e a função de sobrevivência. A função de sobrevivência de longa duração em dois estágios $S_{pop}(t)$ não é uma função de sobrevivência própria.
+% Diferentemente dos modelos tradicionais de sobrevivência, em que se assume que todos os indivíduos eventualmente
+% experimentarão o evento de interesse, nos modelos de longa duração admite-se a existência de uma fração da população
+% para a qual o evento nunca ocorrerá. Essa característica é usualmente denominada fração de cura.
 
-Observe que, para a função de sobrevivência própria, $\lim_{t\rightarrow 0}S(t) = 1$ e $\lim_{t\rightarrow \infty}S(t) = 0$. Já para a função de sobrevivência imprópria, $\lim_{t\rightarrow 0}S(t) = 1$ e $\lim_{t\rightarrow \infty}S_{pop}(t) = P[N = 0] = p_0$. Dessa forma, $p_0$ é a proporção de não ocorrências do evento de interesse na população, ou seja, a fração de cura.
+% Seja $T$ uma variável aleatória representando o tempo até a ocorrência do evento. Em modelos clássicos de sobrevivência,
+% a função de sobrevivência é definida por
+% \[
+% S(t)=P(T>t), \quad t\geq 0,
+% \]
+% satisfazendo $\lim_{t\to\infty}S(t)=0$. Entretanto, em modelos com fração de cura, essa condição deixa de valer, pois
+% há uma probabilidade positiva de o evento nunca ocorrer. Assim, a função de sobrevivência torna-se imprópria, isto é,
+% \[
+% \lim_{t\to\infty}S(t)=p_0 > 0,
+% \]
+% em que $p_0$ representa a fração de indivíduos curados.
 
-A função de sobrevivência populacional possui as seguintes propriedades:
-\vspace{0.5cm}
+% Equivalentemente, pode-se escrever a função de sobrevivência populacional como
+% \[
+% S_{pop}(t)=p_0+(1-p_0)S_0(t),
+% \]
+% em que $S_0(t)$ representa a função de sobrevivência dos indivíduos suscetíveis ao evento. Nessa formulação,
+% a população é vista como uma mistura entre indivíduos curados e suscetíveis.
 
-$\bullet$ Se $p_0=1$, então $S_{pop}(t) = S(t)$;
+% Os modelos de fração de cura podem ser classificados em duas abordagens principais. Isto é, os modelos de mistura e os modelos de não mistura. Nos modelos de mistura,
+% a fração de cura é modelada explicitamente como uma combinação entre curados e suscetíveis. Já nos modelos de não mistura,
+% a estrutura da função de sobrevivência incorpora a fração de cura de forma implícita.
 
-$\bullet$ $S_{pop}(0) = 1$;
+% Entre os modelos de não mistura, destaca-se o modelo de tempo de promoção,
+% também conhecido como modelo de risco acumulado limitado.
 
-$\bullet$ $S_{pop}(t)$ é não crescente;
+% \subsection{Modelo de Tempo de Promoção}
 
-$\bullet$ $\lim_{t \rightarrow \infty}S_{pop}(t) = p_0$
+% De uma forma geral a ideia básica do modelo unificado de fração de cura está baseada na noção de ocorrência do evento de interesse em um processo em dois estágios:
 
-\vspace{0.5cm}
+% Estágio de iniciação. Seja $N$ uma variável aleatória representando o número de causas ou riscos competitivos da ocorrência do evento de interesse. A causa de ocorrência do evento é desconhecida, e a variável $N$ não é observada, com distribuição de probabilidade $p_n$ e sua cauda dadas, respectivamente, por
+% \begin{eqnarray}
+% p_n=P[N=n] \quad \text{e} \quad q_n=P[N>n],
+% \end{eqnarray}
+% com $n=0,1,2,...$.
+
+% Estágio de maturação. Dado $N=n$, sejam $Z_k$, $k=1,...,n$, variáveis aleatórias contínuas (não-negativas) independentes com função distribuição acumulada $F(z)=1-S(z)$ e independentes de $N$, que representam o tempo de ocorrência do evento de interesse devido à $k$-ésima causa.
+% Afim de incluir os indivíduos que não são suscetíveis ao evento de interesse, seu tempo de ocorrência é definido como
+% \begin{eqnarray}
+% T = \min(Z_0,Z_1,Z_2, ...,Z_N)
+% \end{eqnarray}
+% em que $P[Z_0 = \infty] = 1$, admitindo a possibilidade que uma proporção $p_0$ da população não apresenta a ocorrência do evento de interesse, $T$ é uma variável aleatória observável ou censurada e $Z_j$ e $N$ são variáveis latentes.
+
+% Seja $\{a_n\}$ uma sequência de números reais. Se $s$ pertence ao intervalo $[0, 1]$
+% \begin{eqnarray}
+% A(s) = a_0 + a_1s + a_2s^2 + \cdots
+% \end{eqnarray}
+% converge, então $A(s)$ é definida como a função geradora da sequência $\{a_n\}$.
+
+% Se $a = a_n = p_n = p$, temos que $A_p(s) = E[s^N]$. Observe que a função geradora de probabilidades é a funçãao geradora de momentos da variável aleatória $N$ calculada no ponto $\log(s)$, isto é, $A_p(s) = E[\exp{\log(s)N}]$.
+
+% A função de sobrevivência da variável aleatória $T$ (função de sobrevivência da população) será indicada por
+% \begin{eqnarray}
+% S_{pop}(t) &=& P[N = 0] + P[Z_1 > t,Z_2 > t, ...,Z_N > t,N \geq 1] \nonumber \\
+% &=& P[N = 0] + \sum_{n=1}^{\infty} P[N = n]P[Z_1 > t,Z_2 > t, ...,Z_N > t] \nonumber \\
+% &=& p_0 + \sum_{n=1}^{\infty} p_n{S(t)}^n \nonumber \\
+% &=& A(S(t)),
+% \end{eqnarray}
+% sendo que $A(\cdot)$ é a função geradora da sequência $p_n$. Ou seja, a função de sobrevivência da variável aleatória $T$, correspondente a um modelo de longa duração em dois estágios, é uma composição da função geradora de probabilidades e a função de sobrevivência. A função de sobrevivência de longa duração em dois estágios $S_{pop}(t)$ não é uma função de sobrevivência própria.
+
+% Observe que, para a função de sobrevivência própria, $\lim_{t\rightarrow 0}S(t) = 1$ e $\lim_{t\rightarrow \infty}S(t) = 0$. Já para a função de sobrevivência imprópria, $\lim_{t\rightarrow 0}S(t) = 1$ e $\lim_{t\rightarrow \infty}S_{pop}(t) = P[N = 0] = p_0$. Dessa forma, $p_0$ é a proporção de não ocorrências do evento de interesse na população, ou seja, a fração de cura.
+
+% A função de sobrevivência populacional possui as seguintes propriedades:
+% \vspace{0.5cm}
+
+% $\bullet$ Se $p_0=1$, então $S_{pop}(t) = S(t)$;
+
+% $\bullet$ $S_{pop}(0) = 1$;
+
+% $\bullet$ $S_{pop}(t)$ é não crescente;
+
+% $\bullet$ $\lim_{t \rightarrow \infty}S_{pop}(t) = p_0$
+
+% \vspace{0.5cm}
 
 % As funções de densidade e de risco associadas à função de sobrevivência de longa duração são dadas, respectivamente, por
 % \begin{eqnarray}
@@ -521,17 +521,17 @@ $\bullet$ $\lim_{t \rightarrow \infty}S_{pop}(t) = p_0$
 
 % Dessa forma, de (\ref{Spop_Poi}) tem-se a fração de cura dada por $p_{0}=\displaystyle \lim_{t\rightarrow \infty}{S_{pop}(t)} = \exp(-\theta)$.
 
-%As funções de sobrevivência, densidade e de risco para a população em risco são dadas respectivamente, por
-%\begin{align}
-%	S^{*}(t) = \frac{\exp(-\theta F(t)) - \exp(-\theta)}{1- \exp(-\theta) }, \label{c5}
-%\end{align}
-%\[
-%	f^{*}(t) =  \frac{\exp(-\theta F(t))}{1- \exp(-\theta)}\theta f(t)\label{c6}
-%\]
-%e
-%\[
-%	h^{*}(t) = \frac{\exp(-\theta F(t)) }{  \exp(-\theta F(t))- \exp(\theta) }h_{pop}(t). \label{c7}
-%\]
+% As funções de sobrevivência, densidade e de risco para a população em risco são dadas respectivamente, por
+% \begin{align}
+% 	S^{*}(t) = \frac{\exp(-\theta F(t)) - \exp(-\theta)}{1- \exp(-\theta) }, \label{c5}
+% \end{align}
+% \[
+% 	f^{*}(t) =  \frac{\exp(-\theta F(t))}{1- \exp(-\theta)}\theta f(t)\label{c6}
+% \]
+% e
+% \[
+% 	h^{*}(t) = \frac{\exp(-\theta F(t)) }{  \exp(-\theta F(t))- \exp(\theta) }h_{pop}(t). \label{c7}
+% \]
 
 
 
