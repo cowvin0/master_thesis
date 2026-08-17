@@ -1227,3 +1227,139 @@ p^{(k+1)}
 
 \end{algorithmic}
 \end{algorithm}
+
+\begin{algorithm}[H]
+\caption{EM with functional gradient boosting for the GG-KM model -
+$N_i \sim \mathrm{Binomial}(K,\theta_i^*)$.}
+\begin{algorithmic}[1]
+
+\State Initialize
+$
+f^{(0)}(\cdot),
+a^{(0)},
+d^{(0)},
+p^{(0)}
+$
+and choose $\varepsilon>0$, $\varepsilon_{\mathrm{tree}}>0$, and
+the maximum number of trees $M$.
+
+\State Set $k\gets0$.
+
+\Repeat
+
+\State \textbf{E-step:} compute, for $i=1,\ldots,n$,
+
+\[
+\theta_i^{*(k)}
+=
+\frac{\exp\{f^{(k)}(x_i)\}}
+     {1+\exp\{f^{(k)}(x_i)\}},
+\]
+
+\[
+\widehat N_i^{(k+1)}
+=
+\delta_i
++
+(K-\delta_i)
+\frac{
+\theta_i^{*(k)}
+S_{GG}(t_i;a^{(k)},d^{(k)},p^{(k)})
+}{
+1-\theta_i^{*(k)}
++
+\theta_i^{*(k)}
+S_{GG}(t_i;a^{(k)},d^{(k)},p^{(k)})
+}.
+\]
+
+\State \textbf{M-step for $f(x)$:} set $f_0(x)\gets f^{(k)}(x)$ and,
+for $m=1,\ldots,M$, compute
+
+\[
+g_{i,m}
+=
+\widehat N_i^{(k+1)}
+-
+K
+\frac{\exp\{f_{m-1}(x_i)\}}
+     {1+\exp\{f_{m-1}(x_i)\}},
+\]
+
+fit a regression tree $h_m(x)$ to
+$\{(x_i,g_{i,m})\}_{i=1}^n$, and obtain
+
+\[
+\rho_m
+=
+\arg\max_{\rho\geq0}
+\sum_{i=1}^n
+\left[
+\widehat N_i^{(k+1)}
+\{f_{m-1}(x_i)+\rho h_m(x_i)\}
+-
+K\log
+\left(
+1+\exp\{f_{m-1}(x_i)+\rho h_m(x_i)\}
+\right)
+\right].
+\]
+
+\State Update
+
+\[
+f_m(x)=f_{m-1}(x)+\rho_m h_m(x),
+\]
+
+and stop the boosting iterations if
+
+\[
+\frac{1}{n}\sum_{i=1}^n
+|f_m(x_i)-f_{m-1}(x_i)|
+<\varepsilon_{\mathrm{tree}}.
+\]
+
+\State Set $f^{(k+1)}(x)\gets f_m(x)$.
+
+\State \textbf{M-step for the Generalized Gamma parameters:}
+
+\[
+(a^{(k+1)},d^{(k+1)},p^{(k+1)})
+=
+\arg\max_{a,d,p}
+\sum_{i=1}^n
+\left[
+\delta_i\log f_{GG}(t_i;a,d,p)
++
+(\widehat N_i^{(k+1)}-\delta_i)
+\log S_{GG}(t_i;a,d,p)
+\right].
+\]
+
+\State Compute
+
+\[
+\Delta^{(k+1)}
+=
+\left|
+\ell_P^{(k+1)}-\ell_P^{(k)}
+\right|,
+\]
+
+where
+
+\[
+\ell_P^{(k+1)}
+=
+\ell_P
+\left(
+f^{(k+1)},a^{(k+1)},d^{(k+1)},p^{(k+1)}
+\right).
+\]
+
+\State $k\gets k+1$.
+
+\Until{$\Delta^{(k+1)}<\varepsilon$}
+
+\end{algorithmic}
+\end{algorithm}
