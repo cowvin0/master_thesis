@@ -346,11 +346,84 @@ f_{p}(t) = f(t)\frac{dA(s)}{ds}|_{s=S(t)}\text{,}
 h_{p}(t) = \frac{f_{p}(t)}{S_{p}(t)}=f(t)\frac{\frac{dA(s)}{ds}|_{s=S(t)}}{S_{p}(t)}.
 \end{eqnarray}
 
-The methods developed in this work consider different distributions for the latent
-variable $N$, representing the number of competing causes. Specifically, the Bernoulli,
-Binomial, Negative Binomial, and Poisson distributions are considered. The corresponding
-results are presented in Table (ADD TABLE REFERENCE HERE), and their derivations are
-given below, beginning with the Bernoulli distribution.
+
+\begin{table}[htb]
+    \centering
+    \caption{Long-term survival, density, hazard, and cure fraction for the different
+    distributions considered for the latent number of competing causes $N$.}
+    \label{tab:long_term_models}
+    \scriptsize
+    \renewcommand{\arraystretch}{1.15}
+    \setlength{\tabcolsep}{3pt}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{c|c|c|c|c}
+        \hline
+        Distribution of $N$
+        & $S_p(t)$
+        & $f_p(t)$
+        & $h_p(t)$
+        & $p_0$ \\
+        \hline
+
+        Bernoulli$(\theta)$
+        &
+        $1-\theta+\theta S(t)$
+        &
+        $\theta f(t)$
+        &
+        $\dfrac{\theta f(t)}
+        {1-\theta+\theta S(t)}$
+        &
+        $1-\theta$
+        \\[2mm]
+
+        Binomial$(K,\theta^* = \frac{\theta}{1 + \theta})$
+        &
+        $\left[1-\theta^*+\theta^*S(t)\right]^K$
+        &
+        $K\theta^*f(t)
+        \left[1-\theta^*+\theta^*S(t)\right]^{K-1}$
+        &
+        $\dfrac{K\theta^*f(t)}
+        {1-\theta^*+\theta^*S(t)}$
+        &
+        $(1-\theta^*)^K$
+        \\[2mm]
+
+        Negative Binomial$(\alpha,\theta)$
+        &
+        $\left[1+\alpha\theta\{1-S(t)\}\right]^{-1/\alpha}$
+        &
+        $\theta f(t)
+        \left[1+\alpha\theta\{1-S(t)\}\right]^{-1/\alpha-1}$
+        &
+        $\dfrac{\theta f(t)}
+        {1+\alpha\theta\{1-S(t)\}}$
+        &
+        $(1+\alpha\theta)^{-1/\alpha}$
+        \\[2mm]
+
+        Poisson$(\theta)$
+        &
+        $\exp\{-\theta[1-S(t)]\}$
+        &
+        $\theta f(t)\exp\{-\theta[1-S(t)]\}$
+        &
+        $\theta f(t)$
+        &
+        $e^{-\theta}$
+        \\[2mm]
+
+        \hline
+    \end{tabular}%
+    }
+\end{table}
+
+The methods developed in this work consider different distributions for the latent variable
+$N$, representing the number of competing causes. Specifically, the Bernoulli, Binomial, Negative
+Binomial, and Poisson distributions are considered. The corresponding results are summarized in
+Table~\ref{tab:long_term_models}, and their derivations are given below, beginning
+with the Bernoulli distribution.
 
 \subsection{Bernoulli distribution}
 
@@ -628,6 +701,4 @@ h_p(t)
 \end{equation}
 
 The Poisson specification is particularly important in long-term survival analysis
-because it leads to the promotion-time cure model \cite{yakovlev1996stochastic}. Thus,
-the Poisson distribution provides a direct connection between the general latent
-competing-cause formulation and the promotion-time approach to cure-rate modeling.
+because it leads to the promotion-time cure model \cite{yakovlev1996stochastic}.
