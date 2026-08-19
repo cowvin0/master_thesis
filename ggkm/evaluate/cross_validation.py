@@ -4,12 +4,12 @@ import numpy as np
 from tqdm.auto import tqdm
 
 from sklearn.model_selection import StratifiedKFold
-from utils.metrics import uno_c_index_rmst, integrated_brier_score, auc_cure
-from utils.optuna_utils import (
+from ggkm.utils.metrics import uno_c_index_rmst, integrated_brier_score, auc_cure
+from ggkm.utils.optuna_utils import (
     _suggest_kernel_ranges,
     _kernel_ranges_from_best_params,
 )
-from evaluate.simulated_data import simulate_pcm
+from ggkm.evaluate.simulated_data import simulate_pcm
 
 
 def cross_validate_pcm(
@@ -525,7 +525,7 @@ def cross_validate_gg_km(
                 n_trials=n_trials,
                 show_progress_bar=False,
                 callbacks=[callback],
-                n_jobs=-1,
+                n_jobs=n_jobs,
             )
 
         finally:
