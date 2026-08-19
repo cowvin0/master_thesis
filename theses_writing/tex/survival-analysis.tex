@@ -377,7 +377,7 @@ h_{p}(t) = \frac{f_{p}(t)}{S_{p}(t)}=f(t)\frac{\frac{dA(s)}{ds}|_{s=S(t)}}{S_{p}
         $1-\theta$
         \\[2mm]
 
-        Binomial$(K,\theta^* = \frac{\theta}{1 + \theta})$
+        $\text{Binomial}\left(K,\theta^* = \frac{\theta}{1 + \theta}\right)$
         &
         $\left[1-\theta^*+\theta^*S(t)\right]^K$
         &
@@ -392,13 +392,13 @@ h_{p}(t) = \frac{f_{p}(t)}{S_{p}(t)}=f(t)\frac{\frac{dA(s)}{ds}|_{s=S(t)}}{S_{p}
 
         Negative Binomial$(\alpha,\theta)$
         &
-        $\left[1+\alpha\theta\{1-S(t)\}\right]^{-1/\alpha}$
+        $\{1+\alpha\theta\left[1-S(t)\right]\}^{-1/\alpha}$
         &
         $\theta f(t)
-        \left[1+\alpha\theta\{1-S(t)\}\right]^{-1/\alpha-1}$
+        \{1+\alpha\theta\left[1-S(t)\right]\}^{-1/\alpha-1}$
         &
         $\dfrac{\theta f(t)}
-        {1+\alpha\theta\{1-S(t)\}}$
+        {1+\alpha\theta\left[1-S(t)\right]}$
         &
         $(1+\alpha\theta)^{-1/\alpha}$
         \\[2mm]
@@ -485,7 +485,7 @@ be a random variable representing the number of latent competing causes associat
 the occurrence of the event of interest, following a Binomial distribution with
 parameters $K$ and $\theta^*\in(0,1)$, i.e.,
 \[
-N\sim\mathrm{Binomial}(K,\theta^*),
+N\sim\mathrm{Binomial}\left(K,\theta^* = \frac{\theta}{1 + \theta}\right),
 \]
 where $K$ is a positive integer. Its probability mass function is given by
 \begin{equation}
@@ -493,7 +493,7 @@ where $K$ is a positive integer. Its probability mass function is given by
 P(N=n)
 =
 \binom{K}{n}
-(\theta^*)^n(1-\theta^*)^{K-n},
+\left(\theta^*\right)^n\left(1-\theta^*\right)^{K-n},
 \qquad n=0,1,\ldots,K.
 \end{equation}
 
@@ -502,7 +502,7 @@ The probability generating function of $N$ is
 \label{eq:binomial_pgf}
 A(s)
 =
-(1-\theta^*+\theta^*s)^K.
+\left(1-\theta^*+\theta^*s\right)^K.
 \end{equation}
 Consequently, the corresponding long-term survival function is
 \begin{equation}
@@ -519,9 +519,9 @@ The cure fraction is obtained by taking the limit as $t\rightarrow\infty$,
 \label{eq:binomial_cure_fraction}
 p_0
 =
-\lim_{t\rightarrow\infty}S_p(t)
+\lim_{t\rightarrow\infty}S_p\left(t\right)
 =
-(1-\theta^*)^K.
+\left(1-\theta^*\right)^K.
 \end{equation}
 
 Thus, increasing $K$, while keeping $\theta^*$ fixed, decreases the cure fraction, since
@@ -532,20 +532,21 @@ Differentiating \eqref{eq:binomial_survival} with respect to $t$, the correspond
 density function is
 \begin{equation}
 \label{eq:binomial_density}
-f_p(t)
+f_p\left(t\right)
 =
-K\theta^*f(t)
-\left[1-\theta^*+\theta^*S(t)\right]^{K-1},
+K\theta^*f\left(t\right)
+\left[1-\theta^*+\theta^*S\left(t\right)\right]^{K-1},
 \end{equation}
-where $f(t)=-S'(t)$ is the density associated with the proper survival function $S(t)$.
+where $f\left(t\right)=-S'\left(t\right)$ is the density associated with the proper survival function $S(t)$.
 Therefore, the corresponding hazard rate function is
 \begin{equation}
 \label{eq:binomial_hazard}
-h_p(t)
+h_p\left(t\right)
 =
-\frac{K\theta^*f(t)}
-{1-\theta^*+\theta^*S(t)}.
+\frac{K\theta^*f\left(t\right)}
+{1-\theta^*+\theta^*S\left(t\right)}.
 \end{equation}
+
 
 \subsection{Negative Binomial distribution}
 
@@ -555,18 +556,18 @@ distribution with parameters $\alpha$ and $\theta$, where $\theta>0$ and
 $\alpha\theta>-1$. Its probability mass function can be written as
 \begin{equation}
 \label{eq:negative_binomial_pmf}
-P(N=n)
+P\left(N=n\right)
 =
-\frac{\Gamma(\alpha^{-1}+n)}
-{\Gamma(\alpha^{-1})n!}
+\frac{\Gamma\left(\alpha^{-1}+n\right)}
+{\Gamma\left(\alpha^{-1}\right)n!}
 \left(\frac{\alpha\theta}{1+\alpha\theta}\right)^n
-(1+\alpha\theta)^{-1/\alpha},
+\left(1+\alpha\theta\right)^{-1/\alpha},
 \qquad n=0,1,2,\ldots,
 \end{equation}
 with the corresponding probability generating function
 \begin{equation}
 \label{eq:negative_binomial_pgf}
-A(s)
+A\left(s\right)
 =
 \left[1+\alpha\theta(1-s)\right]^{-1/\alpha}.
 \end{equation}
@@ -574,36 +575,28 @@ A(s)
 The long-term survival function is consequently given by
 \begin{equation}
 \label{eq:negative_binomial_survival}
-S_p(t)
+S_p\left(t\right)
 =
-\left[1+\alpha\theta\{1-S(t)\}\right]^{-1/\alpha}.
+\{1+\alpha\theta\left[1-S\left(t\right)\right]\}^{-1/\alpha}.
 \end{equation}
 Its cure fraction is
 \begin{equation}
 \label{eq:negative_binomial_cure_fraction}
 p_0
 =
-\lim_{t\rightarrow\infty}S_p(t)
+\lim_{t\rightarrow\infty}S_p\left(t\right)
 =
-(1+\alpha\theta)^{-1/\alpha}.
+\left(1+\alpha\theta\right)^{-1/\alpha}.
 \end{equation}
 
-Under this parametrization,
-\[
-E[N]=\theta
-\qquad\text{and}\qquad
-\operatorname{Var}(N)=\theta+\alpha\theta.
-\]
+Under this parametrization, $E\left[N\right]=\theta$ and $\operatorname{Var}\left(N\right)=\theta+\alpha\theta$.
 Therefore, the parameter $\alpha$ controls the dispersion of the number of latent
 competing causes. For $\alpha>0$, the distribution is overdispersed relative to a
 Poisson distribution, whereas $\alpha<0$ corresponds to underdispersion, subject to the
 condition $\alpha\theta>-1$.
 
 This parametrization is particularly useful because it provides a continuous connection
-among the Binomial, Poisson, and Negative Binomial distributions. Specifically, when
-\[
-\alpha=-\frac{1}{K},
-\]
+among the Binomial, Poisson, and Negative Binomial distributions. Specifically, when $\alpha=-1/K$,
 the Negative Binomial distribution reduces to a Binomial distribution with parameters
 $K$ and $\theta/K$, provided that $0\leq\theta/K\leq1$. As $\alpha\rightarrow0$, the
 distribution converges to a Poisson distribution with parameter $\theta$. For
@@ -616,7 +609,7 @@ with the long-term survival distribution is
 f_p(t)
 =
 \theta f(t)
-\left[1+\alpha\theta\{1-S(t)\}\right]^{-1/\alpha-1},
+\{1+\alpha\theta\left[1-S(t)\right]\}^{-1/\alpha-1},
 \end{equation}
 and its hazard rate function is
 \begin{equation}
@@ -624,7 +617,7 @@ and its hazard rate function is
 h_p(t)
 =
 \frac{\theta f(t)}
-{1+\alpha\theta\{1-S(t)\}}.
+{1+\alpha\theta\left[1-S(t)\right]}.
 \end{equation}
 
 The flexibility of this formulation is particularly relevant for long-term survival
@@ -638,10 +631,7 @@ model.
 
 The Poisson distribution is obtained as the limiting case of the Negative Binomial
 formulation when $\alpha\rightarrow0$. Let $N$ follow a Poisson distribution with
-parameter $\theta>0$, i.e.,
-\[
-N\sim\mathrm{Poisson}(\theta).
-\]
+parameter $\theta>0$, i.e., $N\sim\mathrm{Poisson}(\theta)$.
 Its probability mass function is
 \begin{equation}
 \label{eq:poisson_pmf}
@@ -650,55 +640,63 @@ P(N=n)
 \frac{e^{-\theta}\theta^n}{n!},
 \qquad n=0,1,2,\ldots,
 \end{equation}
-and its probability generating function is
-\begin{equation}
-\label{eq:poisson_pgf}
-A(s)
-=
-\exp\{\theta(s-1)\}.
-\end{equation}
-
-Therefore, the corresponding long-term survival function is
+and its probability generating function is $A(s) = \exp\{\theta(s-1)\}$. Therefore, the
+corresponding long-term survival function is
 \begin{equation}
 \label{eq:poisson_survival}
 S_p(t)
 =
 A\left(S(t)\right)
 =
-\exp\left\{-\theta[1-S(t)]\right\}.
-\end{equation}
-Since $F(t)=1-S(t)$, this can equivalently be written as
-\begin{equation}
-S_p(t)
+\exp\left\{-\theta[1-S\left(t\right)]\right\}
 =
-\exp\{-\theta F(t)\}.
+\exp\left\{-\theta F\left(t\right)\right\}.
 \end{equation}
 
-The cure fraction is given by
-\begin{equation}
-\label{eq:poisson_cure_fraction}
-p_0
-=
-\lim_{t\rightarrow\infty}S_p(t)
-=
-e^{-\theta}.
-\end{equation}
-
-The corresponding density function is
-\begin{equation}
-\label{eq:poisson_density}
-f_p(t)
-=
-\theta f(t)
-\exp\{-\theta F(t)\},
-\end{equation}
-and the associated hazard rate function is
-\begin{equation}
-\label{eq:poisson_hazard}
-h_p(t)
-=
-\theta f(t).
-\end{equation}
-
-The Poisson specification is particularly important in long-term survival analysis
+The cure fraction is given by $p_0 = \lim_{t\rightarrow\infty}S_p(t) = e^{-\theta}$,
+the corresponding density function is $f_p\left(t\right) = \theta f\left(t\right) \exp\{-\theta F\left(t\right)\}$,
+and the associated hazard rate function is $h_p\left(t\right) = \theta f\left(t\right)$. The Poisson specification is particularly important in long-term survival analysis
 because it leads to the promotion-time cure model \cite{yakovlev1996stochastic}.
+
+The Kaplan--Meier estimator (KME) is one of the most widely used nonparametric
+methods for estimating the survival function in the presence of right-censored
+observations. In the context of long-term survival analysis, the estimated survival
+curve can also provide an indication of the presence of a cure fraction when it
+approaches a positive plateau at large observed times. Although the Kaplan--Meier
+estimator does not, by itself, identify or consistently estimate the cure fraction
+without additional assumptions regarding the follow-up period, it provides a useful
+nonparametric reference for assessing whether a long-term survival pattern is
+supported by the data. In this work, the Kaplan--Meier estimator is used for this
+purpose and to assess whether the proposed long-term survival models adequately
+capture the observed survival pattern.
+
+\section{Kaplan--Meier estimator}
+
+The Kaplan--Meier estimator (KME) is one of the most widely used nonparametric
+methods for estimating the survival function in the presence of right-censored
+observations \cite{kaplan1958nonparametric}. Let $\{(t_i,\delta_i)\}_{i=1}^n$
+denote the observed survival data, where $t_i$ is the observed time and
+$\delta_i$ is the censoring indicator, with $\delta_i=1$ indicating an observed
+event and $\delta_i=0$ indicating right censoring. Let
+$t_{(1)}<\cdots<t_{(m)}$ denote the distinct observed event times. If $d_j$
+individuals experience the event at $t_{(j)}$ and $Y_j$ individuals are at risk
+immediately before $t_{(j)}$, the KME is given by
+\begin{equation}
+\label{eq:kaplan_meier}
+\widehat{S}_{KM}(t)
+=
+\prod_{t_{(j)}\leq t}
+\left(1-\frac{d_j}{Y_j}\right).
+\end{equation}
+
+The KME is a step function that changes only at observed event times, while
+censored observations contribute to the risk set up to their censoring times.
+In the context of long-term survival analysis, a survival curve that approaches
+a positive plateau at large follow-up times may provide empirical evidence of a
+nonzero long-term survivor fraction. However, such a plateau should be
+interpreted with caution, as limited follow-up and heavy censoring can also
+produce a positive tail.
+
+In this work, the KME is used as a nonparametric reference for assessing the
+long-term survival pattern in the data and for evaluating whether the proposed
+long-term survival models adequately capture the observed cure fraction.

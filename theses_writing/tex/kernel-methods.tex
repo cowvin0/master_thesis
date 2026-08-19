@@ -1,5 +1,296 @@
 \section{Introduction}
 
+\section{Decision tree}
+
+Árvores de decisão podem ser utilizadas tanto para regressão quanto
+para classificação. Elas servem de base para os modelos baseados em
+árvores empregados neste trabalho, com foco especial nas árvores de
+regressão\footnote{Uma árvore de regressão é um caso específico da
+árvore de decisão, mas para regressão.}. O processo de construção de
+uma árvore se baseia no particionamento recursivo do espaço dos
+preditores, onde cada particionamento é chamado de nó e o resultado
+final é chamado de folha ou nó terminal. Em cada nó, é definida uma
+condição e, caso essa condição seja satisfeita, o resultado será uma das
+folhas desse nó. Caso contrário, o processo segue para o próximo nó e
+verifica a próxima condição, podendo gerar uma folha ou outro nó. Veja
+um exemplo na Figura~\ref{fig:fig-arvore}.
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/mermaid-tree.png}
+	\caption{Exemplo de estrutura de árvore de regressão. A árvore tem cinco folhas e quatro nós internos.}
+    \label{fig:fig-arvore}
+\end{figure}
+
+
+O espaço dos preditores é dividido em \(J\) regiões distintas e
+disjuntas denotadas por \(R_1, R_2, \dots, R_J\). Essas regiões são
+construídas em formato de caixa de forma a minimizar a soma dos
+quadrados dos resíduos. Dessa forma, pode-se modelar a variável resposta
+como uma constante \(c_j\) em cada região \(R_j\). Isto é
+
+\begin{equation}
+f\left(x\right) = \sum^J_{j=1}c_j I\left(x \in R_j \right)\text{.}
+\end{equation}
+
+O estimador para a constante \(c_j\) é encontrado pelo método de mínimos
+quadrados. Assim, deve-se minimizar
+\(\sum_{x_i \in R_j} \left[y_i - f\left(x_i\right)\right]^2\). No
+entanto, perceba que \(f\left(x_i\right)\) está sendo avaliado somente
+em um ponto específico \(x_i\), o que reduzirá \(f\left(x_i\right)\)
+para uma constante \(c_j\). É fácil de se chegar ao resultado se for
+observada a definição da função indicadora \(I\left(x \in R_j\right)\):
+\begin{equation}
+I_{R_j}(x_i) =
+\begin{cases}
+    1,& \text{se } x_i \in R_j \\
+    0,& \text{se } x_i \notin R_j
+\end{cases}\text{.}
+\end{equation}
+
+Como as regiões são disjuntas, \(x_i\) não pode estar simultaneamente em
+duas regiões. Assim, para um ponto específico \(x_i\), apenas um dos
+casos da função indicadora será diferente de 0. Portanto,
+\(f\left(x_i\right) = c_j\). Agora, derivando
+\(\sum_{x_i \in R_j}\left(y_i - c_j\right)^2\) em relação a \(c_j\)
+
+\begin{equation}\phantomsection\label{eq-partialdev}{
+\frac{\partial}{\partial{c_j}}\sum_{x_i \in R_j} \left(y_i - c_j\right)^2 = -2\sum_{x_i \in R_j} \left(y_i - c_j\right)
+}\end{equation} e, ao igualar a Equação~\ref{eq-partialdev} a 0, tem-se
+a seguinte igualdade:
+\begin{equation}
+\sum_{x_i \in R_j} \left(y_i - \hat{c}_j\right) = 0\text{.}
+\end{equation}
+
+Expandindo o somatório e dividindo pelo número total de pontos \(N_j\)
+na região \(R_j\), concluí-se que o estimador de \(c_j\), denotado por
+\(\hat{c}_j\), é simplesmente a média dos valores observados \(y_i\) na
+região \(R_j\):
+\begin{equation}\phantomsection\label{eq-estimacjdev}{
+\sum_{x_i \in R_j} y_i - \hat{c}_j N_j = 0 \Rightarrow \hat{c}_j = \frac{1}{N_{j}}\sum_{x_i \in R_j} y_i\text{.}
+}\end{equation}
+
+No entanto, \citeonline{james2021introduction} caracteriza como inviável considerar
+todas as possíveis partições do espaço das variáveis independentes em
+\(J\) caixas devido ao alto custo computacional. Dessa forma, a
+abordagem a ser adotada é uma divisão binária recursiva. O processo
+começa no topo da árvore, o ponto em que contém todas as observações, e
+continua sucessivamente dividindo o espaço dos preditores. As divisões
+são indicadas como dois novos ramos na árvore, como pode ser visto na
+Figura~\ref{fig:fig-arvore}.
+
+Para executar a divisão binária recursiva, deve-se primeiramente
+selecionar a variável independente \(X_j\) e o ponto de corte \(s\) tal
+que a divisão do espaço dos preditores conduza a maior redução possível
+na soma dos quadrados dos resíduos. Dessa forma, definimos dois
+semi-planos:
+\begin{equation}
+R_{1}\left(j, s\right) = \{X | X_j \leq s\}\quad \text{e}\quad R_{2}\left(j, s\right) = \{X | X_j > s\}\text{,}
+\end{equation}
+e procura-se a divisão da variável \(j\) e o ponto de corte \(s\) que
+minimizem a seguinte expressão:
+\begin{equation}
+\min_{j, s}\left[\min_{c_1} \sum_{x_i \in R_1\left(j, s\right)} \left(y_i - c_{1}\right)^2 + \min_{c_2} \sum_{x_i \in R_2\left(j, s\right)} \left(y_i - c_{2}\right)^2\right]\text{,}
+\end{equation}
+em que \(c_1\) e \(c_2\) é a média da variável dependente para as
+observações nas regiões \(R_1\left(j, s\right)\) e
+\(R_2\left(j, s\right)\), respectivamente. Após determinar a melhor
+divisão, os dados são particionados nessas duas regiões, e o processo é
+repetido recursivamente para todas as sub-regiões resultantes.
+
+O tamanho da árvore pode ser considerado um hiperparâmetro para regular
+a complexidade do modelo, pois uma árvore muito grande pode causar
+sobreajuste aos dados de treinamento, capturando não apenas os padrões
+relevantes, mas também o ruído. Como resultado, o modelo pode apresentar
+bom desempenho nos dados de treinamento, mas falhar ao lidar com novos
+dados devido à sua incapacidade de generalização. Por outro lado, uma
+árvore muito pequena pode não captar padrões, relações e estruturas
+importantes presentes nos dados. Dessa forma, a estratégia adotada para
+selecionar o tamanho da árvore consiste em crescer uma grande árvore
+\(T_0\), interrompendo o processo de divisão apenas ao atingir um
+tamanho mínimo de observações nos nós. Posteriormente, a árvore \(T_0\)
+é podada utilizando o critério de custo de complexidade, que será
+definido a seguir.
+
+Para o processo de poda da árvore, definimos uma árvore qualquer \(T\)
+que pode ser obtida através do processo da poda de \(T_0\), de modo que
+\(T \subset T_0\). Assim, sendo \(N_j\) a quantidade de pontos na região
+\(R_j\), seja
+\begin{equation}
+Q_j\left(T\right) = \frac{1}{N_j} \sum_{x_i \in R_j}\left(y_i - \hat{c}_j\right)^2
+\end{equation}
+uma medida de impureza do nó pelo erro quadrático médio. Assim,
+define-se o critério de custo de complexidade:
+\begin{equation}
+C_{\alpha}\left(T\right) = \sum_{j = 1}^{|T|}N_jQ_j\left(T\right) + \alpha |T|\text{,}
+\end{equation}
+em que \(|T|\) denota a quantidade total de folhas, e
+\(\alpha \geq 0\) é um hiperparâmetro que equilibra o tamanho da árvore
+e a adequação aos dados. A ideia é encontrar, para cada \(\alpha\), a
+árvore \(T_{\alpha} \subset T_0\) que minimiza
+\(C_{\alpha}\left(T\right)\). Valores grandes de \(\alpha\) resultam em
+árvores menores, enquanto valores menores resultam em árvores maiores, e
+\(\alpha = 0\) resulta na própria árvore \(T_0\). A busca por
+\(T_{\alpha}\) envolve colapsar sucessivamente o nó interno que provoca
+o menor aumento em \(\sum_j N_j Q_j\left(T\right)\), continuando o
+processo até produzir uma árvore com um único nó. Esse processo gera uma
+sequência de subárvores, dentre as quais existe, para cada valor de
+\(\alpha\), uma única subárvore que minimiza
+\(C_{\alpha}\left(T\right)\).
+
+A estimação de \(\alpha\) pode ser realizada por validação cruzada com
+cinco ou dez folds. Assim, a árvore final será \(T_{\hat \alpha}\). O
+Algoritmo~\ref{alg:algo-buildtree}  exemplifica o processo de crescimento
+de uma árvore de regressão:
+\begin{algorithm}[H]
+\caption{Algoritmo para crescer uma árvore de regressão \cite{james2021introduction}.}
+\label{alg:algo-buildtree}
+\begin{algorithmic}[1]
+
+\State \textbf{1.} Use a divisão binária recursiva para crescer uma árvore grande
+$T_0$ nos dados de treinamento, parando apenas quando cada folha tiver
+menos do que um número mínimo de observações.
+
+\State \textbf{2.} Aplique o critério de custo de complexidade à árvore grande
+$T_0$ para obter uma sequência de melhores subárvores $T_\alpha$,
+em função de $\alpha$.
+
+\State \textbf{3.} Use validação cruzada $K\text{-Fold}$ para escolher $\alpha$.
+Isto é, divida as observações de treinamento em $K$ folds. Para cada
+$k=1,\ldots,K$:
+
+\State \hspace{1em} (a) Repita os Passos 1 e 2 em todos os folds, exceto no
+$k\text{-ésimo}$ fold dos dados de treinamento.
+
+\State \hspace{1em} (b) Avalie o erro quadrático médio da estimação no
+$k\text{-ésimo}$ fold deixado de fora, em função de $\alpha$.
+
+
+\State \hspace{1em} Faça a média dos resultados para cada valor de $\alpha$
+e escolha $\alpha$ que minimize o erro médio.
+
+
+\State \textbf{4.} Retorne a subárvore $T_{\hat{\alpha}}$ do Passo 2 que
+corresponde ao valor estimado de $\alpha$.
+
+\end{algorithmic}
+\end{algorithm}
+
+No caso de uma árvore de decisão para classificação, a principal
+diferença está no critério de divisão dos nós e na poda da árvore. Para
+a classificação, a predição em um nó \(j\), correspondente a uma região
+\(R_j\) com \(N_j\) observações, será simplesmente a classe majoritária.
+Assim, tem-se:
+\begin{equation}
+\hat{p}_{jk} = \frac{1}{N_j}\sum_{x_i \in R_j} I\left(y_i = k\right)\text{,}
+\end{equation}
+como sendo a proporção de observações da classe \(k\) no nó \(j\).
+Dessa forma, as observações no nó \(j\) são classificadas na classe
+\(k\left(j\right) = \arg \max_{k} \hat{p}_{jk}\), correspondente à
+classe majoritária nesse nó.
+
+Para a divisão dos nós no caso da regressão, foi utilizado o erro
+quadrático médio como medida de impureza. Para a classificação, algumas
+medidas comuns para \(Q_j\left(T\right)\) são o erro de classificação, o
+índice de Gini ou a entropia cruzada.
+
+\section{Ensemble Methods}
+
+As árvores de decisão são conhecidas por sua alta interpretabilidade,
+mas geralmente apresentam um desempenho preditivo inferior em comparação
+com outros modelos e algoritmos. No entanto, é possível superar essa
+limitação construindo um modelo preditivo que combina a força de uma
+coleção de estimadores base, um processo conhecido como aprendizado em
+conjunto (Ensemble Learning). De acordo com \citeonline{hastie2009elements}, o
+aprendizado em conjunto pode ser dividido em duas etapas principais: a
+primeira etapa consiste em desenvolver uma população de algoritmos de
+aprendizado base a partir dos dados de treinamento, e a segunda etapa
+envolve a combinação desses algoritmos para formar um estimador
+agregado. Portanto, nesta seção, serão definidos os métodos de
+aprendizado em conjunto utilizados neste trabalho.
+
+\subsection{Bagging}
+
+O algoritmo de Bootstrap Aggregation, ou Bagging, foi introduzido por
+\citeonline{breiman1996bagging}. Sua ideia principal é gerar um estimador agregado a
+partir de múltiplas versões de um preditor, que são criadas por meio de
+amostras bootstrap do conjunto de treinamento, utilizadas como novos
+conjuntos de treinamento. O Bagging pode ser empregado para melhorar a
+estabilidade e a predição de modelos ou algoritmos de aprendizado de
+máquina, além de reduzir a variância e evitar o sobreajuste. Por
+exemplo, o Bagging pode ser utilizado para melhorar o desempenho da
+árvore de regressão descrita anteriormente.
+
+\citeonline{breiman1996bagging} define formalmente o algoritmo de Bagging, que utiliza
+um conjunto de treinamento \(\mathcal{L}\). A partir desse conjunto, são
+geradas amostras bootstrap \(\mathcal{L}^{(B)}\) com \(B\) réplicas,
+formando uma coleção de modelos \(\{f(x, \mathcal{L}^{(B)})\}\), onde
+\(f\) representa um modelo estatístico ou algoritmo treinado nas
+amostras bootstrap para prever ou classificar uma variável dependente
+\(y\) com base em variáveis independentes. Se a variável dependente
+\(y\) for numérica, a predição é obtida pela média das estimações dos
+modelos:
+\begin{equation}
+f_{B}\left(x\right) = \frac{1}{B} \sum_{b = 1}^B f \left(x, \mathcal{L}^{\left(B\right)}\right)\text{,}
+\end{equation}
+em que \(f_{B}\) representa a predição agregada. No caso em que \(y\)
+prediz uma classe, utiliza-se a votação majoritária. Ou seja, se
+estivermos classificando em classes \(j \in \{1, \dots, J\}\), então
+\(N_j = \#\{B; f(x, \mathcal{L}^{(B)}) = j\}\) representa o número de
+vezes que a classe \(j\) foi predita pelos estimadores. Assim:
+\begin{equation}
+f_{B}\left(x\right) = \arg \max_{j} N_j\text{.}
+\end{equation}
+isto é, o \(j\) para o qual \(N_j\) é máximo
+
+Embora a técnica de Bagging possa melhorar o desempenho de uma árvore de
+regressão ou de classificação, isso geralmente vem ao custo de menor
+interpretabilidade. Quando o Bagging é aplicado a uma árvore de
+regressão, construímos \(B\) árvores de regressão usando \(B\) réplicas
+de amostras bootstrap e tomamos a média das predições resultantes (JAMES
+et al., 2013). Nesse processo, as árvores de regressão crescem até seu
+máximo, sem passar pelo processo de poda, resultando em cada árvore
+individual com alta variância e baixo viés. No entanto, ao agregar as
+predições das \(B\) árvores, a variância é reduzida.
+
+Para mitigar a falta de interpretabilidade do método Bagging aplicado a
+árvores de regressão, pode-se utilizar a medida de impureza baseada no
+erro quadrático médio como uma métrica para avaliar a importância das
+variáveis independentes. Um valor elevado na redução total média do erro
+quadrático médio, calculado com base nas divisões realizadas por um
+determinado preditor em todas as \(B\) árvores, indica que o preditor é
+importante.
+
+As árvores construídas pelo algoritmo de árvore de decisão se beneficiam
+da estratégia de agregação do Bagging, principalmente por meio da
+redução da variância das previsões. No entanto, esse benefício é
+limitado pela correlação existente entre as árvores geradas. Se essas
+árvores forem variáveis aleatórias independentes e identicamente
+distribuídas (i.i.d.), cada uma com variância \(\sigma^2\), a variância
+da média das previsões das \(B\) árvores será \(\frac{1}{B} \sigma^2\).
+
+Contudo, se as árvores forem apenas identicamente distribuídas (i.d.),
+mas não independentes, apresentando uma correlação positiva \(\rho\), a
+variância da média das previsões passa a ser dada por:
+\begin{equation}\phantomsection\label{eq-cor}{
+\rho \sigma^2 + \frac{1 - \rho}{B}\sigma^2\text{.}
+}\end{equation}
+
+Nesse caso, à medida que o número de árvores \(B\) tende ao infinito, o
+segundo termo da expressão se aproxima de zero, mas o primeiro termo
+permanece constante. Isso demonstra que os ganhos proporcionados pelo
+Bagging são limitados pela correlação entre as árvores (HASTIE et al.,
+2009).
+
+Essa correlação ocorre porque as árvores geradas pelo Bagging tendem a
+ser bastante semelhantes. As variáveis selecionadas para as divisões são
+escolhidas com base na maior redução do erro nas regiões, e,
+frequentemente, as mesmas variáveis são as que mais contribuem para essa
+redução, sendo repetidamente escolhidas. Uma forma de reduzir essa
+correlação - e, com isso, melhorar o desempenho do Bagging - é por meio
+do algoritmo Random Forest, que será apresentado a seguir.
+
+\section{Gradient Boost}
+
 \section{Kernel}
 
 \noindent Métodos baseados em Kernel são técnicas extremamente flexíveis que podem ser utilizados
