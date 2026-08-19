@@ -19,7 +19,7 @@ the latent event times. This distribution includes several commonly used
 parametric survival distributions as special cases and, consequently,
 allows a broad range of hazard shapes to be represented.
 
-The model is estimated through an Expectation--Maximization (EM)
+The model is estimated through an Expectation--Maximization (EM) \cite{mclachlan2008algorithm}
 algorithm and is formulated for different probability distributions of the
 latent number of competing causes $N$, namely the Bernoulli, Binomial,
 Poisson, and Negative Binomial distributions. This formulation provides a
@@ -32,27 +32,28 @@ semiparametric formulation.
 Although the classical promotion-time cure model allows covariates to be
 incorporated through parametric functions of $\theta(\mathbf{x})$, such an
 approach may be restrictive when the relationship between the covariates
-and the latent competing-risk structure is complex or highly nonlinear.
+and the latent competing-risk structure is complex or nonlinear.
 
-In this context, the proposition is to model the mean intensity of the latent
-competing causes, $\theta(\mathbf{x})$, through a nonparametric function
+In this context, the proposition is to model the parameter governing the
+distribution of the latent competing causes, $\theta(\mathbf{x})$, through
+a nonparametric function
 \begin{equation}
-f(\mathbf{x}) = \log\left(\theta(\mathbf{x})\right),
+g(\mathbf{x}) = \log\left(\theta(\mathbf{x})\right),
 \end{equation}
-where $f:\mathcal{X}\rightarrow\mathbb{R}$. The logarithmic
+where $g:\mathcal{X}\rightarrow\mathbb{R}$. The logarithmic
 transformation ensures that $\theta(\mathbf{x})>0$ for every
-$\mathbf{x}$. The estimation of $f$ is formulated through the minimization
+$\mathbf{x}$. The estimation of $g$ is formulated through the minimization
 of a penalized negative log-likelihood:
 \begin{equation}
 \label{eq:ggkm_penalized_likelihood}
-\min_{f \in \mathcal{H}_K}
+\min_{g \in \mathcal{H}_K}
 \left\{
--\sum_{i=1}^{n} l_i(f)
+-\sum_{i=1}^{n} l_i(g)
 +
-\frac{\lambda}{2}\|f\|_{\mathcal{H}_K}^{2}
+\frac{\lambda}{2}\|g\|_{\mathcal{H}_K}^{2}
 \right\},
 \end{equation}
-where $l_i(f)$ denotes the log-likelihood contribution of the $i$th
+where $l_i(g)$ denotes the log-likelihood contribution of the $i$th
 individual, $\mathcal{H}_K$ is a Reproducing Kernel Hilbert Space (RKHS)
 associated with a positive-definite kernel $K(\cdot,\cdot)$, and
 $\lambda\geq 0$ is a regularization parameter controlling the complexity
@@ -63,13 +64,14 @@ Equation~\eqref{eq:ggkm_penalized_likelihood} admits a finite-dimensional
 representation of the form
 \begin{equation}
 \label{eq:ggkm_representer}
-f^*(\mathbf{x})
+g^*(\mathbf{x})
 =
 \sum_{i=1}^{n}\alpha_i K(\mathbf{x},\mathbf{x}_i),
 \end{equation}
 where $\alpha_1,\ldots,\alpha_n\in\mathbb{R}$ are coefficients to be
-estimated. Consequently, the mean intensity of the latent competing
-causes for an individual with covariate vector $\mathbf{x}_i$ is given by
+estimated. Consequently, the parameter governing the distribution of the
+latent competing causes for an individual with covariate vector
+$\mathbf{x}_i$ is given by
 \begin{equation}
 \label{eq:ggkm_theta}
 \theta(\mathbf{x}_i)
@@ -79,6 +81,109 @@ causes for an individual with covariate vector $\mathbf{x}_i$ is given by
 \alpha_j K(\mathbf{x}_i,\mathbf{x}_j)
 \right\}.
 \end{equation}
+
+\begin{table}[htb]
+    \centering
+    \caption{Complete-data log-likelihood contributions for the different
+    distributions considered for the latent number of competing causes $N$.
+    See proof in appendix (ADD THE APPENDIX HERE LATER!!!!!!)}
+    \label{tab:complete_loglikelihood}
+    \small
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabular}{p{0.18\textwidth} p{0.74\textwidth}}
+        \hline
+        Distribution of $N$ & Complete-data log-likelihood $\ell_c$ \\
+        \hline
+
+        Bernoulli$(\theta_i)$
+        &
+        $\displaystyle
+        \begin{aligned}
+        \ell_c
+        &=
+        \sum_{i=1}^n
+        \Big[
+        n_i\log\theta_i
+        +(1-n_i)\log(1-\theta_i)
+        +\delta_i\log n_i \\
+        &\qquad
+        +\delta_i\log f(t_i)
+        +(n_i-\delta_i)\log S(t_i)
+        \Big]
+        \end{aligned}
+        $
+        \\[5mm]
+
+        Binomial$(K,\theta_i^*)$
+        &
+        $\displaystyle
+        \begin{aligned}
+        \ell_c
+        &=
+        \sum_{i=1}^n
+        \Bigg[
+        \log {K\choose n_i}
+        +n_i\log\theta_i^*
+        +(K-n_i)\log(1-\theta_i^*) \\
+        &\qquad
+        +\delta_i\log n_i
+        +\delta_i\log f(t_i)
+        +(n_i-\delta_i)\log S(t_i)
+        \Bigg]
+        \end{aligned}
+        $
+        \\[5mm]
+
+        Negative Binomial$(\alpha,\theta_i)$
+        &
+        $\displaystyle
+        \begin{aligned}
+        \ell_c
+        &=
+        \sum_{i=1}^n
+        \Bigg[
+        \log\Gamma\left(\alpha^{-1}+n_i\right)
+        -\log\Gamma\left(\alpha^{-1}\right)
+        -\log(n_i!) \\
+        &\qquad
+        +n_i\log\left(
+        \frac{\alpha\theta_i}
+        {1+\alpha\theta_i}
+        \right)
+        -\frac{1}{\alpha}
+        \log(1+\alpha\theta_i) \\
+        &\qquad
+        +\delta_i\log n_i
+        +\delta_i\log f(t_i)
+        +(n_i-\delta_i)\log S(t_i)
+        \Bigg]
+        \end{aligned}
+        $
+        \\[5mm]
+
+        Poisson$(\theta_i)$
+        &
+        $\displaystyle
+        \begin{aligned}
+        \ell_c
+        &=
+        \sum_{i=1}^n
+        \Big[
+        n_i\log\theta_i
+        -\log(n_i!)
+        -\theta_i \\
+        &\qquad
+        +\delta_i\log n_i
+        +\delta_i\log f(t_i)
+        +(n_i-\delta_i)\log S(t_i)
+        \Big]
+        \end{aligned}
+        $
+        \\[5mm]
+
+        \hline
+    \end{tabular}
+\end{table}
 
 \subsection{Estimação via algoritmo EM penalizado}
 
@@ -592,10 +697,10 @@ pela função geradora de probabilidades
 A(u)
 =
 \left[
-1+\phi\theta_i(1-u)
-\right]^{-1/\phi},
+1+\alpha\theta_i(1-u)
+\right]^{-1/\alpha},
 \end{equation}
-onde \(\theta_i>0\) representa o número médio de riscos latentes e \(\phi\) é um parâmetro de dispersão.
+onde \(\theta_i>0\) representa o número médio de riscos latentes e \(\alpha\) é um parâmetro de dispersão.
 Sob essa parametrização,
 
 \begin{equation}
@@ -603,23 +708,23 @@ Sob essa parametrização,
 \qquad
 \mathrm{Var}(N_i)
 =
-\theta_i+\phi\theta_i^2.
+\theta_i+\alpha\theta_i^2.
 \end{equation}
 
-Assim, valores positivos de \(\phi\) produzem sobredispersão em relação ao modelo de Poisson. Além disso,
-essa parametrização engloba importantes casos particulares. Quando \(\phi \to 0\), recupera-se a
+Assim, valores positivos de \(\alpha\) produzem sobredispersão em relação ao modelo de Poisson. Além disso,
+essa parametrização engloba importantes casos particulares. Quando \(\alpha \to 0\), recupera-se a
 distribuição de Poisson e, consequentemente, o modelo GG-KM apresentado na seção anterior. Já o caso
-\(\phi=-1\) conduz ao modelo de mistura de \citeonline{berkson1952survival}. Neste trabalho, entretanto,
-considera-se apenas o cenário \(\phi>0\), correspondente à presença de sobredispersão.
+\(\alpha=-1\) conduz ao modelo de mistura de \citeonline{berkson1952survival}. Neste trabalho, entretanto,
+considera-se apenas o cenário \(\alpha>0\), correspondente à presença de sobredispersão.
 
 A função de sobrevivência populacional passa a ser
 \begin{equation}
 S_{\text{pop}}(t)
 =
 \left[
-1+\phi\theta_i
+1+\alpha\theta_i
 F_{GG}(t;a,d,p)
-\right]^{-1/\phi},
+\right]^{-1/\alpha},
 \end{equation}
 com
 \begin{equation}
@@ -649,14 +754,14 @@ f_{GG}(t_i;a,d,p)
 \right]
 -
 \left(
-\frac{1}{\phi}
+\frac{1}{\alpha}
 +
 \delta_i
 \right)
 \log
 \left[
 1+
-\phi
+\alpha
 \theta_i
 F_{GG}(t_i;a,d,p)
 \right]
@@ -668,26 +773,26 @@ K
 \boldsymbol{\alpha}.
 \end{equation}
 
-Quando o parâmetro de dispersão \(\phi\) é previamente especificado, ele é mantido fixo ao
+Quando o parâmetro de dispersão \(\alpha\) é previamente especificado, ele é mantido fixo ao
 longo do processo iterativo e apenas os parâmetros \(\boldsymbol{\alpha}\), \(a\), \(d\) e \(p\) são estimados.
-Por outro lado, quando \(\phi\) não é previamente informado, sua estimação é realizada conjuntamente com os
+Por outro lado, quando \(\alpha\) não é previamente informado, sua estimação é realizada conjuntamente com os
 demais parâmetros do modelo.
 
 Neste último caso, a estimação é realizada por meio de uma extensão do algoritmo EM, o
 Expectation Conditional Maximization Either (ECME) \cite{mclachlan2008algorithm}. A escolha desse
-algoritmo decorre da presença do parâmetro de dispersão \(\phi\), cuja
+algoritmo decorre da presença do parâmetro de dispersão \(\alpha\), cuja
 atualização não admite solução analítica em forma fechada. De fato,
-\(\phi\) aparece simultaneamente nos termos \(\log(1+\phi\theta_iF_{GG}(t_i))\), \(1/\phi\) e nas
+\(\alpha\) aparece simultaneamente nos termos \(\log(1+\alpha\theta_iF_{GG}(t_i))\), \(1/\alpha\) e nas
 esperanças condicionais dos riscos latentes, o que torna a maximização da função auxiliar substancialmente
 mais complexa do que a atualização dos demais parâmetros. Assim, os parâmetros \(\boldsymbol{\alpha}\)
-e \((a,d,p)\) são atualizados por meio da maximização da função auxiliar, enquanto \(\phi\) é atualizado
+e \((a,d,p)\) são atualizados por meio da maximização da função auxiliar, enquanto \(\alpha\) é atualizado
 diretamente pela maximização da log-verossimilhança observada.
 
 % Neste último caso, a estimação é realizada por meio de uma extensão do algoritmo EM, o ECME
 % (Expectation Conditional Maximization Either), \cite{mclachlan2008algorithm}. A escolha desse algoritmo decorre da presença do
-% parâmetro de dispersão \(\phi\), cuja atualização a partir da função auxiliar não conduz a uma etapa de
+% parâmetro de dispersão \(\alpha\), cuja atualização a partir da função auxiliar não conduz a uma etapa de
 % maximização simples. Assim, os parâmetros \(\boldsymbol{\alpha}\) e \((a,d,p)\) são atualizados por meio da
-% maximização da função auxiliar, enquanto \(\phi\) é atualizado diretamente pela maximização da
+% maximização da função auxiliar, enquanto \(\alpha\) é atualizado diretamente pela maximização da
 % log-verossimilhança observada.
 
 No passo E, obtém-se
@@ -707,7 +812,7 @@ N_i
 +
 \frac{
 \left(
-1+\phi^{(k)}\delta_i
+1+\alpha^{(k)}\delta_i
 \right)
 \theta_i^{(k)}
 S_{GG}
@@ -719,7 +824,7 @@ p^{(k)}
 \right)
 }{
 1+
-\phi^{(k)}
+\alpha^{(k)}
 \theta_i^{(k)}
 F_{GG}
 \!\left(
@@ -756,9 +861,9 @@ Q_{\alpha}
 \left(
 \widehat N_i^{(k+1)}
 +
-\frac{1}{\phi}
+\frac{1}{\alpha}
 \right)
-\log(1+\phi\theta_i)
+\log(1+\alpha\theta_i)
 \right]
 -
 \frac{\lambda}{2}
@@ -782,12 +887,12 @@ e
 Q_{GG}.
 \end{equation}
 
-Quando \(\phi\) não é previamente especificado, realiza-se adicionalmente a etapa ECME
+Quando \(\alpha\) não é previamente especificado, realiza-se adicionalmente a etapa ECME
 
 \begin{equation}
-\phi^{(k+1)}
+\alpha^{(k+1)}
 =
-\arg\max_{\phi>0}
+\arg\max_{\alpha>0}
 \;
 \ell_P
 \!\left(
@@ -795,7 +900,7 @@ Quando \(\phi\) não é previamente especificado, realiza-se adicionalmente a et
 a^{(k+1)},
 d^{(k+1)},
 p^{(k+1)},
-\phi
+\alpha
 \right).
 \end{equation}
 
@@ -813,7 +918,7 @@ $
 a^{(0)},\,
 d^{(0)},\,
 p^{(0)},\,
-\phi^{(0)}
+\alpha^{(0)}
 $
 e escolha uma tolerância $\varepsilon>0$.
 
@@ -854,11 +959,11 @@ S_{GG}^{(k)}(t_i)
 \delta_i
 +
 \frac{
-\bigl(1+\phi^{(k)}\delta_i\bigr)
+\bigl(1+\alpha^{(k)}\delta_i\bigr)
 \theta_i^{(k)}
 S_{GG}^{(k)}(t_i)
 }{
-1+\phi^{(k)}
+1+\alpha^{(k)}
 \theta_i^{(k)}
 F_{GG}^{(k)}(t_i)
 },
@@ -880,9 +985,9 @@ i=1,\ldots,n.
 \left(
 \widehat N_i^{(k+1)}
 +
-\frac{1}{\phi^{(k)}}
+\frac{1}{\alpha^{(k)}}
 \right)
-\log\!\bigl(1+\phi^{(k)}\theta_i\bigr)
+\log\!\bigl(1+\alpha^{(k)}\theta_i\bigr)
 \right]
 -
 \frac{\lambda}{2}
@@ -905,9 +1010,9 @@ i=1,\ldots,n.
 \]
 
 \[
-\phi^{(k+1)}
+\alpha^{(k+1)}
 =
-\arg\max_{\phi>0}
+\arg\max_{\alpha>0}
 \,
 \ell_O
 \!\left(
@@ -915,7 +1020,7 @@ i=1,\ldots,n.
 a^{(k+1)},
 d^{(k+1)},
 p^{(k+1)},
-\phi
+\alpha
 \right).
 \]
 
@@ -929,7 +1034,7 @@ p^{(k+1)},
 a^{(k+1)},
 d^{(k+1)},
 p^{(k+1)},
-\phi^{(k+1)}
+\alpha^{(k+1)}
 \right).
 \]
 
