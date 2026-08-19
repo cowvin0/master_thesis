@@ -19,6 +19,7 @@
 % Pacotes Opcionais
 % ---------------------------------------------------------------------------
 
+\usepackage{pgfplots}
 \usepackage{rotating}           % Usado para rotacionar o texto
 \usepackage{bm}
 \usepackage{amsmath}
@@ -28,6 +29,7 @@
 \usepackage[all,knot,arc,import,poly]{xy}   % Pacote para desenhos gráficos
 % Este pacote pode conflitar com outros pacotes gráficos como o ``pictex''
 % Então é necessário usar apenas um dos pacotes conflitantes
+\pgfplotsset{compat=1.18}
 \DeclareMathOperator{\sgn}{sgn}
 \newcommand{\VerbL}{0.52\textwidth}
 \newcommand{\LatL}{0.42\textwidth}
@@ -144,6 +146,10 @@ the Integrated Brier Score (IBS) with IPCW adjustment \cite{prince2025estimation
 \label{chapter:kernel_methods}
 \input{tex/kernel-methods}
 
+\chapter{Proposed Methods}
+\label{chapter:proposed_methods}
+\input{tex/proposed_methods}
+
 \chapter{Experimental Evaluation}
 \label{chapter:methodology}
 \input{tex/methodology}
@@ -198,11 +204,11 @@ the Integrated Brier Score (IBS) with IPCW adjustment \cite{prince2025estimation
 % ---------------------------------------------------------------------
 
 % Arquivo que contém as definições que vão aparecer no glossário
-\input{tex/glossario}
+% \input{tex/glossario}
 % Comando para incluir todas as definições do arquivo glossario.tex
-\glsaddall
+% \glsaddall
 % Impressão do glossário
-\printglossaries
+% \printglossaries
 
 % ----------------------------------------------------------
 % Apêndices

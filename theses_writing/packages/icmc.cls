@@ -270,7 +270,7 @@
 % Pacote para criacao do GLOSSARIO
 %================================================================================
 % Gera o indice do Glossario
-\makeglossaries
+% \makeglossaries
 % Traduz o nome do glossario
 \addto\captionsbrazil{% portugues-brasil
     \renewcommand{\glossaryname}{Gloss\'ario}

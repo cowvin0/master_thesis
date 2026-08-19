@@ -1,1655 +1,477 @@
 \section{Introduction}
 
-\section{Decision tree}
+\section{Decision Trees}
 
-Árvores de decisão podem ser utilizadas tanto para regressão quanto
-para classificação. Elas servem de base para os modelos baseados em
-árvores empregados neste trabalho, com foco especial nas árvores de
-regressão\footnote{Uma árvore de regressão é um caso específico da
-árvore de decisão, mas para regressão.}. O processo de construção de
-uma árvore se baseia no particionamento recursivo do espaço dos
-preditores, onde cada particionamento é chamado de nó e o resultado
-final é chamado de folha ou nó terminal. Em cada nó, é definida uma
-condição e, caso essa condição seja satisfeita, o resultado será uma das
-folhas desse nó. Caso contrário, o processo segue para o próximo nó e
-verifica a próxima condição, podendo gerar uma folha ou outro nó. Veja
-um exemplo na Figura~\ref{fig:fig-arvore}.
+Decision trees can be used for both regression and classification. They provide
+the foundation for the tree-based models considered in this work, with particular
+emphasis on regression trees\footnote{A regression tree is a particular type of
+decision tree designed for regression problems.}. The construction of a tree is
+based on the recursive partitioning of the predictor space, where each partition
+defines a node and the final resulting partitions are referred to as leaves or
+terminal nodes. At each internal node, a splitting condition is defined based on
+one or more predictors. If the condition is satisfied, the observation is directed
+to one of the resulting child nodes; otherwise, it is directed to the other child
+node. This process is repeated recursively until the terminal nodes are reached.
+An example of a regression tree is presented in Figure~\ref{fig:fig-arvore}.
+
 \begin{figure}[htb]
     \centering
     \includegraphics[width=0.8\textwidth]{images/mermaid-tree.png}
-	\caption{Exemplo de estrutura de árvore de regressão. A árvore tem cinco folhas e quatro nós internos.}
+    \caption{Example of a regression tree. The tree has five terminal nodes and
+    four internal nodes.}
     \label{fig:fig-arvore}
 \end{figure}
 
-
-O espaço dos preditores é dividido em \(J\) regiões distintas e
-disjuntas denotadas por \(R_1, R_2, \dots, R_J\). Essas regiões são
-construídas em formato de caixa de forma a minimizar a soma dos
-quadrados dos resíduos. Dessa forma, pode-se modelar a variável resposta
-como uma constante \(c_j\) em cada região \(R_j\). Isto é
-
+For a regression problem, the predictor space is partitioned into $J$ distinct
+and disjoint regions, denoted by $R_1, R_2, \ldots, R_J$. These regions are
+typically constructed as rectangular or box-shaped regions through recursive
+binary splitting, with the objective of minimizing the residual sum of squares.
+The response variable can then be modeled as a constant $c_j$ within each region
+$R_j$. Thus, the resulting regression tree can be represented by
 \begin{equation}
-f\left(x\right) = \sum^J_{j=1}c_j I\left(x \in R_j \right)\text{.}
+\label{eq:regression_tree}
+f\left(x\right)
+=
+\sum_{j=1}^{J} c_j I\left(x \in R_j\right)\text{.}
 \end{equation}
 
-O estimador para a constante \(c_j\) é encontrado pelo método de mínimos
-quadrados. Assim, deve-se minimizar
-\(\sum_{x_i \in R_j} \left[y_i - f\left(x_i\right)\right]^2\). No
-entanto, perceba que \(f\left(x_i\right)\) está sendo avaliado somente
-em um ponto específico \(x_i\), o que reduzirá \(f\left(x_i\right)\)
-para uma constante \(c_j\). É fácil de se chegar ao resultado se for
-observada a definição da função indicadora \(I\left(x \in R_j\right)\):
+The estimator of the constant $c_j$ is obtained by the method of least
+squares. Thus, for a given region $R_j$, $c_j$ is chosen to minimize $\sum_{x_i \in R_j} \left[y_i - f\left(x_i\right)\right]^2$.
+Since $x_i \in R_j$, the indicator function associated with $R_j$ satisfies
 \begin{equation}
 I_{R_j}(x_i) =
 \begin{cases}
-    1,& \text{se } x_i \in R_j \\
-    0,& \text{se } x_i \notin R_j
-\end{cases}\text{.}
+    1, & \text{if } x_i \in R_j,\\
+    0, & \text{if } x_i \notin R_j.
+\end{cases}
 \end{equation}
 
-Como as regiões são disjuntas, \(x_i\) não pode estar simultaneamente em
-duas regiões. Assim, para um ponto específico \(x_i\), apenas um dos
-casos da função indicadora será diferente de 0. Portanto,
-\(f\left(x_i\right) = c_j\). Agora, derivando
-\(\sum_{x_i \in R_j}\left(y_i - c_j\right)^2\) em relação a \(c_j\)
-
-\begin{equation}\phantomsection\label{eq-partialdev}{
-\frac{\partial}{\partial{c_j}}\sum_{x_i \in R_j} \left(y_i - c_j\right)^2 = -2\sum_{x_i \in R_j} \left(y_i - c_j\right)
-}\end{equation} e, ao igualar a Equação~\ref{eq-partialdev} a 0, tem-se
-a seguinte igualdade:
+Because the regions are disjoint, each observation belongs to at most one
+region. Therefore, for $x_i \in R_j$, the representation in
+Equation~\eqref{eq:regression_tree} reduces to $f\left(x_i\right) = c_j$.
+Consequently, the least-squares problem within region $R_j$ reduces to
+minimizing
 \begin{equation}
-\sum_{x_i \in R_j} \left(y_i - \hat{c}_j\right) = 0\text{.}
+\sum_{x_i \in R_j} \left(y_i-c_j\right)^2
 \end{equation}
-
-Expandindo o somatório e dividindo pelo número total de pontos \(N_j\)
-na região \(R_j\), concluí-se que o estimador de \(c_j\), denotado por
-\(\hat{c}_j\), é simplesmente a média dos valores observados \(y_i\) na
-região \(R_j\):
-\begin{equation}\phantomsection\label{eq-estimacjdev}{
-\sum_{x_i \in R_j} y_i - \hat{c}_j N_j = 0 \Rightarrow \hat{c}_j = \frac{1}{N_{j}}\sum_{x_i \in R_j} y_i\text{.}
-}\end{equation}
-
-No entanto, \citeonline{james2021introduction} caracteriza como inviável considerar
-todas as possíveis partições do espaço das variáveis independentes em
-\(J\) caixas devido ao alto custo computacional. Dessa forma, a
-abordagem a ser adotada é uma divisão binária recursiva. O processo
-começa no topo da árvore, o ponto em que contém todas as observações, e
-continua sucessivamente dividindo o espaço dos preditores. As divisões
-são indicadas como dois novos ramos na árvore, como pode ser visto na
-Figura~\ref{fig:fig-arvore}.
-
-Para executar a divisão binária recursiva, deve-se primeiramente
-selecionar a variável independente \(X_j\) e o ponto de corte \(s\) tal
-que a divisão do espaço dos preditores conduza a maior redução possível
-na soma dos quadrados dos resíduos. Dessa forma, definimos dois
-semi-planos:
+with respect to $c_j$. Differentiating with respect to $c_j$ gives
 \begin{equation}
-R_{1}\left(j, s\right) = \{X | X_j \leq s\}\quad \text{e}\quad R_{2}\left(j, s\right) = \{X | X_j > s\}\text{,}
+\label{eq:partialdev}
+\frac{\partial}{\partial c_j}
+\sum_{x_i \in R_j} \left(y_i-c_j\right)^2
+=
+-2\sum_{x_i \in R_j}\left(y_i-c_j\right).
 \end{equation}
-e procura-se a divisão da variável \(j\) e o ponto de corte \(s\) que
-minimizem a seguinte expressão:
+Setting Equation~\eqref{eq:partialdev} equal to zero yields
 \begin{equation}
-\min_{j, s}\left[\min_{c_1} \sum_{x_i \in R_1\left(j, s\right)} \left(y_i - c_{1}\right)^2 + \min_{c_2} \sum_{x_i \in R_2\left(j, s\right)} \left(y_i - c_{2}\right)^2\right]\text{,}
+\sum_{x_i \in R_j}
+\left(y_i-\hat{c}_j\right)=0.
 \end{equation}
-em que \(c_1\) e \(c_2\) é a média da variável dependente para as
-observações nas regiões \(R_1\left(j, s\right)\) e
-\(R_2\left(j, s\right)\), respectivamente. Após determinar a melhor
-divisão, os dados são particionados nessas duas regiões, e o processo é
-repetido recursivamente para todas as sub-regiões resultantes.
 
-O tamanho da árvore pode ser considerado um hiperparâmetro para regular
-a complexidade do modelo, pois uma árvore muito grande pode causar
-sobreajuste aos dados de treinamento, capturando não apenas os padrões
-relevantes, mas também o ruído. Como resultado, o modelo pode apresentar
-bom desempenho nos dados de treinamento, mas falhar ao lidar com novos
-dados devido à sua incapacidade de generalização. Por outro lado, uma
-árvore muito pequena pode não captar padrões, relações e estruturas
-importantes presentes nos dados. Dessa forma, a estratégia adotada para
-selecionar o tamanho da árvore consiste em crescer uma grande árvore
-\(T_0\), interrompendo o processo de divisão apenas ao atingir um
-tamanho mínimo de observações nos nós. Posteriormente, a árvore \(T_0\)
-é podada utilizando o critério de custo de complexidade, que será
-definido a seguir.
-
-Para o processo de poda da árvore, definimos uma árvore qualquer \(T\)
-que pode ser obtida através do processo da poda de \(T_0\), de modo que
-\(T \subset T_0\). Assim, sendo \(N_j\) a quantidade de pontos na região
-\(R_j\), seja
+Expanding the summation and denoting by $N_j$ the number of observations
+in region $R_j$, it follows that the estimator of $c_j$, denoted by
+$\hat{c}_j$, is simply the sample mean of the observed responses $y_i$
+within $R_j$:
 \begin{equation}
-Q_j\left(T\right) = \frac{1}{N_j} \sum_{x_i \in R_j}\left(y_i - \hat{c}_j\right)^2
+\label{eq:estimacjdev}
+\sum_{x_i \in R_j} y_i - \hat{c}_j N_j = 0
+\quad\Rightarrow\quad
+\hat{c}_j =
+\frac{1}{N_j}\sum_{x_i \in R_j} y_i.
 \end{equation}
-uma medida de impureza do nó pelo erro quadrático médio. Assim,
-define-se o critério de custo de complexidade:
-\begin{equation}
-C_{\alpha}\left(T\right) = \sum_{j = 1}^{|T|}N_jQ_j\left(T\right) + \alpha |T|\text{,}
-\end{equation}
-em que \(|T|\) denota a quantidade total de folhas, e
-\(\alpha \geq 0\) é um hiperparâmetro que equilibra o tamanho da árvore
-e a adequação aos dados. A ideia é encontrar, para cada \(\alpha\), a
-árvore \(T_{\alpha} \subset T_0\) que minimiza
-\(C_{\alpha}\left(T\right)\). Valores grandes de \(\alpha\) resultam em
-árvores menores, enquanto valores menores resultam em árvores maiores, e
-\(\alpha = 0\) resulta na própria árvore \(T_0\). A busca por
-\(T_{\alpha}\) envolve colapsar sucessivamente o nó interno que provoca
-o menor aumento em \(\sum_j N_j Q_j\left(T\right)\), continuando o
-processo até produzir uma árvore com um único nó. Esse processo gera uma
-sequência de subárvores, dentre as quais existe, para cada valor de
-\(\alpha\), uma única subárvore que minimiza
-\(C_{\alpha}\left(T\right)\).
 
-A estimação de \(\alpha\) pode ser realizada por validação cruzada com
-cinco ou dez folds. Assim, a árvore final será \(T_{\hat \alpha}\). O
-Algoritmo~\ref{alg:algo-buildtree}  exemplifica o processo de crescimento
-de uma árvore de regressão:
+However, as noted by \citeonline{james2021introduction}, considering all
+possible partitions of the predictor space into $J$ regions is
+computationally infeasible due to the large number of possible
+partitions. Therefore, a recursive binary splitting procedure is adopted.
+The process begins at the root node, which contains all observations, and
+successively partitions the predictor space into increasingly smaller
+regions. Each split produces two child nodes, as illustrated in
+Figure~\ref{fig:fig-arvore}.
+
+To perform recursive binary splitting, one first selects a predictor
+$X_j$ and a cutpoint $s$ such that the resulting partition produces the
+largest possible reduction in the residual sum of squares. For a given
+predictor and cutpoint, the predictor space is divided into the two
+regions
+\begin{equation}
+R_{1}(j,s) = \{x : x_j \leq s\}
+\quad\text{and}\quad
+R_{2}(j,s) = \{x : x_j > s\}.
+\end{equation}
+The predictor $j$ and cutpoint $s$ are then selected by solving
+\begin{equation}
+\min_{j,s}
+\left[
+\min_{c_1}
+\sum_{x_i \in R_1(j,s)}
+\left(y_i-c_1\right)^2
++
+\min_{c_2}
+\sum_{x_i \in R_2(j,s)}
+\left(y_i-c_2\right)^2
+\right],
+\end{equation}
+where $c_1$ and $c_2$ are the mean responses in the regions
+$R_1(j,s)$ and $R_2(j,s)$, respectively. Once the optimal split is
+determined, the observations are partitioned into the two resulting
+regions, and the same procedure is recursively applied to each
+subregion.
+
+The size of a regression tree controls the complexity of the resulting
+model. An excessively large tree may overfit the training data by capturing
+not only relevant patterns but also random noise. Consequently, although
+such a model may achieve low prediction error on the training data, its
+performance on new observations may deteriorate due to poor generalization.
+Conversely, a tree that is too small may fail to capture important patterns
+and relationships present in the data. A common strategy for controlling
+tree complexity is therefore to first grow a large tree $T_0$, stopping the
+splitting process only when a specified minimum number of observations is
+reached in each terminal node. The resulting tree is then pruned according
+to the cost-complexity criterion, defined below.
+
+Consider a tree $T$ obtained by pruning $T_0$, such that $T \subseteq T_0$.
+Let $N_j$ denote the number of observations in region $R_j$. The residual
+sum of squares within region $R_j$ can be expressed in terms of the
+mean squared error
+\begin{equation}
+Q_j(T)
+=
+\frac{1}{N_j}
+\sum_{x_i \in R_j}
+\left(y_i-\hat{c}_j\right)^2.
+\end{equation}
+The cost-complexity criterion is then defined as
+\begin{equation}
+C_{\alpha}(T)
+=
+\sum_{j=1}^{|T|}
+N_j Q_j(T)
++
+\alpha |T|,
+\end{equation}
+where $|T|$ denotes the number of terminal nodes of the tree and
+$\alpha\geq0$ is a complexity parameter that controls the trade-off between
+the goodness of fit and the size of the tree. For each value of $\alpha$,
+the optimal subtree is defined as
+\begin{equation}
+T_{\alpha}
+=
+\underset{T\subseteq T_0}{\operatorname{argmin}}
+\; C_{\alpha}(T).
+\end{equation}
+Larger values of $\alpha$ impose a greater penalty on tree complexity and
+therefore favor smaller trees, whereas smaller values of $\alpha$ favor
+larger trees. When $\alpha=0$, the complexity penalty vanishes and the
+resulting tree is $T_0$.
+
+The sequence of subtrees can be obtained through a weakest-link pruning
+procedure, in which internal nodes are successively collapsed according
+to the increase in the residual sum of squares per terminal node removed.
+This procedure produces a finite sequence of nested subtrees, from which
+the optimal tree can be selected for a given value of $\alpha$.
+
+The complexity parameter $\alpha$ can be selected using $K$-fold cross-
+validation, commonly with $K=5$ or $K=10$. The final regression tree is
+then given by $T_{\hat{\alpha}}$. The overall procedure for constructing
+and pruning a regression tree is summarized in
+Algorithm~\ref{alg:algo-buildtree}.
+
 \begin{algorithm}[H]
-\caption{Algoritmo para crescer uma árvore de regressão \cite{james2021introduction}.}
+\caption{Construction and pruning of a regression tree
+\cite{james2021introduction}.}
 \label{alg:algo-buildtree}
 \begin{algorithmic}[1]
 
-\State \textbf{1.} Use a divisão binária recursiva para crescer uma árvore grande
-$T_0$ nos dados de treinamento, parando apenas quando cada folha tiver
-menos do que um número mínimo de observações.
+\State \textbf{1.} Use recursive binary splitting to grow a large tree
+$T_0$ on the training data, stopping only when each terminal node
+contains fewer than a specified minimum number of observations.
 
-\State \textbf{2.} Aplique o critério de custo de complexidade à árvore grande
-$T_0$ para obter uma sequência de melhores subárvores $T_\alpha$,
-em função de $\alpha$.
+\State \textbf{2.} Apply the cost-complexity criterion to $T_0$ to obtain
+a sequence of optimal subtrees $T_{\alpha}$ for different values of
+$\alpha$.
 
-\State \textbf{3.} Use validação cruzada $K\text{-Fold}$ para escolher $\alpha$.
-Isto é, divida as observações de treinamento em $K$ folds. Para cada
+\State \textbf{3.} Use $K$-fold cross-validation to select $\alpha$.
+Partition the training observations into $K$ folds. For each
 $k=1,\ldots,K$:
 
-\State \hspace{1em} (a) Repita os Passos 1 e 2 em todos os folds, exceto no
-$k\text{-ésimo}$ fold dos dados de treinamento.
+\State \hspace{1em} (a) Repeat Steps 1 and 2 using all folds except the
+$k$-th fold.
 
-\State \hspace{1em} (b) Avalie o erro quadrático médio da estimação no
-$k\text{-ésimo}$ fold deixado de fora, em função de $\alpha$.
+\State \hspace{1em} (b) Evaluate the mean squared prediction error on the
+held-out $k$-th fold for each candidate value of $\alpha$.
 
+\State \hspace{1em} Average the validation errors across the $K$ folds for
+each value of $\alpha$, and select $\hat{\alpha}$ that minimizes the
+average error.
 
-\State \hspace{1em} Faça a média dos resultados para cada valor de $\alpha$
-e escolha $\alpha$ que minimize o erro médio.
-
-
-\State \textbf{4.} Retorne a subárvore $T_{\hat{\alpha}}$ do Passo 2 que
-corresponde ao valor estimado de $\alpha$.
+\State \textbf{4.} Return the subtree $T_{\hat{\alpha}}$ corresponding to
+the selected value $\hat{\alpha}$.
 
 \end{algorithmic}
 \end{algorithm}
 
-No caso de uma árvore de decisão para classificação, a principal
-diferença está no critério de divisão dos nós e na poda da árvore. Para
-a classificação, a predição em um nó \(j\), correspondente a uma região
-\(R_j\) com \(N_j\) observações, será simplesmente a classe majoritária.
-Assim, tem-se:
+For classification trees, the main differences from regression trees lie
+in the criterion used to evaluate node splits and in the way predictions
+are assigned to terminal nodes. For a classification tree, consider a node
+$j$ corresponding to a region $R_j$ containing $N_j$ observations. The
+predicted class is typically the majority class within that node. The
+proportion of observations belonging to class $k$ is given by
 \begin{equation}
-\hat{p}_{jk} = \frac{1}{N_j}\sum_{x_i \in R_j} I\left(y_i = k\right)\text{,}
+\hat{p}_{jk}
+=
+\frac{1}{N_j}
+\sum_{x_i \in R_j}
+I\left(y_i=k\right).
 \end{equation}
-como sendo a proporção de observações da classe \(k\) no nó \(j\).
-Dessa forma, as observações no nó \(j\) são classificadas na classe
-\(k\left(j\right) = \arg \max_{k} \hat{p}_{jk}\), correspondente à
-classe majoritária nesse nó.
+Thus, each observation in node $j$ is assigned to the class
+\begin{equation}
+k(j)
+=
+\underset{k}{\operatorname{argmax}}\;\hat{p}_{jk},
+\end{equation}
+corresponding to the class with the largest estimated proportion in that
+node.
 
-Para a divisão dos nós no caso da regressão, foi utilizado o erro
-quadrático médio como medida de impureza. Para a classificação, algumas
-medidas comuns para \(Q_j\left(T\right)\) são o erro de classificação, o
-índice de Gini ou a entropia cruzada.
+While the residual sum of squares is used as the impurity measure for
+regression trees, several measures can be used for classification trees.
+Common choices include the classification error rate, the Gini index, and
+cross-entropy. These measures quantify the degree of
+heterogeneity among the classes within a node and are used to evaluate
+candidate splits.
 
 \section{Ensemble Methods}
 
-As árvores de decisão são conhecidas por sua alta interpretabilidade,
-mas geralmente apresentam um desempenho preditivo inferior em comparação
-com outros modelos e algoritmos. No entanto, é possível superar essa
-limitação construindo um modelo preditivo que combina a força de uma
-coleção de estimadores base, um processo conhecido como aprendizado em
-conjunto (Ensemble Learning). De acordo com \citeonline{hastie2009elements}, o
-aprendizado em conjunto pode ser dividido em duas etapas principais: a
-primeira etapa consiste em desenvolver uma população de algoritmos de
-aprendizado base a partir dos dados de treinamento, e a segunda etapa
-envolve a combinação desses algoritmos para formar um estimador
-agregado. Portanto, nesta seção, serão definidos os métodos de
-aprendizado em conjunto utilizados neste trabalho.
+Decision trees offer an interpretable and flexible approach to predictive
+modeling. However, individual trees can be sensitive to variations in the
+training data, leading to substantial variability in their predictions.
+Ensemble learning provides a general framework for addressing this
+limitation by combining multiple base learners into a single predictive
+model.
+
+According to \citeonline{hastie2009elements}, ensemble methods can be viewed
+as involving two main steps. First, a collection of base learners is
+constructed from the training data, potentially using different samples,
+features, or learning procedures. Second, the predictions from these
+learners are combined to produce an aggregate estimator. The resulting
+model can achieve improved predictive performance and stability relative
+to individual base learners. The following sections describe the ensemble methods
+considered in this work.
+
 
 \subsection{Bagging}
 
-O algoritmo de Bootstrap Aggregation, ou Bagging, foi introduzido por
-\citeonline{breiman1996bagging}. Sua ideia principal é gerar um estimador agregado a
-partir de múltiplas versões de um preditor, que são criadas por meio de
-amostras bootstrap do conjunto de treinamento, utilizadas como novos
-conjuntos de treinamento. O Bagging pode ser empregado para melhorar a
-estabilidade e a predição de modelos ou algoritmos de aprendizado de
-máquina, além de reduzir a variância e evitar o sobreajuste. Por
-exemplo, o Bagging pode ser utilizado para melhorar o desempenho da
-árvore de regressão descrita anteriormente.
+Bootstrap aggregation, commonly referred to as Bagging, was introduced by
+\citeonline{breiman1996bagging}. Its main idea is to construct an aggregate
+estimator by fitting multiple versions of a base learner to bootstrap
+samples drawn from the training data. The predictions from these learners
+are subsequently combined to obtain the final prediction. By averaging
+multiple fitted models, Bagging can reduce the variance of unstable
+learning algorithms and consequently improve the stability and predictive
+performance of the resulting model. In particular, Bagging can be applied
+to regression trees to mitigate the high variability associated with
+individual trees.
 
-\citeonline{breiman1996bagging} define formalmente o algoritmo de Bagging, que utiliza
-um conjunto de treinamento \(\mathcal{L}\). A partir desse conjunto, são
-geradas amostras bootstrap \(\mathcal{L}^{(B)}\) com \(B\) réplicas,
-formando uma coleção de modelos \(\{f(x, \mathcal{L}^{(B)})\}\), onde
-\(f\) representa um modelo estatístico ou algoritmo treinado nas
-amostras bootstrap para prever ou classificar uma variável dependente
-\(y\) com base em variáveis independentes. Se a variável dependente
-\(y\) for numérica, a predição é obtida pela média das estimações dos
-modelos:
+More formally, let $\mathcal{L}$ denote the training set and let
+$\{\mathcal{L}^{\left(i\right)}\}^{B}_{i=1}$ denote $B$ bootstrap samples
+drawn independently from $\mathcal{L}$. For each bootstrap sample, a base
+learner $f$ is fitted, resulting in the collection $f\left(x,\mathcal{L}^{(1)}\right),\ldots, f\left(x,\mathcal{L}^{(B)}\right)$.
+When the response variable $y$ is continuous, the Bagging estimator is
+obtained by averaging the predictions across the $B$ fitted models:
 \begin{equation}
-f_{B}\left(x\right) = \frac{1}{B} \sum_{b = 1}^B f \left(x, \mathcal{L}^{\left(B\right)}\right)\text{,}
+\label{eq:bagging_regression}
+f_B(x)
+=
+\frac{1}{B}
+\sum_{b=1}^{B}
+f\left(x,\mathcal{L}^{(b)}\right).
 \end{equation}
-em que \(f_{B}\) representa a predição agregada. No caso em que \(y\)
-prediz uma classe, utiliza-se a votação majoritária. Ou seja, se
-estivermos classificando em classes \(j \in \{1, \dots, J\}\), então
-\(N_j = \#\{B; f(x, \mathcal{L}^{(B)}) = j\}\) representa o número de
-vezes que a classe \(j\) foi predita pelos estimadores. Assim:
+Here, $f_B(x)$ denotes the aggregated prediction at $x$.
+
+For classification problems, the predictions are instead combined through majority voting. Let the possible classes be indexed by
+$j\in\{1,\ldots,J\}$, and define
 \begin{equation}
-f_{B}\left(x\right) = \arg \max_{j} N_j\text{.}
+N_j(x) = \sum_{b=1}^{B} I\left\{ f\left(x,\mathcal{L}^{(b)}\right)=j \right\}\text{,}
 \end{equation}
-isto é, o \(j\) para o qual \(N_j\) é máximo
+where $N_j(x)$ denotes the number of bootstrap models that assign
+observation $x$ to class $j$. The Bagging classification rule is then
+given by
+\begin{equation}
+\label{eq:bagging_classification}
+f_B(x)
+=
+\underset{j\in\{1,\ldots,J\}}{\operatorname{argmax}}
+\;N_j(x).
+\end{equation}
+Thus, the predicted class is the one receiving the largest number of votes
+among the $B$ fitted base learners.
 
-Embora a técnica de Bagging possa melhorar o desempenho de uma árvore de
-regressão ou de classificação, isso geralmente vem ao custo de menor
-interpretabilidade. Quando o Bagging é aplicado a uma árvore de
-regressão, construímos \(B\) árvores de regressão usando \(B\) réplicas
-de amostras bootstrap e tomamos a média das predições resultantes (JAMES
-et al., 2013). Nesse processo, as árvores de regressão crescem até seu
-máximo, sem passar pelo processo de poda, resultando em cada árvore
-individual com alta variância e baixo viés. No entanto, ao agregar as
-predições das \(B\) árvores, a variância é reduzida.
-
-Para mitigar a falta de interpretabilidade do método Bagging aplicado a
-árvores de regressão, pode-se utilizar a medida de impureza baseada no
-erro quadrático médio como uma métrica para avaliar a importância das
-variáveis independentes. Um valor elevado na redução total média do erro
-quadrático médio, calculado com base nas divisões realizadas por um
-determinado preditor em todas as \(B\) árvores, indica que o preditor é
-importante.
-
-As árvores construídas pelo algoritmo de árvore de decisão se beneficiam
-da estratégia de agregação do Bagging, principalmente por meio da
-redução da variância das previsões. No entanto, esse benefício é
-limitado pela correlação existente entre as árvores geradas. Se essas
-árvores forem variáveis aleatórias independentes e identicamente
-distribuídas (i.i.d.), cada uma com variância \(\sigma^2\), a variância
-da média das previsões das \(B\) árvores será \(\frac{1}{B} \sigma^2\).
-
-Contudo, se as árvores forem apenas identicamente distribuídas (i.d.),
-mas não independentes, apresentando uma correlação positiva \(\rho\), a
-variância da média das previsões passa a ser dada por:
-\begin{equation}\phantomsection\label{eq-cor}{
-\rho \sigma^2 + \frac{1 - \rho}{B}\sigma^2\text{.}
-}\end{equation}
-
-Nesse caso, à medida que o número de árvores \(B\) tende ao infinito, o
-segundo termo da expressão se aproxima de zero, mas o primeiro termo
-permanece constante. Isso demonstra que os ganhos proporcionados pelo
-Bagging são limitados pela correlação entre as árvores \citeonline{hastie2009elements}.
-
-Essa correlação ocorre porque as árvores geradas pelo Bagging tendem a
-ser bastante semelhantes. As variáveis selecionadas para as divisões são
-escolhidas com base na maior redução do erro nas regiões, e,
-frequentemente, as mesmas variáveis são as que mais contribuem para essa
-redução, sendo repetidamente escolhidas. Uma forma de reduzir essa
-correlação - e, com isso, melhorar o desempenho do Bagging - é por meio
-do algoritmo Random Forest, que será apresentado a seguir.
 
 \section{Gradient Boost}
 
-\section{Kernel}
+\section{Kernel Methods}
 
-\noindent Métodos baseados em Kernel são técnicas extremamente flexíveis que podem ser utilizados
-para estender modelos ou algoritmos para regiões de decisão não lineares \cite{mohri2018foundations}. Estes métodos
-são baseados nas conheecidas funções de kernel, os quais, sob condições de simetria e positiva definida, definem
-produtos internos em espaços de alta dimensão, conhecidos como espaços de Hilbert. Dessa forma, este capítulo
-terá como objetivo definir e apresentar os conceitos fundamentais sobre métodos baseados em kernel,
-incluindo a definição de funções de kernel, o teorema do representer e Reproducing Kernel Hilbert
-Space (RKHS).
+\noindent Kernel-based methods are highly flexible techniques that can be used
+to extend models or algorithms to nonlinear decision regions \cite{mohri2018foundations}.
+These methods are based on kernel functions, which, under symmetry and
+positive semidefiniteness conditions, can be interpreted as inner products
+in high-dimensional feature spaces. In particular, positive semidefinite
+kernels are associated with Reproducing Kernel Hilbert Spaces (RKHS).
+Therefore, this section aims to introduce the fundamental concepts of
+kernel-based methods, including the definition of kernel functions, positive
+semidefinite kernels, the representer theorem, and Reproducing Kernel Hilbert
+Spaces (RKHS).
 
 \section{Kernels}
 
-Por definição, uma função $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ é chamada de kernel sobre
-$\mathcal{X}$.
-A ideia central é construir um kernel $K$ tal que, para quaisquer dois pontos $x, x' \in \mathcal{X}$, $K(x, x')$
-corresponda ao produto interno entre duas representações desses pontos em um espaço de Hilbert
-$\mathcal{H}$, isto é,
+By definition, a function $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$
+is called a kernel on $\mathcal{X}$. A central idea is to construct a kernel
+$K$ such that, for any two points $x, x' \in \mathcal{X}$,
+$K(x,x')$ corresponds to the inner product between representations of these
+points in a Hilbert space $\mathcal{H}$, that is,
 \begin{equation}
-\forall x, x' \in \mathcal{X}, \quad K(x,x') = \langle \phi(x), \phi(x') \rangle,
+\forall x, x' \in \mathcal{X}, \quad
+K(x,x') = \langle \phi(x), \phi(x') \rangle_{\mathcal{H}},
 \end{equation}
-para algum mapeamento $\phi: \mathcal{X} \to \mathcal{H}$. O espaço $\mathcal{H}$ é chamado de
+for some mapping $\phi: \mathcal{X} \to \mathcal{H}$. The space
+$\mathcal{H}$ is referred to as the feature space.
+
+From this perspective, the kernel can be interpreted as a measure of
+similarity between elements of $\mathcal{X}$, since the inner product
+provides a notion of similarity between their representations in the
 feature space.
 
-Sob essa perspectiva, o kernel pode ser interpretado como uma medida de similaridade entre elementos
-de $\mathcal{X}$, uma vez que o produto interno mensura a similaridade entre dois vetores.
+A fundamental advantage of this approach is computational. In many cases,
+it is significantly more efficient to compute $K(x,x')$ directly than to
+explicitly compute $\phi(x)$ and $\phi(x')$ and then evaluate their inner
+product. This idea is commonly referred to as the \textit{kernel trick}.
 
-Uma vantagem fundamental dessa abordagem é computacional. Isto é, muitas vezes é significativamente mais eficiente
-calcular diretamente $K(x,x')$ do que computar explicitamente $\phi(x)$ e $\phi(x')$ e então avaliar
-seu produto interno.
+\subsection{Positive Semidefinite Kernels}
 
-\subsection{Kernels positivos definidos}
+For a function $K$ to be used as a positive semidefinite kernel, it must
+satisfy the appropriate symmetry and positive semidefiniteness conditions.
+These properties allow the kernel to induce a consistent inner-product
+structure and, consequently, a geometry in a suitable Hilbert space.
 
-Para que uma função $K$ possa ser utilizada como kernel, é necessário que sejam satisfeitas duas condições, que
-a função seja simétrica e positiva definida. Satisfazendo essas condições, o kernel é capaz de induzir uma geometria
-em um espaço de Hilbert.
-
-Formalmente, um kernel $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ é dito simétrico e positivo
-definido se, para qualquer conjunto finito $\{x_1, \ldots, x_n\} \subset \mathcal{X}$, a matriz de Gram
-$$
-\mathbf{K} = [K(x_i,x_j)]_{i,j=1}^n \in \mathbb{R}^{n \times n}
-$$
-for positiva semidefinida. Isto é, para qualquer vetor $\mathbf{c}=(c_1,\ldots,c_n)^\top \in \mathbb{R}^n$,
-$$
+Formally, a kernel $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ is
+said to be positive semidefinite if, for any finite set
+$\{x_1, \ldots, x_n\} \subset \mathcal{X}$, the Gram matrix
+\begin{equation}
+\mathbf{K} = [K(x_i,x_j)]_{i,j=1}^n
+\in \mathbb{R}^{n \times n}
+\end{equation}
+is positive semidefinite. That is, for any vector
+$\mathbf{c}=(c_1,\ldots,c_n)^\top \in \mathbb{R}^n$,
+\begin{equation}
 \mathbf{c}^\top \mathbf{K}\mathbf{c}
 =
-\sum_{i=1}^n \sum_{j=1}^n c_i c_j K(x_i,x_j)
+\sum_{i=1}^n \sum_{j=1}^n
+c_i c_j K(x_i,x_j)
 \geq 0.
-$$
+\end{equation}
 
-Equivalentemente, todos os autovalores de $\mathbf{K}$ são não negativos. Essa propriedade é essencial,
-pois garante a existência de uma representação geométrica consistente do kernel.
+Equivalently, all eigenvalues of $\mathbf{K}$ are nonnegative. This
+property is essential because it guarantees that the kernel admits a
+consistent inner-product representation in a Hilbert space.
+\subsection{Hilbert Spaces}
 
-\subsection{Espaços de Hilbert}
+The notion of a Hilbert space provides the mathematical structure required
+for the theory of kernels.
 
-A noção de espaço de Hilbert fornece a estrutura matemática necessária para a teoria de kernels.
+By definition, a Hilbert space $\mathcal{H}$ is a vector space equipped with
+an inner product $\langle \cdot, \cdot \rangle_{\mathcal{H}}$ that is complete
+with respect to the norm induced by this inner product. The norm on
+$\mathcal{H}$ is defined by
+\begin{equation}
+\forall h \in \mathcal{H}, \quad
+\|h\|_{\mathcal{H}}
+=
+\sqrt{\langle h,h\rangle_{\mathcal{H}}}.
+\end{equation}
 
-Por definição, um espaço de Hilbert $\mathcal{H}$ é um espaço vetorial munido de um produto interno
-$\langle \cdot, \cdot \rangle_{\mathcal{H}}$ e que é completo com relação à norma induzida por esse produto interno. A norma em $\mathcal{H}$ é definida por
-$$
-\forall h \in \mathcal{H}, \quad \|h\|_{\mathcal{H}} = \sqrt{\langle h,h\rangle}.
-$$
+Completeness implies that every Cauchy sequence in $\mathcal{H}$ converges
+to an element that also belongs to $\mathcal{H}$. This property is important
+in approximation and optimization problems, as it ensures that limits of
+convergent sequences remain within the space.
 
-A completude implica que toda sequência de Cauchy em $\mathcal{H}$ converge para um elemento do próprio
-espaço, garantindo estabilidade analítica para problemas de otimização e aproximação.
-
-No contexto de kernels, o espaço de Hilbert atua como o espaço onde os dados são representados via o
-mapeamento $\phi$.
+In the context of kernel methods, the Hilbert space provides the space in
+which data can be represented through a feature mapping $\phi$.
 
 \subsection{Reproducing Kernel Hilbert Spaces}
 
-A relação entre kernels positivos definidos e espaços de Hilbert é formalizada pelo teorema.
+The relationship between positive semidefinite kernels and Hilbert spaces
+can be formalized through the theory of Reproducing Kernel Hilbert Spaces
+(RKHS).
 
-Seja $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ um kernel simétrico e positivo definido. Então existe um espaço de Hilbert $\mathcal{H}$ e um mapeamento $\phi: \mathcal{X} \to \mathcal{H}$ tais que
-
-$$
-\forall x,x' \in \mathcal{X}, \quad K(x,x') = \langle \phi(x), \phi(x') \rangle_{\mathcal{H}}.
-$$
-
-Além disso, esse espaço satisfaz a chamada propriedade de reprodução:
-
-$$
-\forall h \in \mathcal{H}, \forall x \in \mathcal{X}, \quad h(x) = \langle h, K(x,\cdot)\rangle_{\mathcal{H}}.
-$$
-
-Essa propriedade estabelece que a avaliação funcional é contínua e pode ser representada por meio do próprio
- kernel.
-
-O espaço $\mathcal{H}$ associado a $K$ é chamado de Reproducing Kernel Hilbert Space (RKHS), desempenhando
-papel central em métodos de aprendizado estatístico, particularmente em problemas de regularização,
-estimação não paramétrica e aprendizado supervisionado.
-
-\subsection{Teorema do Representante}
-
-O resultado mais interessante para a definição do modelo GG-KM é o Teorema do Representante. Sua principal
-importância reside no fato de garantir que, embora a otimização ocorra em um espaço potencialmente infinito
--dimensional, a solução ótima pode ser expressa em termos de uma combinação finita de kernels avaliados nas
-observações da amostra.
-
-Formalmente, seja $K \text{ : } \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ um kernel positivo definido e
-$\mathcal{H}$ seu correspondente RKHS. Assim, para qualquer função $G \text{ : } \mathbb{R} \to \mathbb{R}$ não
-decrescente e qualquer função perda $L \text{ : } \mathbb{R}^n \to \mathbb{R} \cup \{+\infty\}$, o problema de otimização
-$$
-{\arg\min}_{h\in\mathcal{H}} F\left(h\right) = {\arg\min}_{h\in\mathcal{H}} G\left(\|h\|_{\mathcal{H}}\right) + L\left(h\left(x_1\right), \ldots, h\left(x_n\right)\right)
-$$
-admite uma solução na forma $h^{*} = \sum_{i=1}^{n}\alpha_i K\left(x_i, \cdot\right)$. Se $G$ é assumido como sendo crescente,
-então qualquer solução tem esta forma.
-
-
-Esse resultado é particularmente relevante porque reduz um problema de otimização funcional em dimensão
-infinita para um problema de otimização em dimensão finita, dependente apenas dos coeficientes
-$\boldsymbol{\alpha} = (\alpha_1, \ldots, \alpha_n)$. Na prática, isso torna viável o uso de métodos
-baseados em kernel, além de evidenciar que toda a informação necessária para a estimação está contida na
-matriz kernel $K$, sem necessidade de explicitar o mapeamento $\phi(\cdot)$.
-
-% \subsection{Principais funções kernel}
-
-% Uma vez estabelecido pelo Teorema do Representante que a solução ótima pode ser escrita
-% como uma combinação linear de kernels avaliados nos dados observados, a escolha da função
-% kernel passa a desempenhar papel central na modelagem. Diferentes kernels induzem distintas
-% geometrias no espaço de características, o que afeta diretamente a flexibilidade e a capacidade
-% de generalização do modelo.
-
-% Entre os kernels mais utilizados, destacam-se:
-
-% \begin{itemize}
-
-%     \item \textbf{Kernel linear}
-%     \[
-%     K(x_i,x_j)=x_i^\top x_j
-%     \]
-
-%     \item \textbf{Kernel polinomial}
-%     \[
-%     K(x_i,x_j)=\left(x_i^\top x_j + c\right)^d
-%     \]
-
-%     \item \textbf{Kernel Gaussiano (RBF)}
-%     \[
-%     K(x_i,x_j)=\exp\left(-\gamma \|x_i-x_j\|^2\right)
-%     \]
-
-%     \item \textbf{Kernel Laplaciano}
-%     \[
-%     K(x_i,x_j)=\exp\left(-\gamma \|x_i-x_j\|\right)
-%     \]
-
-%     \item \textbf{Kernel Sigmoidal}
-%     \[
-%     K(x_i,x_j)=\tanh\left(\gamma x_i^\top x_j + c\right)
-%     \]
-
-%     \item \textbf{Kernel Cauchy}
-%     \[
-%     K(x_i,x_j)=\left(1+\frac{\|x_i-x_j\|^2}{\sigma^2}\right)^{-1}
-%     \]
-
-%     \item \textbf{Kernel exponencial}
-%     \[
-%     K(x_i,x_j)=\exp\left(-\gamma \|x_i-x_j\|\right)
-%     \]
-% \end{itemize}
-
-A escolha do kernel determina implicitamente a classe de funções admissíveis no espaço RKHS e,
-consequentemente, o grau de complexidade que o modelo pode representar. Neste contexto, os kernels podem ser
-visto como um hiperparâmetro de complexidade do modelo, bem como as variáveis que os compõe, $\gamma\text{, } d\text{ e } \sigma$.
-
-\section{GG-KM}
-
-O modelo proposto GG-KM, nada mais é que uma proposta de modelar o valor esperado dos riscos latentes do
-modelo de tempo de promoção a partir da integração de kernels, de forma que seja uma extensão semi-paramétrica.
-Esta seção terá como objetivo descrever o processo de estimação e fundamentação do modelo.
-
-\subsection{Extensão não paramétrica via kernel}
-
-Embora o modelo de tempo de promoção clássico permita incorporar covariáveis por meio de funções paramétricas
-para $\theta(\mathbf{x})$, essa abordagem pode ser restritiva em cenários onde a relação entre as covariáveis
-e a fração de cura apresenta estruturas complexas ou altamente não lineares.
-
-Neste contexto, propõe-se modelar a intensidade média dos riscos latentes $\theta\left(\mathbf{x}\right)$ por
-meio de uma função não paramétrica $f\left(\mathbf{x}\right) = \log\left(\theta\left(\mathbf{x}\right)\right)>0$.
-Dessa forma, suponha que a estimação do modelo de promoção de cura seja feita por meio da maximização da log-verossimilhança
-penalizada:
+Let $K: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ be a symmetric
+positive semidefinite kernel. Then, there exists a Hilbert space
+$\mathcal{H}$ of functions on $\mathcal{X}$ such that, for every
+$x,x' \in \mathcal{X}$,
 \begin{equation}
-\label{eq:ggkm_penalized_likelihood}
-\min_{f} \sum_{i=1}^n - l(\mathbf{x}_i) + \frac{\lambda}{2} \|f\|^2
-\end{equation}
-em que $l(\mathbf{x}_i)$ representa a log-verossimilhança e $\lambda$ é uma parâmetro de regularização da complexidade
-do modelo. No entanto, supondo que a função $f$ pertença a um Reproducing Kernel Hilbert Space (RKHS)
-$\mathcal{H}_K$, associado a um kernel positivo definido $K(\cdot,\cdot)$, o Teorema do Representante
-garante que a solução do problema da Equação \ref{eq:ggkm_penalized_likelihood} pode ser expressa da
-seguinte forma:
-\begin{equation}
-f^*(\mathbf{x}) = \sum_{i=1}^{n}\alpha_i K(\mathbf{x},\mathbf{x}_i),
-\end{equation}
-em que $\alpha_1,\ldots,\alpha_n \in \mathbb{R}$ são coeficientes a serem estimados. Consequentemente, a
-intensidade média dos riscos latentes para o indivíduo $i$ pode ser escrita como
-\begin{equation}
-\theta(\mathbf{x}_i) = \exp\left(\sum_{j=1}^{n}\alpha_j K(\mathbf{x}_i,\mathbf{x}_j)\right).
-\end{equation}
-
-% Para o modelo de tempo de promoção, tem-se que a função log-verossimilhança é dada por:
-% \begin{equation}
-% \label{eq:ggkm_log_likelihood}
-% l(\mathbf{x}_i) = \delta_i \log\left(h_{\text{pop}}\left(t_i|\mathbf{x}_i\right)\right) + \log\left(S_{\text{pop}}\left(t_i|\mathbf{x}_i\right)\right)\text{.}
-% \end{equation}
-
-\subsection{Estimação via algoritmo EM penalizado}
-
-A representação obtida pelo Teorema do Representante permite reescrever o modelo de tempo de promoção em
-termos de um número finito de parâmetros. Seja
-\begin{equation}
-f(\mathbf{x}_i) = \sum_{j=1}^{n} \alpha_j K(\mathbf{x}_i,\mathbf{x}_j),
-\end{equation}
-
-Sob a formulação do modelo de tempo de promoção, assume-se que o número de riscos latentes associados ao
-indivíduo $i$ segue uma distribuição de Poisson com média $\theta(\mathbf{x}_i)$, isto é,
-\begin{equation}
-N_i
-\sim
-\text{Poisson}
-\left(
-\theta(\mathbf{x}_i)
-\right).
-\end{equation}
-
-Para realizar a estimação dos parâmetros, foi considerado o algoritmo EM. Em particular, considera-se uma extensão
-particular, o EM penalizado \cite{mclachlan2008algorithm}.
-
-% Entretanto, os riscos competitivos $N_i$ associados ao evento de interesse não são observados. Assim, a
-% estimação dos parâmetros pode ser conduzida por meio do algoritmo EM. Neste caso, considera-se o algoritmo
-% EM penalizado \cite{mclachlan2008algorithm}.
-
-Dessa forma, considere os dados completos $D_{\text{comp}} = \left\{t_i, \delta_i, N_i, \mathbf{x}_i\right\}^n_{i=1}$,
-em que $t_i$ representa o tempo observado, $\delta_i$ o indicador de falha e $N_i$ o número de riscos latentes
-associados ao $i\text{-ésimo}$ indíviduo. A log-verossimilhança completa, menos uma constante aditiva
-$C = -\sum_{i=1}^n \log\left(N_i!\right)$, pode ser escrita como
-\begin{equation}
-\begin{aligned}
-l_c
+K(x,x')
 =
-&
-\sum_{i=1}^{n}
-\left[
--\exp\!\bigl(f(\mathbf{x}_i)\bigr)
-+
-N_i f(\mathbf{x}_i)
-\right]
-\\
-&
-+
-\sum_{i=1}^{n}
-\left[
-\delta_i
-\log f_{GG}(t_i;a,d,p)
-\right]
-\\
-&
-+
-\sum_{i=1}^{n}
-\left[
-(N_i-\delta_i)
-\log S_{GG}(t_i;a,d,p)
-\right].
-\end{aligned}
+\langle K(x,\cdot), K(x',\cdot) \rangle_{\mathcal{H}}.
 \end{equation}
 
-Portanto, tem-se a log-verossimilhança completa penalizada:
-
+Moreover, $\mathcal{H}$ satisfies the so-called reproducing property:
 \begin{equation}
-\ell_{c, P} = l_c - \frac{\lambda}{2} \boldsymbol{\alpha}^{\top} K \boldsymbol{\alpha},
+\forall h \in \mathcal{H}, \forall x \in \mathcal{X}, \quad
+h(x)
+=
+\langle h, K(x,\cdot)\rangle_{\mathcal{H}}.
 \end{equation}
-em que
+
+The reproducing property implies that the evaluation functional
+$h \mapsto h(x)$ is continuous for every $x \in \mathcal{X}$ and can be
+represented by the function $K(x,\cdot)$ through the Riesz representation
+theorem.
+
+A Hilbert space satisfying these properties is called a Reproducing Kernel
+Hilbert Space (RKHS) associated with the kernel $K$. RKHSs play a central
+role in statistical learning methods, particularly in regularization,
+nonparametric estimation, and supervised learning.
+
+\subsection{Representer Theorem}
+
+One of the most important results for the formulation of the GG-KM model
+is the Representer Theorem. Its main importance lies in the fact that,
+although the optimization is performed over a potentially infinite-dimensional
+space, an optimal solution can be expressed as a finite linear combination
+of kernels evaluated at the observations in the sample.
+
+Formally, let $K : \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ be a
+positive semidefinite kernel and let $\mathcal{H}$ be its associated RKHS.
+For any nondecreasing function $G : \mathbb{R} \to \mathbb{R}$ and any loss
+function $L : \mathbb{R}^n \to \mathbb{R} \cup \{+\infty\}$, consider the
+optimization problem
 \begin{equation}
-\boldsymbol{\alpha} = (\alpha_1,\ldots,\alpha_n)^{\top}
-\end{equation}
-e $K$ denota a matriz de kernel com elementos $K_{ij}=K(\mathbf{x}_i,\mathbf{x}_j)$.
-
-O algoritmo EM consiste em alternar entre o cálculo das esperanças condicionais das variáveis latentes e a maximização da esperança da log-verossimilhança completa penalizada.
-
-No passo E, as quantidades não observadas são substituídas por suas respectivas esperanças condicionais, calculadas sob os valores correntes dos parâmetros. Dessa forma, define-se a função auxiliar
-
-\begin{equation}
-Q\!\left(
-\Theta \mid \Theta^{(k)}
-\right)
-=
-\mathbb{E}
-\left[
-\ell_{c,P}
-\mid
-\mathcal{D}_{\mathrm{obs}},
-\Theta^{(k)}
-\right],
-\end{equation}
-
-em que
-\[
-\Theta=(\boldsymbol{\alpha},a,d,p)
-\]
-representa o vetor de parâmetros do modelo.
-
-Utilizando propriedades do modelo de tempo de promoção, obtém-se que a esperança condicional do número de riscos latentes possui forma fechada, dada por
-
-\begin{equation}
-\widehat{N}_i^{(k+1)}
-=
-\mathbb{E}
-\!\left[
-N_i
-\mid
-\mathcal{D}_{\mathrm{obs}},
-\Theta^{(k)}
-\right]
-=
-\delta_i
-+
-\theta_i^{(k)}
-S_{GG}
-\!\left(
-t_i;
-a^{(k)},
-d^{(k)},
-p^{(k)}
-\right),
-\end{equation}
-
-em que
-
-\begin{equation}
-\theta_i^{(k)}
-=
-\exp
-\!\left(
-f^{(k)}(\mathbf{x}_i)
-\right)
-=
-\exp
-\!\left(
-\sum_{j=1}^{n}
-\alpha_j^{(k)}
-K(\mathbf{x}_i,\mathbf{x}_j)
-\right).
-\end{equation}
-
-Substituindo \(N_i\) por sua esperança condicional na log-verossimilhança completa penalizada e eliminando
-termos constantes em relação aos parâmetros, obtém-se a função auxiliar penalizada
-\begin{equation}
-Q_P
-=
-Q_{\alpha}
-+
-Q_{GG},
-\end{equation}
-em que
-\begin{equation}
-Q_{\alpha}
-=
-\sum_{i=1}^{n}
-\left[
--\exp\!\bigl(f(\mathbf{x}_i)\bigr)
-+
-\widehat N_i^{(k+1)}
-f(\mathbf{x}_i)
-\right]
--
-\frac{\lambda}{2}
-\boldsymbol{\alpha}^{\top}
-K
-\boldsymbol{\alpha},
-\end{equation}
-e
-\begin{equation}
-Q_{GG}
-=
-\sum_{i=1}^{n}
-\left[
-\delta_i
-\log f_{GG}(t_i;a,d,p)
-+
-\bigl(\widehat N_i^{(k+1)}-\delta_i\bigr)
-\log S_{GG}(t_i;a,d,p)
-\right].
-\end{equation}
-
-Observa-se que a função auxiliar penalizada é separável em dois blocos de parâmetros: o primeiro associado aos coeficientes do kernel, \(\boldsymbol{\alpha}\), e o segundo aos parâmetros da distribuição Gama Generalizada, \((a,d,p)\). Essa decomposição permite que o passo M seja realizado por meio de atualizações alternadas dos dois blocos.
-
-Inicialmente, atualizam-se os coeficientes do kernel resolvendo
-
-\begin{equation}
-\boldsymbol{\alpha}^{(k+1)}
-=
-\arg\max_{\boldsymbol{\alpha}}
-Q_{\alpha}.
-\end{equation}
-
-Em seguida, atualizam-se os parâmetros da distribuição Gama Generalizada por meio de
-\begin{equation}
-(a^{(k+1)},d^{(k+1)},p^{(k+1)})
-=
-\arg\max_{a,d,p}
-Q_{GG}.
-\end{equation}
-% Cabe destacar que o termo de penalização afeta apenas a atualização dos coeficientes do kernel, não
-% alterando a forma da atualização dos parâmetros da distribuição Gama Generalizada.
-Ambos os problemas de maximização são resolvidos numericamente por meio do algoritmo L-BFGS-B, utilizando as derivadas analíticas
-das respectivas funções objetivo.
-
-Após cada iteração, calcula-se a log-verossimilhança penalizada observada
-\begin{equation}
-\ell_P
-=
-\sum_{i=1}^{n}
-\left[
-\delta_i
-\left(
-f(\mathbf{x}_i)
-+
-\log f_{GG}(t_i;a,d,p)
-\right)
--
-\exp\!\bigl(f(\mathbf{x}_i)\bigr)
-F_{GG}(t_i;a,d,p)
-\right]
--
-\frac{\lambda}{2}
-\boldsymbol{\alpha}^{\top}
-K
-\boldsymbol{\alpha},
-\end{equation}
-a qual é utilizada para monitorar a convergência do algoritmo. O procedimento iterativo é interrompido quando
-a variação absoluta da log-verossimilhança penalizada observada entre duas iterações consecutivas se torna
-inferior a uma tolerância previamente especificada, isto é,
-\begin{equation}
-\left|
-\ell_P^{(k+1)}
--
-\ell_P^{(k)}
-\right|
-<
-\varepsilon,
-\end{equation}
-em que \(\varepsilon>0\) representa uma constante de tolerância.
-
-% O algoritmo EM consiste em alternar entre o cálculo da esperança condicional dos riscos latentes e a
-% maximização da esperança da log-verossimilhança completa penalizada.
-
-% No passo E, calcula-se
-% \begin{equation}
-% Q\!\left(
-% \Theta \mid \Theta^{(k)}
-% \right)
-% =
-% \mathbb{E}
-% \left[
-% \ell_{c,P}
-% \mid
-% \mathcal{D}_{\mathrm{obs}},
-% \Theta^{(k)}
-% \right].
-% \end{equation}
-% em que $\Theta = \left(\boldsymbol{\alpha},a,d,p\right)$.
-
-% Pode-se provar que:
-% % Utilizando propriedades do modelo de tempo de promoção, obtém-se que
-% \begin{equation}
-% \widehat{N}_i^{(k+1)}
-% =
-% \mathbb{E}
-% \!\left[
-% N_i
-% \mid
-% \mathcal{D}_{obs},
-% \Theta^{(k)}
-% \right]
-% =
-% \delta_i
-% +
-% \theta_i^{(k)}
-% S_{GG}
-% \!\left(
-% t_i;
-% a^{(k)},
-% d^{(k)},
-% p^{(k)}
-% \right),
-% \end{equation}
-% em que
-% \begin{equation}
-% \theta_i^{(k)}
-% =
-% \exp
-% \!\left(
-% f^{(k)}(\mathbf{x}_i)
-% \right)
-% =
-% \exp
-% \!\left(
-% \sum_{j=1}^{n}
-% \alpha_j^{(k)}
-% K(\mathbf{x}_i,\mathbf{x}_j)
-% \right).
-% \end{equation}
-
-% Substituindo as quantidades não observadas por suas respectivas
-% esperanças condicionais, a função auxiliar penalizada assume a forma
-% \begin{equation}
-% Q_P
-% =
-% Q_{\alpha}
-% +
-% Q_{GG},
-% \end{equation}
-% com
-% \begin{equation}
-% Q_{\alpha}
-% =
-% \sum_{i=1}^{n}
-% \left[
-% -\exp\!\bigl(f(\mathbf{x}_i)\bigr)
-% +
-% \widehat N_i^{(k+1)}
-% f(\mathbf{x}_i)
-% \right]
-% -
-% \frac{\lambda}{2}
-% \boldsymbol{\alpha}^{\top}
-% K
-% \boldsymbol{\alpha},
-% \end{equation}
-% e
-% \begin{equation}
-% Q_{GG}
-% =
-% \sum_{i=1}^{n}
-% \left[
-% \delta_i
-% \log f_{GG}(t_i;a,d,p)
-% +
-% \bigl(\widehat N_i^{(k+1)}-\delta_i\bigr)
-% \log S_{GG}(t_i;a,d,p)
-% \right].
-% \end{equation}
-
-% Observa-se que a função auxiliar penalizada é separável em dois blocos de parâmetros,
-% \(\boldsymbol{\alpha}\) e \((a,d,p)\). Consequentemente, o passo M pode ser realizado por
-% otimização alternada.
-
-% Inicialmente, atualizam-se os coeficientes do kernel resolvendo
-% \begin{equation}
-% \boldsymbol{\alpha}^{(k+1)}
-% =
-% \arg\max_{\boldsymbol{\alpha}}
-% Q_{\alpha}.
-% \end{equation}
-
-% Em seguida, atualizam-se os parâmetros da distribuição Gama Generalizada por meio de
-% \begin{equation}
-% (a^{(k+1)},d^{(k+1)},p^{(k+1)})
-% =
-% \arg\max_{a,d,p}
-% Q_{GG}.
-% \end{equation}
-
-% A otimização de ambos problemas de otimização é realizada numericamente através de L-BFGS-B, utilizando-se
-% as derivadas analíticas das respectivas funções objetivos.
-
-% O processo iterativo é repetido até a convergência da log-verossimilhança penalizada observada,
-% \begin{equation}
-% \ell_P
-% =
-% \sum_{i=1}^{n}
-% \left[
-% \delta_i
-% \left(
-% f(\mathbf{x}_i)
-% +
-% \log f_{GG}(t_i;a,d,p)
-% \right)
-% -
-% \exp\!\bigl(f(\mathbf{x}_i)\bigr)
-% F_{GG}(t_i;a,d,p)
-% \right]
-% -
-% \frac{\lambda}{2}
-% \boldsymbol{\alpha}^{\top}
-% K
-% \boldsymbol{\alpha},
-% \end{equation}
-% sendo adotado como critério de parada
-% \begin{equation}
-% \left|
-% \ell_P^{(k+1)}
-% -
-% \ell_P^{(k)}
-% \right|
-% <
-% \varepsilon,
-% \end{equation}
-% em que \(\varepsilon > 0\) representa uma tolerância previamente especificada.
-
-\begin{algorithm}[H]
-\caption{Algoritmo EM penalizado para estimar o modelo GG-KM - $N_i \sim \mathrm{Poisson}\!\bigl(\theta(\mathbf{x}_i)\bigr).$}
-\begin{algorithmic}[1]
-
-\State Inicialize
-$
-\alpha^{(0)},\,
-a^{(0)},\,
-d^{(0)},\,
-p^{(0)}
-$
-e escolha uma tolerância $\varepsilon>0$.
-
-\State Defina $k \gets 0$.
-
-\Repeat
-
-\State \textbf{E-step:} para $i=1,\ldots,n$, calcule
-\[
-\widehat N_i^{(k+1)}
-=
-\delta_i
-+
-\exp\!\left(
-\sum_{j=1}^{n}
-\alpha_j^{(k)}
-K(x_i,x_j)
-\right)
-S_{GG}
-\!\left(
-t_i;
-a^{(k)},
-d^{(k)},
-p^{(k)}
-\right).
-\]
-
-\State \textbf{M-step:}
-\[
-\alpha^{(k+1)}
-=
-\arg\max_{\alpha}
+\min_{h \in \mathcal{H}}
 \left\{
-\sum_{i=1}^{n}
-\left[
--
-\exp\!\left(
-\sum_{j=1}^{n}
-\alpha_j
-K(x_i,x_j)
-\right)
+G\left(\|h\|_{\mathcal{H}}\right)
 +
-\widehat N_i^{(k+1)}
-\sum_{j=1}^{n}
-\alpha_j
-K(x_i,x_j)
-\right]
--
-\frac{\lambda}{2}
-\alpha^\top K\alpha
+L\left(h(x_1),\ldots,h(x_n)\right)
 \right\}.
-\]
-
-\[
-(a^{(k+1)},d^{(k+1)},p^{(k+1)})
-=
-\arg\max_{a,d,p}
-\sum_{i=1}^{n}
-\left[
-\delta_i
-\log f_{GG}(t_i;a,d,p)
-+
-(\widehat N_i^{(k+1)}-\delta_i)
-\log S_{GG}(t_i;a,d,p)
-\right].
-\]
-
-\State Calcule a log-verossimilhança penalizada observada
-\[
-\ell_P^{(k+1)}
-=
-\ell_P
-\!\left(
-\alpha^{(k+1)},
-a^{(k+1)},
-d^{(k+1)},
-p^{(k+1)}
-\right).
-\]
-
-\State Atualize
-\[
-\Delta^{(k+1)}
-=
-\left|
-\ell_P^{(k+1)}
--
-\ell_P^{(k)}
-\right|.
-\]
-
-\State $k \gets k+1$.
-
-\Until{$\Delta^{(k+1)} < \varepsilon$}
-
-\end{algorithmic}
-\end{algorithm}
-
-\subsection{Estimação do modelo GG-KM com riscos latentes Binomial Negativa}
-
-Uma generalização do modelo apresentado anteriormente consiste em assumir que o número de riscos latentes
-\(N_i\) segue uma distribuição Binomial Negativa em vez de uma distribuição de Poisson. Em vez de
-especificar essa distribuição por meio de sua função de probabilidade, adota-se a parametrização definida
-pela função geradora de probabilidades
-\begin{equation}
-A(u)
-=
-\left[
-1+\phi\theta_i(1-u)
-\right]^{-1/\phi},
 \end{equation}
-onde \(\theta_i>0\) representa o número médio de riscos latentes e \(\phi\) é um parâmetro de dispersão.
-Sob essa parametrização,
-
+Under the appropriate conditions for the existence of a minimizer, this
+problem admits a solution of the form
 \begin{equation}
-\mathbb{E}(N_i)=\theta_i,
-\qquad
-\mathrm{Var}(N_i)
+h^{*}(\cdot)
 =
-\theta_i+\phi\theta_i^2.
+\sum_{i=1}^{n}\alpha_i K(x_i,\cdot).
 \end{equation}
-
-Assim, valores positivos de \(\phi\) produzem sobredispersão em relação ao modelo de Poisson. Além disso,
-essa parametrização engloba importantes casos particulares. Quando \(\phi \to 0\), recupera-se a
-distribuição de Poisson e, consequentemente, o modelo GG-KM apresentado na seção anterior. Já o caso
-\(\phi=-1\) conduz ao modelo de mistura de \citeonline{berkson1952survival}. Neste trabalho, entretanto,
-considera-se apenas o cenário \(\phi>0\), correspondente à presença de sobredispersão.
-
-A função de sobrevivência populacional passa a ser
-\begin{equation}
-S_{\text{pop}}(t)
-=
-\left[
-1+\phi\theta_i
-F_{GG}(t;a,d,p)
-\right]^{-1/\phi},
-\end{equation}
-com
-\begin{equation}
-\theta_i
-=
-\exp
-\!\left(
-\sum_{j=1}^{n}
-\alpha_j
-K(\mathbf{x}_i,\mathbf{x}_j)
-\right).
-\end{equation}
-
-Consequentemente, a log-verossimilhança penalizada observada é dada por
-
-\begin{equation}
-\ell_P
-=
-\sum_{i=1}^{n}
-\left\{
-\delta_i
-\left[
-f(\mathbf{x}_i)
-+
-\log
-f_{GG}(t_i;a,d,p)
-\right]
--
-\left(
-\frac{1}{\phi}
-+
-\delta_i
-\right)
-\log
-\left[
-1+
-\phi
-\theta_i
-F_{GG}(t_i;a,d,p)
-\right]
-\right\}
--
-\frac{\lambda}{2}
-\boldsymbol{\alpha}^{\top}
-K
-\boldsymbol{\alpha}.
-\end{equation}
-
-Quando o parâmetro de dispersão \(\phi\) é previamente especificado, ele é mantido fixo ao
-longo do processo iterativo e apenas os parâmetros \(\boldsymbol{\alpha}\), \(a\), \(d\) e \(p\) são estimados.
-Por outro lado, quando \(\phi\) não é previamente informado, sua estimação é realizada conjuntamente com os
-demais parâmetros do modelo.
-
-Neste último caso, a estimação é realizada por meio de uma extensão do algoritmo EM, o
-Expectation Conditional Maximization Either (ECME) \cite{mclachlan2008algorithm}. A escolha desse
-algoritmo decorre da presença do parâmetro de dispersão \(\phi\), cuja
-atualização não admite solução analítica em forma fechada. De fato,
-\(\phi\) aparece simultaneamente nos termos \(\log(1+\phi\theta_iF_{GG}(t_i))\), \(1/\phi\) e nas
-esperanças condicionais dos riscos latentes, o que torna a maximização da função auxiliar substancialmente
-mais complexa do que a atualização dos demais parâmetros. Assim, os parâmetros \(\boldsymbol{\alpha}\)
-e \((a,d,p)\) são atualizados por meio da maximização da função auxiliar, enquanto \(\phi\) é atualizado
-diretamente pela maximização da log-verossimilhança observada.
-
-% Neste último caso, a estimação é realizada por meio de uma extensão do algoritmo EM, o ECME
-% (Expectation Conditional Maximization Either), \cite{mclachlan2008algorithm}. A escolha desse algoritmo decorre da presença do
-% parâmetro de dispersão \(\phi\), cuja atualização a partir da função auxiliar não conduz a uma etapa de
-% maximização simples. Assim, os parâmetros \(\boldsymbol{\alpha}\) e \((a,d,p)\) são atualizados por meio da
-% maximização da função auxiliar, enquanto \(\phi\) é atualizado diretamente pela maximização da
-% log-verossimilhança observada.
-
-No passo E, obtém-se
-
-\begin{equation}
-\widehat N_i^{(k+1)}
-=
-\mathbb{E}
-\!\left[
-N_i
-\mid
-\mathcal D_{\mathrm{obs}},
-\Theta^{(k)}
-\right]
-=
-\delta_i
-+
-\frac{
-\left(
-1+\phi^{(k)}\delta_i
-\right)
-\theta_i^{(k)}
-S_{GG}
-\!\left(
-t_i;
-a^{(k)},
-d^{(k)},
-p^{(k)}
-\right)
-}{
-1+
-\phi^{(k)}
-\theta_i^{(k)}
-F_{GG}
-\!\left(
-t_i;
-a^{(k)},
-d^{(k)},
-p^{(k)}
-\right)
-}.
-\end{equation}
-
-Substituindo as quantidades não observadas por suas respectivas esperanças condicionais, obtém-se uma
-função auxiliar penalizada que pode ser decomposta em
-
-\begin{equation}
-Q_P
-=
-Q_{\alpha}
-+
-Q_{GG}.
-\end{equation}
-
-O termo associado aos parâmetros da distribuição Gama Generalizada, \(Q_{GG}\), permanece idêntico ao
-obtido no caso Poisson. Já a componente dependente de \(\boldsymbol{\alpha}\) passa a ser
-
-\begin{equation}
-Q_{\alpha}
-=
-\sum_{i=1}^{n}
-\left[
-\widehat N_i^{(k+1)}
-\log(\theta_i)
--
-\left(
-\widehat N_i^{(k+1)}
-+
-\frac{1}{\phi}
-\right)
-\log(1+\phi\theta_i)
-\right]
--
-\frac{\lambda}{2}
-\boldsymbol{\alpha}^{\top}
-K
-\boldsymbol{\alpha}.
-\end{equation}
-
-O passo CM consiste então nas atualizações
-\begin{equation}
-\boldsymbol{\alpha}^{(k+1)}
-=
-\arg\max_{\boldsymbol{\alpha}}
-Q_{\alpha},
-\end{equation}
-e
-\begin{equation}
-(a^{(k+1)},d^{(k+1)},p^{(k+1)})
-=
-\arg\max_{a,d,p}
-Q_{GG}.
-\end{equation}
-
-Quando \(\phi\) não é previamente especificado, realiza-se adicionalmente a etapa ECME
-
-\begin{equation}
-\phi^{(k+1)}
-=
-\arg\max_{\phi>0}
-\;
-\ell_P
-\!\left(
-\boldsymbol{\alpha}^{(k+1)},
-a^{(k+1)},
-d^{(k+1)},
-p^{(k+1)},
-\phi
-\right).
-\end{equation}
-
-A otimização dos problemas de maximização é realizada numericamente por meio do algoritmo L-BFGS-B,
-utilizando-se as derivadas analíticas das respectivas funções objetivo. O processo iterativo é repetido
-até a convergência da log-verossimilhança penalizada observada.
-
-\begin{algorithm}[H]
-\caption{Algoritmo ECME para estimar o modelo GG-KM com riscos latentes Binomial Negativa}
-\begin{algorithmic}[1]
-
-\State Inicialize
-$
-\alpha^{(0)},\,
-a^{(0)},\,
-d^{(0)},\,
-p^{(0)},\,
-\phi^{(0)}
-$
-e escolha uma tolerância $\varepsilon>0$.
-
-\State Defina $k \gets 0$.
-
-\Repeat
-
-\State Para $i=1,\ldots,n$, calcule
-\[
-\theta_i^{(k)}
-=
-\exp\!\left(
-\sum_{j=1}^{n}
-\alpha_j^{(k)}
-K(x_i,x_j)
-\right),
-\]
-\[
-F_{GG}^{(k)}(t_i)
-=
-F_{GG}
-\!\left(
-t_i;
-a^{(k)},
-d^{(k)},
-p^{(k)}
-\right),
-\qquad
-S_{GG}^{(k)}(t_i)
-=
-1-F_{GG}^{(k)}(t_i).
-\]
-
-\State \textbf{E-step:}
-\[
-\widehat N_i^{(k+1)}
-=
-\delta_i
-+
-\frac{
-\bigl(1+\phi^{(k)}\delta_i\bigr)
-\theta_i^{(k)}
-S_{GG}^{(k)}(t_i)
-}{
-1+\phi^{(k)}
-\theta_i^{(k)}
-F_{GG}^{(k)}(t_i)
-},
-\qquad
-i=1,\ldots,n.
-\]
-
-\State \textbf{M-step:}
-\[
-\alpha^{(k+1)}
-=
-\arg\max_{\alpha}
-\left\{
-\sum_{i=1}^{n}
-\left[
-\widehat N_i^{(k+1)}
-\log(\theta_i)
--
-\left(
-\widehat N_i^{(k+1)}
-+
-\frac{1}{\phi^{(k)}}
-\right)
-\log\!\bigl(1+\phi^{(k)}\theta_i\bigr)
-\right]
--
-\frac{\lambda}{2}
-\alpha^\top K\alpha
-\right\},
-\]
-
-\[
-(a^{(k+1)},d^{(k+1)},p^{(k+1)})
-=
-\arg\max_{a,d,p}
-\sum_{i=1}^{n}
-\left[
-\delta_i
-\log f_{GG}(t_i;a,d,p)
-+
-(\widehat N_i^{(k+1)}-\delta_i)
-\log S_{GG}(t_i;a,d,p)
-\right].
-\]
-
-\[
-\phi^{(k+1)}
-=
-\arg\max_{\phi>0}
-\,
-\ell_O
-\!\left(
-\alpha^{(k+1)},
-a^{(k+1)},
-d^{(k+1)},
-p^{(k+1)},
-\phi
-\right).
-\]
-
-\State Calcule a log-verossimilhança penalizada observada
-\[
-\ell_P^{(k+1)}
-=
-\ell_P
-\!\left(
-\alpha^{(k+1)},
-a^{(k+1)},
-d^{(k+1)},
-p^{(k+1)},
-\phi^{(k+1)}
-\right).
-\]
-
-\State Atualize
-\[
-\Delta^{(k+1)}
-=
-\left|
-\ell_P^{(k+1)}
--
-\ell_P^{(k)}
-\right|.
-\]
-
-\State $k \gets k+1$.
-
-\Until{$\Delta^{(k+1)} < \varepsilon$}
-
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}[H]
-\caption{Algoritmo EM penalizado para estimar o modelo GG-KM - $N_i \sim \mathrm{Binomial}(K,\theta_i^*)$.}
-\begin{algorithmic}[1]
-
-\State Inicialize
-$
-\alpha^{(0)},
-a^{(0)},
-d^{(0)},
-p^{(0)}
-$
-e escolha uma tolerância $\varepsilon>0$.
-
-\State Defina $k \gets 0$.
-
-\Repeat
-
-\State \textbf{E-step:} para $i=1,\ldots,n$, calcule
-
-\[
-f_i^{(k)}
-=
-\sum_{j=1}^{n}
-\alpha_j^{(k)}
-K(x_i,x_j),
-\]
-
-\[
-\theta_i^{*(k)}
-=
-\frac{\exp(f_i^{(k)})}
-     {1+\exp(f_i^{(k)})},
-\]
-
-e
-
-\[
-\widehat N_i^{(k+1)}
-=
-\delta_i
-+
-(K-\delta_i)
-\frac{
-\theta_i^{*(k)}
-S_{GG}
-\!\left(
-t_i;
-a^{(k)},
-d^{(k)},
-p^{(k)}
-\right)
-}
-{
-1-\theta_i^{*(k)}
-+
-\theta_i^{*(k)}
-S_{GG}
-\!\left(
-t_i;
-a^{(k)},
-d^{(k)},
-p^{(k)}
-\right)
-}.
-\]
-
-\State \textbf{M-step:}
-
-Atualize $\alpha$ resolvendo
-
-\[
-\alpha^{(k+1)}
-=
-\arg\max_{\alpha}
-\left\{
-\sum_{i=1}^{n}
-\left[
-\widehat N_i^{(k+1)}
-f_i
--
-K
-\log
-\bigl(
-1+\exp(f_i)
-\bigr)
-\right]
--
-\frac{\lambda}{2}
-\alpha^\top K\alpha
-\right\},
-\]
-
-onde
-
-\[
-f_i
-=
-\sum_{j=1}^{n}
-\alpha_j
-K(x_i,x_j).
-\]
-
-\State Atualize os parâmetros da distribuição Generalizada Gama:
-
-\[
-(a^{(k+1)},d^{(k+1)},p^{(k+1)})
-=
-\arg\max_{a,d,p}
-\sum_{i=1}^{n}
-\left[
-\delta_i
-\log f_{GG}(t_i;a,d,p)
-+
-(\widehat N_i^{(k+1)}-\delta_i)
-\log S_{GG}(t_i;a,d,p)
-\right].
-\]
-
-\State Calcule a log-verossimilhança penalizada observada
-
-\[
-\ell_P^{(k+1)}
-=
-\ell_P
-\!\left(
-\alpha^{(k+1)},
-a^{(k+1)},
-d^{(k+1)},
-p^{(k+1)}
-\right).
-\]
-
-\State Atualize
-
-\[
-\Delta^{(k+1)}
-=
-\left|
-\ell_P^{(k+1)}
--
-\ell_P^{(k)}
-\right|.
-\]
-
-\State $k \gets k+1$.
-
-\Until{$\Delta^{(k+1)} < \varepsilon$}
-
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}[H]
-\caption{EM with functional gradient boosting for the GG-KM model -
-$N_i \sim \mathrm{Binomial}(K,\theta_i^*)$.}
-\begin{algorithmic}[1]
-
-\State Initialize
-$
-f^{(0)}(\cdot),
-a^{(0)},
-d^{(0)},
-p^{(0)}
-$
-and choose $\varepsilon>0$, $\varepsilon_{\mathrm{tree}}>0$, and
-the maximum number of trees $M$.
-
-\State Set $k\gets0$.
-
-\Repeat
-
-\State \textbf{E-step:} compute, for $i=1,\ldots,n$,
-
-\[
-\theta_i^{*(k)}
-=
-\frac{\exp\{f^{(k)}(x_i)\}}
-     {1+\exp\{f^{(k)}(x_i)\}},
-\]
-
-\[
-\widehat N_i^{(k+1)}
-=
-\delta_i
-+
-(K-\delta_i)
-\frac{
-\theta_i^{*(k)}
-S_{GG}(t_i;a^{(k)},d^{(k)},p^{(k)})
-}{
-1-\theta_i^{*(k)}
-+
-\theta_i^{*(k)}
-S_{GG}(t_i;a^{(k)},d^{(k)},p^{(k)})
-}.
-\]
-
-\State \textbf{M-step for $f(x)$:} set $f_0(x)\gets f^{(k)}(x)$ and,
-for $m=1,\ldots,M$, compute
-
-\[
-g_{i,m}
-=
-\widehat N_i^{(k+1)}
--
-K
-\frac{\exp\{f_{m-1}(x_i)\}}
-     {1+\exp\{f_{m-1}(x_i)\}},
-\]
-
-fit a regression tree $h_m(x)$ to
-$\{(x_i,g_{i,m})\}_{i=1}^n$, and obtain
-
-\[
-\rho_m
-=
-\arg\max_{\rho\geq0}
-\sum_{i=1}^n
-\left[
-\widehat N_i^{(k+1)}
-\{f_{m-1}(x_i)+\rho h_m(x_i)\}
--
-K\log
-\left(
-1+\exp\{f_{m-1}(x_i)+\rho h_m(x_i)\}
-\right)
-\right].
-\]
-
-\State Update
-
-\[
-f_m(x)=f_{m-1}(x)+\rho_m h_m(x),
-\]
-
-and stop the boosting iterations if
-
-\[
-\frac{1}{n}\sum_{i=1}^n
-|f_m(x_i)-f_{m-1}(x_i)|
-<\varepsilon_{\mathrm{tree}}.
-\]
-
-\State Set $f^{(k+1)}(x)\gets f_m(x)$.
-
-\State \textbf{M-step for the Generalized Gamma parameters:}
-
-\[
-(a^{(k+1)},d^{(k+1)},p^{(k+1)})
-=
-\arg\max_{a,d,p}
-\sum_{i=1}^n
-\left[
-\delta_i\log f_{GG}(t_i;a,d,p)
-+
-(\widehat N_i^{(k+1)}-\delta_i)
-\log S_{GG}(t_i;a,d,p)
-\right].
-\]
-
-\State Compute
-
-\[
-\Delta^{(k+1)}
-=
-\left|
-\ell_P^{(k+1)}-\ell_P^{(k)}
-\right|,
-\]
-
-where
-
-\[
-\ell_P^{(k+1)}
-=
-\ell_P
-\left(
-f^{(k+1)},a^{(k+1)},d^{(k+1)},p^{(k+1)}
-\right).
-\]
-
-\State $k\gets k+1$.
-
-\Until{$\Delta^{(k+1)}<\varepsilon$}
-
-\end{algorithmic}
-\end{algorithm}
+If $G$ is strictly increasing, then every minimizer admits this
+representation.
+
+This result is particularly relevant because it reduces a functional
+optimization problem in an infinite-dimensional space to a finite-dimensional
+optimization problem involving only the coefficients
+$\boldsymbol{\alpha}=(\alpha_1,\ldots,\alpha_n)^\top$. In practice, this
+makes kernel-based methods computationally feasible and shows that the
+necessary information for estimation can be obtained from the kernel matrix,
+without explicitly computing the feature mapping $\phi(\cdot)$.
+
+% The choice of kernel implicitly determines the class of functions contained
+% in the associated RKHS and, consequently, the complexity of the functions
+% that the model can represent. In this context, the kernel and its associated
+% parameters, such as $\gamma$, $d$, and $\sigma$, can be regarded as
+% hyperparameters controlling the complexity of the model.
