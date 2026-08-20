@@ -151,113 +151,77 @@ $\text{EQM}\left(\hat{\pi}\left(\mathbf{x}\right)\right)$
 
 \section{Aplicação a Dados Reais}
 
-% O conjunto de dados reais escolhido para aplicação do modelo foi o Melanoma, amplamente utilizado em estudos
-% de análise de sobrevivência. Esse conjunto contém informações de 205 pacientes diagnosticados com melanoma
-% maligno, um tipo agressivo de câncer de pele, submetidos a cirurgia radical no Hospital Universitário de
-% Odense, na Dinamarca, entre os anos de 1962 e 1977.
+\begin{figure}[htb]
+    \centering
 
-% Os pacientes foram acompanhados até o final de 1977, período no qual 134 indivíduos permaneceram vivos,
-% enquanto 71 evoluíram para óbito, sendo 57 mortes atribuídas diretamente ao melanoma e 14 decorrentes de
-% outras causas. Este conjunto de dados, especificiamente, é utilizado em textos de modelos com fração de cura,
-% pois há o conhecimento de que existe de fato uma fração de cura no conjunto de dados.
+    \resizebox{0.9\textwidth}{!}{%
+    \begin{minipage}{\textwidth}
+        \centering
 
-% A base é composta por sete variáveis: tempo de acompanhamento em dias (time), status do paciente ao final do estudo (status), sexo
-% (sex), idade no momento da cirurgia (age), ano da cirurgia (year), espessura do tumor em milímetros
-% (thickness) e presença de ulceração (ulcer).
+        % Bernoulli
+        \begin{subfigure}{0.47\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_bernoulli.png}
+            \caption{Bernoulli}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}{0.47\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_boost_bernoulli.png}
+            \caption{Boosted Bernoulli}
+        \end{subfigure}
 
-% Para fins de modelagem, consideramos como evento de interesse o óbito por melanoma, tratando os demais casos,
-% pacientes vivos ao final do estudo ou óbitos por outras causas, como observações censuradas. Portanto, ao final,
-% tem-se aproximadamente $73\%$ de observações censuradas.
+        \vspace{0.3cm}
 
-% \begin{figure}[htb]
-%     \centering
+        % Binomial
+        \begin{subfigure}{0.47\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_binomial.png}
+            \caption{Binomial}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}{0.47\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_boost_binomial.png}
+            \caption{Boosted Binomial}
+        \end{subfigure}
 
-%     \begin{subfigure}{0.47\textwidth}
-%         \centering
-%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_bernoulli.png}
-%         \caption{Bernoulli}
-%     \end{subfigure}
-%     \hfill
-%     \begin{subfigure}{0.47\textwidth}
-%         \centering
-%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_binomial.png}
-%         \caption{Binomial}
-%     \end{subfigure}
+        \vspace{0.3cm}
 
-%     \vspace{0.3cm}
+        % Poisson
+        \begin{subfigure}{0.47\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_poisson.png}
+            \caption{Poisson}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}{0.47\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_boost_poisson.png}
+            \caption{Boosted Poisson}
+        \end{subfigure}
 
-%     \begin{subfigure}{0.47\textwidth}
-%         \centering
-%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_poisson.png}
-%         \caption{Poisson}
-%     \end{subfigure}
-%     \hfill
-%     \begin{subfigure}{0.47\textwidth}
-%         \centering
-%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_bn.png}
-%         \caption{Negative Binomial}
-%     \end{subfigure}
+        \vspace{0.3cm}
 
-%     \vspace{0.3cm}
+        % Negative Binomial
+        \begin{subfigure}{0.47\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_bn.png}
+            \caption{Negative Binomial}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}{0.47\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_boost_bn.png}
+            \caption{Boosted Negative Binomial}
+        \end{subfigure}
 
-%     \begin{subfigure}{0.47\textwidth}
-%         \centering
-%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_boost_bernoulli.png}
-%         \caption{Boosted Bernoulli}
-%     \end{subfigure}
-%     \hfill
-%     \begin{subfigure}{0.47\textwidth}
-%         \centering
-%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_boost_binomial.png}
-%         \caption{Boosted Binomial}
-%     \end{subfigure}
+    \end{minipage}%
+    }
 
-%     \vspace{0.3cm}
-
-%     \begin{subfigure}{0.47\textwidth}
-%         \centering
-%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_boost_poisson.png}
-%         \caption{Boosted Poisson}
-%     \end{subfigure}
-%     \hfill
-%     \begin{subfigure}{0.47\textwidth}
-%         \centering
-%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_boost_bn.png}
-%         \caption{Boosted Negative Binomial}
-%     \end{subfigure}
-
-%     \caption{Kaplan--Meier survival curves for the melanoma test set, comparing the GG-KM models under different distributions.}
-%     \label{fig:melanoma_km_ggkm}
-% \end{figure}
-
-% Inicialmente, assim como foi feito com os dados simulados, foi realizada a comparação entre
-% a curva de sobrevivência estimada pelo modelo proposto e o estimador de Kaplan-Meier, conforme apresentado
-% na Figura~\ref{fig:melanoma_km_ggkm}. Como pode ser observado a partir da figura, há de fato indícios de que
-% o modelo está conseguindo capturar adequadamente a fração de cura presente nos dados.
-
-% \begin{figure}[htb]
-%     \centering
-%     \includegraphics[width=0.6\textwidth]{images/melanoma_violin_ibs_em.png}
-%     \caption{Distribuição do IBS em relação a cada kernel.}
-%     \label{fig:melanoma_violin_ibs}
-% \end{figure}
-
-% \begin{figure}[htb]
-%     \centering
-%     \includegraphics[width=0.6\textwidth]{images/boxplot_cindex_poisson.png}
-%     \includegraphics[width=0.6\textwidth]{images/nestedcv_poisson_cindex.png}
-%     \caption{Distribuição do IBS em relação a cada kernel.}
-%     \label{fig:melanoma_violin_ibs}
-% \end{figure}
-
-% Na Figura~\ref{fig:melanoma_violin_ibs}, pode-se observar a variação do desempenho do modelo GG-KM para
-% cada kernel, com base na distribuição do IBS. Nota-se que o kernel cauchy, embora tenha alcançado
-% um dos menores valores de IBS, foi também o que apresentou maior variabilidade nessa métrica. Os kernels
-% linear e gaussiano apresentaram desempenhos bastante semelhantes entre si. De forma análoga, os kernels
-% laplaciano e exponencial também exibiram resultados próximos, destacando-se por apresentarem menor
-% variabilidade, embora não tenham atingido os menores valores de IBS. Por fim, os kernels sigmoid
-% e polinomial também apresentaram comportamento semelhante, tanto em termos de nível quanto de dispersão do
-% erro.
+    \caption{Kaplan--Meier survival curves for the melanoma test set, comparing the GG-KM models under different distributions.}
+    \label{fig:melanoma_km_ggkm}
+\end{figure}
 
 \begin{table}[ht]
 \centering
@@ -661,14 +625,3 @@ $N$ & Tempo (min) & Abordagem & Métrica & Média & DP \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-% A Tabela~\ref{tab:melanoma_kernels} resume esses resultados ao apresentar o IBS médio e seu respectivo
-% desvio padrão para cada kernel. Observa-se que o kernel linear apresentou o menor IBS médio, indicando o
-% melhor desempenho preditivo global nesse conjunto de dados, seguido de perto pelos kernels exponential e polynomial.
-
-% Embora o kernel cauchy tenha apresentado alguns bons resultados, seu IBS médio mais elevado
-% e maior variabilidade indicam menor estabilidade no processo de estimação. Por outro lado, o kernel
-% exponential se destaca por combinar desempenho preditivo próximo ao melhor observado com a menor dispersão
-% entre todos os kernels avaliados, sugerindo maior robustez. De modo geral, os resultados indicam que, para o
-% conjunto de dados Melanoma, estruturas mais simples ou moderadamente flexíveis parecem ser suficientes para
-% capturar adequadamente a dinâmica da sobrevivência e a fração de cura presente nos dados.
