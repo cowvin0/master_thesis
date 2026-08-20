@@ -3,7 +3,7 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 from utils.metrics import kaplan_meier
-from sklearn.model_selection import train_test_split, StratifiedKFold
+from sklearn.model_selection import StratifiedKFold
 
 
 def plot_survival_curves_gb(
@@ -73,7 +73,7 @@ def plot_survival_curves_gb(
         km_s_test,
         where="post",
         linewidth=2,
-        label="KM (test)",
+        label="KM",
     )
 
     ax.plot(
@@ -87,7 +87,7 @@ def plot_survival_curves_gb(
     ax.set_ylim(0, 1)
     ax.set_xlabel("t")
     ax.set_ylabel("S(t)")
-    ax.set_title("Kaplan-Meier vs GG-GB survival curves (best outer fold)")
+    ax.set_title("Kaplan-Meier vs GG-GB survival curves")
     ax.legend()
     ax.grid(True)
 
@@ -191,7 +191,7 @@ def plot_survival_curves_ggkm(
         km_s_test,
         where="post",
         linewidth=2,
-        label="KM (test)",
+        label="KM",
     )
 
     ax.plot(
@@ -205,7 +205,7 @@ def plot_survival_curves_ggkm(
     ax.set_ylim(0, 1)
     ax.set_xlabel("t")
     ax.set_ylabel("S(t)")
-    ax.set_title("Kaplan-Meier vs GG-KM survival curves " "(best outer fold)")
+    ax.set_title("Kaplan-Meier vs GG-KM survival curves")
     ax.legend()
     ax.grid(True)
 
