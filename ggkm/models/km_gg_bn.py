@@ -94,15 +94,26 @@ class GGNBGB:
 
     def _functional_gradient(self, eta, Nhat):
         phi = self.phi
-        theta = np.exp(eta)
+
+        eta_safe = eta
+        theta = np.exp(eta_safe)
+
         denominator = 1.0 + phi * theta
-        return Nhat - (Nhat + 1.0 / phi) * (phi * theta / denominator)
+
+        gradient = Nhat - (Nhat + 1.0 / phi) * (phi * theta / denominator)
+
+        return gradient
 
     def _boosting_m_step(self, X, Nhat):
+
         eta = self.eta_train_.copy()
 
         for m in range(self.n_estimators):
-            gradient = self._functional_gradient(eta=eta, Nhat=Nhat)
+
+            gradient = self._functional_gradient(
+                eta=eta,
+                Nhat=Nhat,
+            )
 
             tree = DecisionTreeRegressor(
                 max_depth=self.max_depth,
@@ -112,45 +123,80 @@ class GGNBGB:
                     None if self.random_state is None else self.random_state + m
                 ),
             )
+
             tree.fit(X, gradient)
+
             h = tree.predict(X)
 
-            rho = self._line_search_step(eta, h, Nhat)
-            eta_new = eta + rho * h
+            rho = self._line_search_step(
+                eta=eta,
+                h=h,
+                Nhat=Nhat,
+            )
 
+            step = self.learning_rate * rho
+            eta_new = eta + step * h
+            eta_new = eta_new
             improvement = np.mean(np.abs(eta_new - eta))
 
             self.models_.append(tree)
-            self.model_weights_.append(rho)
+            self.model_weights_.append(step)
 
             eta = eta_new
 
             if improvement < 1e-8:
                 break
 
-        self.eta_train_ = eta
-
     def _line_search_step(self, eta, h, Nhat):
+
         phi = self.phi
 
         def negative_Q(rho_arr):
+
             rho = rho_arr[0]
             eta_candidate = eta + rho * h
-            log_term = np.log1p(phi * np.exp(eta_candidate))
+            log_term = np.logaddexp(
+                0.0,
+                np.log(phi) + eta_candidate,
+            )
             Q = np.sum(Nhat * eta_candidate - (Nhat + 1.0 / phi) * log_term)
+
             return -Q
 
         result = minimize(
             negative_Q,
-            x0=np.array([self.learning_rate]),
+            x0=np.array([1.0]),
             method="L-BFGS-B",
             bounds=[(0.0, 10.0)],
         )
-
         rho = float(result.x[0])
-        if not np.isfinite(rho) or rho <= 1e-12:
-            rho = self.learning_rate
+
+        if not result.success or not np.isfinite(rho) or rho <= 1e-12:
+            rho = 1.0
+
         return rho
+
+    # def _line_search_step(self, eta, h, Nhat):
+    #     phi = self.phi
+
+    #     def negative_Q(rho_arr):
+    #         rho = rho_arr[0]
+    #         eta_candidate = eta + rho * h
+    #         log_term = np.log1p(phi * np.exp(eta_candidate))
+    #         Q = np.sum(Nhat * eta_candidate - (Nhat + 1.0 / phi) * log_term)
+    #         return -Q
+
+    #     result = minimize(
+    #         negative_Q,
+    #         x0=np.array([self.learning_rate]),
+    #         method="L-BFGS-B",
+    #         bounds=[(0.0, 10.0)],
+    #     )
+
+    #     rho = float(result.x[0])
+    #     if not np.isfinite(rho) or rho <= 1e-12:
+    #         rho = self.learning_rate
+    #     return rho
 
     def _gg_value_and_grad(self, pars, t, delta, Nhat):
         a, d, p = pars

@@ -2,7 +2,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 from utils.metrics import kaplan_meier
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import train_test_split
 
 
 def plot_survival_curves_gb(
@@ -11,6 +11,7 @@ def plot_survival_curves_gb(
     model_class,
     preprocessor,
     distribution_name,
+    test_size=0.2,
     random_state=42,
     n_grid=300,
 ):
@@ -22,18 +23,12 @@ def plot_survival_curves_gb(
     print(f"Best fold C-index: {best_fold['cindex']:.5f}")
     print(f"Selected hyperparameters: {best_params}")
 
-    outer_cv = StratifiedKFold(
-        n_splits=5,
-        shuffle=True,
+    df_train, df_test = train_test_split(
+        df,
+        test_size=test_size,
+        stratify=df["delta"],
         random_state=random_state,
     )
-
-    outer_splits = list(outer_cv.split(df, df["delta"]))
-    best_fold_number = best_fold.name
-    train_idx, test_idx = outer_splits[best_fold_number]
-
-    df_train = df.iloc[train_idx].copy()
-    df_test = df.iloc[test_idx].copy()
 
     X_train, t_train, delta_train = preprocessor.fit(df_train)
     X_test, t_test, delta_test = preprocessor.transform(df_test)
@@ -49,6 +44,7 @@ def plot_survival_curves_gb(
         delta_train,
     )
 
+    # Predict survival curves
     t_grid_test = np.linspace(
         np.min(t_test),
         np.max(t_test),
@@ -60,11 +56,13 @@ def plot_survival_curves_gb(
         t_grid_test,
     ).mean(axis=0)
 
+    # Kaplan-Meier curve
     km_t_test, km_s_test = kaplan_meier(
         t_test,
         delta_test,
     )
 
+    # Plot
     fig, ax = plt.subplots(figsize=(8, 6))
 
     ax.step(
@@ -101,7 +99,14 @@ def plot_survival_curves_gb(
 
     plt.show()
 
-    return model, best_params, train_idx, test_idx
+    return model, best_params
+
+
+import numpy as np
+
+import matplotlib.pyplot as plt
+from utils.metrics import kaplan_meier
+from sklearn.model_selection import train_test_split
 
 
 def plot_survival_curves_ggkm(
@@ -110,6 +115,7 @@ def plot_survival_curves_ggkm(
     model_class,
     preprocessor,
     distribution_name,
+    test_size=0.2,
     random_state=42,
     n_grid=300,
 ):
@@ -128,29 +134,23 @@ def plot_survival_curves_ggkm(
     )
 
     best_kernel = kernel_selection.iloc[0]["kernel"]
-    best_kernel_results = results[results["kernel"] == best_kernel].reset_index(
-        drop=True
-    )
+
+    print(f"Selected kernel: {best_kernel}")
+    print(f"Mean C-index: " f"{kernel_selection.iloc[0]['cindex_mean']:.5f}")
+
+    best_kernel_results = results[results["kernel"] == best_kernel]
     best_fold = best_kernel_results.sort_values("cindex", ascending=False).iloc[0]
     best_params = best_fold["best_params"]
-    best_fold_number = best_kernel_results["cindex"].idxmax()
 
-    outer_cv = StratifiedKFold(
-        n_splits=5,
-        shuffle=True,
+    print(f"Best fold C-index: {best_fold['cindex']:.5f}")
+    print(f"Selected hyperparameters: {best_params}")
+
+    df_train, df_test = train_test_split(
+        df,
+        test_size=test_size,
+        stratify=df["delta"],
         random_state=random_state,
     )
-
-    outer_splits = list(
-        outer_cv.split(
-            df,
-            df["delta"],
-        )
-    )
-    train_idx, test_idx = outer_splits[best_fold_number]
-
-    df_train = df.iloc[train_idx].copy()
-    df_test = df.iloc[test_idx].copy()
 
     X_train, t_train, delta_train = preprocessor.fit(df_train)
     X_test, t_test, delta_test = preprocessor.transform(df_test)
@@ -177,6 +177,7 @@ def plot_survival_curves_ggkm(
         t_grid_test,
     ).mean(axis=0)
 
+    # Kaplan-Meier curve
     km_t_test, km_s_test = kaplan_meier(
         t_test,
         delta_test,
@@ -208,12 +209,14 @@ def plot_survival_curves_ggkm(
     ax.grid(True)
 
     plt.tight_layout()
+
     plt.savefig(
         f"../theses_writing/images/"
         f"survival_curve_ggkm_testset_{distribution_name}.png",
         dpi=300,
         bbox_inches="tight",
     )
+
     plt.show()
 
     return model, best_kernel, best_params
