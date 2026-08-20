@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 import matplotlib.pyplot as plt
 from utils.metrics import kaplan_meier
@@ -94,7 +93,7 @@ def plot_survival_curves_gb(
     plt.tight_layout()
 
     plt.savefig(
-        f"../theses_writing/"
+        f"../theses_writing/images/"
         f"survival_curve_ggkm_testset_boost_{distribution_name}.png",
         dpi=300,
         bbox_inches="tight",
@@ -110,6 +109,7 @@ def plot_survival_curves_ggkm(
     results,
     model_class,
     preprocessor,
+    distribution_name,
     random_state=42,
     n_grid=300,
 ):
@@ -128,10 +128,12 @@ def plot_survival_curves_ggkm(
     )
 
     best_kernel = kernel_selection.iloc[0]["kernel"]
-    best_kernel_results = results[results["kernel"] == best_kernel]
+    best_kernel_results = results[results["kernel"] == best_kernel].reset_index(
+        drop=True
+    )
     best_fold = best_kernel_results.sort_values("cindex", ascending=False).iloc[0]
     best_params = best_fold["best_params"]
-    best_fold_number = best_fold.name
+    best_fold_number = best_kernel_results["cindex"].idxmax()
 
     outer_cv = StratifiedKFold(
         n_splits=5,
@@ -145,11 +147,7 @@ def plot_survival_curves_ggkm(
             df["delta"],
         )
     )
-
     train_idx, test_idx = outer_splits[best_fold_number]
-
-    print(f"Training observations: {len(train_idx)}")
-    print(f"Test observations: {len(test_idx)}")
 
     df_train = df.iloc[train_idx].copy()
     df_test = df.iloc[test_idx].copy()
@@ -210,6 +208,12 @@ def plot_survival_curves_ggkm(
     ax.grid(True)
 
     plt.tight_layout()
+    plt.savefig(
+        f"../theses_writing/images/"
+        f"survival_curve_ggkm_testset_{distribution_name}.png",
+        dpi=300,
+        bbox_inches="tight",
+    )
     plt.show()
 
     return model, best_kernel, best_params

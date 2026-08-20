@@ -169,12 +169,66 @@ $\text{EQM}\left(\hat{\pi}\left(\mathbf{x}\right)\right)$
 % pacientes vivos ao final do estudo ou óbitos por outras causas, como observações censuradas. Portanto, ao final,
 % tem-se aproximadamente $73\%$ de observações censuradas.
 
-\begin{figure}[htb]
-    \centering
-    \includegraphics[width=0.6\textwidth]{images/km_ggkm_melanoma_em.png}
-    \caption{Curva de Kaplan Meier para o conjunto de dados de melanoma, comparando o modelo GG-KM.}
-    \label{fig:melanoma_km_ggkm}
-\end{figure}
+% \begin{figure}[htb]
+%     \centering
+
+%     \begin{subfigure}{0.47\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_bernoulli.png}
+%         \caption{Bernoulli}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}{0.47\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_binomial.png}
+%         \caption{Binomial}
+%     \end{subfigure}
+
+%     \vspace{0.3cm}
+
+%     \begin{subfigure}{0.47\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_poisson.png}
+%         \caption{Poisson}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}{0.47\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_bn.png}
+%         \caption{Negative Binomial}
+%     \end{subfigure}
+
+%     \vspace{0.3cm}
+
+%     \begin{subfigure}{0.47\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_boost_bernoulli.png}
+%         \caption{Boosted Bernoulli}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}{0.47\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_boost_binomial.png}
+%         \caption{Boosted Binomial}
+%     \end{subfigure}
+
+%     \vspace{0.3cm}
+
+%     \begin{subfigure}{0.47\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_boost_poisson.png}
+%         \caption{Boosted Poisson}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}{0.47\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{images/survival_curve_ggkm_testset_boost_bn.png}
+%         \caption{Boosted Negative Binomial}
+%     \end{subfigure}
+
+%     \caption{Kaplan--Meier survival curves for the melanoma test set, comparing the GG-KM models under different distributions.}
+%     \label{fig:melanoma_km_ggkm}
+% \end{figure}
 
 % Inicialmente, assim como foi feito com os dados simulados, foi realizada a comparação entre
 % a curva de sobrevivência estimada pelo modelo proposto e o estimador de Kaplan-Meier, conforme apresentado
