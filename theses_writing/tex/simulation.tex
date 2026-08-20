@@ -188,13 +188,13 @@ $\text{EQM}\left(\hat{\pi}\left(\mathbf{x}\right)\right)$
 %     \label{fig:melanoma_violin_ibs}
 % \end{figure}
 
-\begin{figure}[htb]
-    \centering
-    \includegraphics[width=0.6\textwidth]{images/boxplot_cindex_poisson.png}
-    \includegraphics[width=0.6\textwidth]{images/nestedcv_poisson_cindex.png}
-    \caption{Distribuição do IBS em relação a cada kernel.}
-    \label{fig:melanoma_violin_ibs}
-\end{figure}
+% \begin{figure}[htb]
+%     \centering
+%     \includegraphics[width=0.6\textwidth]{images/boxplot_cindex_poisson.png}
+%     \includegraphics[width=0.6\textwidth]{images/nestedcv_poisson_cindex.png}
+%     \caption{Distribuição do IBS em relação a cada kernel.}
+%     \label{fig:melanoma_violin_ibs}
+% \end{figure}
 
 % Na Figura~\ref{fig:melanoma_violin_ibs}, pode-se observar a variação do desempenho do modelo GG-KM para
 % cada kernel, com base na distribuição do IBS. Nota-se que o kernel cauchy, embora tenha alcançado
@@ -483,32 +483,81 @@ sigmoid \\
 \end{tabular}
 \end{table}
 
-
 \begin{table}[ht]
 \centering
 \footnotesize
-\setlength{\tabcolsep}{6pt}
-\caption{Resultados do IBS médio, C-index médio, AUC médio e respectivos desvios padrão para o modelo GG-KM com abordagem de boosting no conjunto de dados Melanoma.}
-\label{tab:melanoma_boosting}
+\setlength{\tabcolsep}{5pt}
+\caption{Resultados do IBS médio, C-index médio, AUC médio e respectivos desvios padrão para as abordagens de boosting e bagging no conjunto de dados Melanoma, juntamente com os respectivos tempos de execução.}
+\label{tab:melanoma_ensemble}
 
 \begin{tabular}{
->{\centering\arraybackslash}p{3cm}
 >{\centering\arraybackslash}p{2.5cm}
+>{\centering\arraybackslash}p{1.8cm}
+>{\centering\arraybackslash}p{2.5cm}
+>{\centering\arraybackslash}p{2.2cm}
 cc
 }
 \toprule
-$N$ & Métrica & Média & DP \\
+$N$ & Tempo (min) & Abordagem & Métrica & Média & DP \\
+\midrule
+
+\multirow{6}{*}{Bernoulli}
+& \multirow{3}{*}{3766.15}
+& \multirow{3}{*}{Boosting}
+& IBS
+& 0.20606
+& 0.06084 \\
+
+&
+&
+& C-index
+& 0.60949
+& 0.05800 \\
+
+&
+&
+& AUC
+& 0.91526
+& 0.04285 \\
+
+\cmidrule{2-6}
+
+&
+\multirow{3}{*}{616.70}
+& \multirow{3}{*}{Bagging}
+& IBS
+& 0.16184
+& 0.02144 \\
+
+&
+&
+& C-index
+& 0.70700
+& 0.10220 \\
+
+&
+&
+& AUC
+& 0.69115
+& 0.03826 \\
+
 \midrule
 
 \multirow{3}{*}{Poisson}
+& \multirow{3}{*}{4737.75}
+& \multirow{3}{*}{Boosting}
 & IBS
 & 0.19676
 & 0.03105 \\
 
+&
+&
 & C-index
 & 0.46930
 & 0.23929 \\
 
+&
+&
 & AUC
 & 0.78523
 & 0.14891 \\
@@ -516,44 +565,41 @@ $N$ & Métrica & Média & DP \\
 \midrule
 
 \multirow{3}{*}{\shortstack[c]{Binomial Negativa\\com $\phi$ estimado}}
+& \multirow{3}{*}{5867.78}
+& \multirow{3}{*}{Boosting}
 & IBS
 & 0.20688
 & 0.05000 \\
 
+&
+&
 & C-index
 & 0.63721
 & 0.05803 \\
 
+&
+&
 & AUC
 & 0.88976
 & 0.07179 \\
 
 \midrule
 
-\multirow{3}{*}{Bernoulli}
-& IBS
-& 0.20606
-& 0.06084 \\
-
-& C-index
-& 0.60949
-& 0.05800 \\
-
-& AUC
-& 0.91526
-& 0.04285 \\
-
-\midrule
-
 \multirow{3}{*}{Binomial}
+& \multirow{3}{*}{4384.03}
+& \multirow{3}{*}{Boosting}
 & IBS
 & 0.20493
 & 0.04882 \\
 
+&
+&
 & C-index
 & 0.62684
 & 0.02914 \\
 
+&
+&
 & AUC
 & 0.90809
 & 0.05775 \\
