@@ -3,10 +3,18 @@ from __future__ import annotations
 import numpy as np
 
 from scipy.optimize import minimize
-from scipy.special import digamma, gamma, gammainc, gammaln
+from scipy.special import (
+    digamma,
+    gamma,
+    gammainc,
+    gammaln,
+)
 from sklearn.tree import DecisionTreeRegressor
-from utils.kernels import KernelFunc
-from utils.pgamma_derivate import pgamma_shape_derivative_vec
+
+from ggkm.utils.kernels import KernelFunc
+from ggkm.utils.pgamma_derivate import (
+    pgamma_shape_derivative_vec,
+)
 
 
 class GGNBGB:
@@ -24,6 +32,7 @@ class GGNBGB:
         max_features=None,
         random_state=None,
     ):
+
         self.a = a
         self.d = d
         self.p = p
@@ -39,19 +48,42 @@ class GGNBGB:
         self.random_state = random_state
 
         self.X_train_ = None
+
         self.initial_eta_ = None
         self.eta_train_ = None
+
         self.models_ = []
         self.model_weights_ = []
+
         self.loglik_history_ = []
+
         self.converged_ = False
         self.n_iter_ = 0
         self.final_loglik_ = None
+
         self.phi_ = None
 
-    def _log_fGG(self, t):
-        a, d, p = self.a, self.d, self.p
+    @staticmethod
+    def _safe_exp(x):
+
+        return np.exp(
+            np.clip(
+                x,
+                -50.0,
+                50.0,
+            )
+        )
+
+    def _log_fGG(
+        self,
+        t,
+    ):
+
+        a = self.a
+        d = self.d
+        p = self.p
         s = d / p
+
         return (
             np.log(p)
             + (d - 1.0) * np.log(t)
@@ -60,43 +92,83 @@ class GGNBGB:
             - gammaln(s)
         )
 
-    def _fGG(self, t):
+    def _fGG(
+        self,
+        t,
+    ):
+
         return np.exp(self._log_fGG(t))
 
-    def _FGG(self, t):
-        return gammainc(self.d / self.p, (t / self.a) ** self.p)
+    def _FGG(
+        self,
+        t,
+    ):
 
-    def _predict_eta_train(self):
+        return gammainc(
+            self.d / self.p,
+            (t / self.a) ** self.p,
+        )
+
+    def _predict_eta_train(
+        self,
+    ):
+
         return self.eta_train_
 
-    def _predict_theta_train(self):
-        return np.exp(self.eta_train_)
+    def _predict_theta_train(
+        self,
+    ):
 
-    def _penalized_loglikelihood(self, t, delta):
+        return self._safe_exp(self.eta_train_)
+
+    def _loglikelihood(
+        self,
+        t,
+        delta,
+    ):
+
         eta = self._predict_eta_train()
-        theta = np.exp(eta)
+        theta = self._safe_exp(eta)
         FGG = self._FGG(t)
         phi = self.phi
-
         log_term = np.log1p(phi * theta * FGG)
+        ll = np.sum(delta * (eta + self._log_fGG(t)) - (1.0 / phi + delta) * log_term)
 
-        return np.sum(delta * (eta + self._log_fGG(t)) - (1.0 / phi + delta) * log_term)
+        return ll
 
-    def _e_step(self, t, delta):
+    def _e_step(
+        self,
+        t,
+        delta,
+    ):
+
         theta = self._predict_theta_train()
 
         FGG = self._FGG(t)
-        SGG = 1.0 - FGG
+
+        SGG = np.clip(
+            1.0 - FGG,
+            1e-15,
+            1.0,
+        )
 
         phi = self.phi
+
         denominator = 1.0 + phi * theta * FGG
-        return delta + ((1.0 + phi * delta) * theta * SGG) / denominator
 
-    def _functional_gradient(self, eta, Nhat):
+        Nhat = delta + ((1.0 + phi * delta) * theta * SGG) / denominator
+
+        return Nhat
+
+    def _functional_gradient(
+        self,
+        eta,
+        Nhat,
+    ):
+
         phi = self.phi
 
-        eta_safe = eta
-        theta = np.exp(eta_safe)
+        theta = self._safe_exp(eta)
 
         denominator = 1.0 + phi * theta
 
@@ -104,7 +176,52 @@ class GGNBGB:
 
         return gradient
 
-    def _boosting_m_step(self, X, Nhat):
+    def _line_search_step(
+        self,
+        eta,
+        h,
+        Nhat,
+    ):
+
+        phi = self.phi
+
+        log_phi = np.log(phi)
+
+        def negative_Q(
+            rho_arr,
+        ):
+
+            rho = rho_arr[0]
+            eta_candidate = eta + rho * h
+            log_term = np.logaddexp(
+                0.0,
+                log_phi + eta_candidate,
+            )
+
+            Q = np.sum(Nhat * eta_candidate - (Nhat + 1.0 / phi) * log_term)
+
+            return -Q
+
+        result = minimize(
+            negative_Q,
+            x0=np.array([1.0]),
+            method="L-BFGS-B",
+            bounds=[(0.0, 10.0)],
+        )
+
+        rho = float(result.x[0])
+
+        if not result.success or not np.isfinite(rho) or rho <= 1e-12:
+
+            rho = 1.0
+
+        return rho
+
+    def _boosting_m_step(
+        self,
+        X,
+        Nhat,
+    ):
 
         eta = self.eta_train_.copy()
 
@@ -124,8 +241,10 @@ class GGNBGB:
                 ),
             )
 
-            tree.fit(X, gradient)
-
+            tree.fit(
+                X,
+                gradient,
+            )
             h = tree.predict(X)
 
             rho = self._line_search_step(
@@ -136,7 +255,6 @@ class GGNBGB:
 
             step = self.learning_rate * rho
             eta_new = eta + step * h
-            eta_new = eta_new
             improvement = np.mean(np.abs(eta_new - eta))
 
             self.models_.append(tree)
@@ -145,75 +263,47 @@ class GGNBGB:
             eta = eta_new
 
             if improvement < 1e-8:
+
                 break
 
-    def _line_search_step(self, eta, h, Nhat):
+        self.eta_train_ = eta
 
-        phi = self.phi
+    def _gg_value_and_grad(
+        self,
+        pars,
+        t,
+        delta,
+        Nhat,
+    ):
 
-        def negative_Q(rho_arr):
-
-            rho = rho_arr[0]
-            eta_candidate = eta + rho * h
-            log_term = np.logaddexp(
-                0.0,
-                np.log(phi) + eta_candidate,
-            )
-            Q = np.sum(Nhat * eta_candidate - (Nhat + 1.0 / phi) * log_term)
-
-            return -Q
-
-        result = minimize(
-            negative_Q,
-            x0=np.array([1.0]),
-            method="L-BFGS-B",
-            bounds=[(0.0, 10.0)],
-        )
-        rho = float(result.x[0])
-
-        if not result.success or not np.isfinite(rho) or rho <= 1e-12:
-            rho = 1.0
-
-        return rho
-
-    # def _line_search_step(self, eta, h, Nhat):
-    #     phi = self.phi
-
-    #     def negative_Q(rho_arr):
-    #         rho = rho_arr[0]
-    #         eta_candidate = eta + rho * h
-    #         log_term = np.log1p(phi * np.exp(eta_candidate))
-    #         Q = np.sum(Nhat * eta_candidate - (Nhat + 1.0 / phi) * log_term)
-    #         return -Q
-
-    #     result = minimize(
-    #         negative_Q,
-    #         x0=np.array([self.learning_rate]),
-    #         method="L-BFGS-B",
-    #         bounds=[(0.0, 10.0)],
-    #     )
-
-    #     rho = float(result.x[0])
-    #     if not np.isfinite(rho) or rho <= 1e-12:
-    #         rho = self.learning_rate
-    #     return rho
-
-    def _gg_value_and_grad(self, pars, t, delta, Nhat):
         a, d, p = pars
+
         s = d / p
+
         u = (t / a) ** p
+
         log_ta = np.log(t / a)
 
-        FGG = gammainc(s, u)
-        SGG = np.clip(1.0 - FGG, 1e-15, None)
+        FGG = gammainc(
+            s,
+            u,
+        )
+
+        SGG = np.clip(
+            1.0 - FGG,
+            1e-15,
+            1.0,
+        )
+
         log_fGG = np.log(p) + (d - 1.0) * np.log(t) - u - d * np.log(a) - gammaln(s)
-
         Q = np.sum(delta * log_fGG + (Nhat - delta) * np.log(SGG))
-
         psi_s = digamma(s)
         gamma_s = gamma(s)
         H = np.exp(s * np.log(u) - u) / gamma_s
-        G = pgamma_shape_derivative_vec(u, s)
+        G = pgamma_shape_derivative_vec(
+            u,
+            s,
+        )
 
         grad_a = np.sum(
             delta * ((p * u - d) / a) + (Nhat - delta) * ((p / a) * H / SGG)
@@ -224,33 +314,82 @@ class GGNBGB:
             - (Nhat - delta) * ((-d * G / p**2 + H * log_ta) / SGG)
         )
 
-        grad = np.array([grad_a, grad_d, grad_p])
-        return -Q, -grad
+        grad = np.array(
+            [
+                grad_a,
+                grad_d,
+                grad_p,
+            ]
+        )
 
-    def _gg_m_step(self, t, delta, Nhat):
+        return (
+            -Q,
+            -grad,
+        )
+
+    def _gg_m_step(
+        self,
+        t,
+        delta,
+        Nhat,
+    ):
+
         result_gg = minimize(
             fun=self._gg_value_and_grad,
-            x0=[self.a, self.d, self.p],
+            x0=[
+                self.a,
+                self.d,
+                self.p,
+            ],
             jac=True,
-            args=(t, delta, Nhat),
+            args=(
+                t,
+                delta,
+                Nhat,
+            ),
             method="L-BFGS-B",
-            bounds=[(1e-05, None)] * 3,
+            bounds=[
+                (1e-5, None),
+                (1e-5, None),
+                (1e-5, None),
+            ],
         )
-        self.a, self.d, self.p = result_gg.x
 
-    def _phi_value_and_grad(self, phi_arr, const, A, delta):
+        if result_gg.success:
+
+            self.a = float(result_gg.x[0])
+            self.d = float(result_gg.x[1])
+            self.p = float(result_gg.x[2])
+
+    def _phi_value_and_grad(
+        self,
+        phi_arr,
+        const,
+        A,
+        delta,
+    ):
+
         phi = phi_arr[0]
 
         log1p_phiA = np.log1p(phi * A)
 
         ll = np.sum(const - (1.0 / phi + delta) * log1p_phiA)
+
         grad = np.sum(log1p_phiA / phi**2 - (1.0 / phi + delta) * A / (1.0 + phi * A))
 
-        return -ll, np.array([-grad])
+        return (
+            -ll,
+            np.array([-grad]),
+        )
 
-    def _phi_m_step(self, t, delta):
+    def _phi_m_step(
+        self,
+        t,
+        delta,
+    ):
+
         eta_fixed = self.eta_train_
-        theta_fixed = np.exp(eta_fixed)
+        theta_fixed = self._safe_exp(eta_fixed)
         FGG_fixed = self._FGG(t)
         A_fixed = theta_fixed * FGG_fixed
         const_fixed = delta * (eta_fixed + self._log_fGG(t))
@@ -259,17 +398,51 @@ class GGNBGB:
             fun=self._phi_value_and_grad,
             x0=np.array([self.phi]),
             jac=True,
-            args=(const_fixed, A_fixed, delta),
+            args=(
+                const_fixed,
+                A_fixed,
+                delta,
+            ),
             method="L-BFGS-B",
             bounds=[(1e-8, None)],
         )
-        self.phi = float(result_phi.x[0])
 
-    def fit(self, X, t, delta, tol=1e-6, max_em_iter=1000):
+        if result_phi.success:
+
+            phi_new = float(result_phi.x[0])
+
+            if np.isfinite(phi_new) and phi_new > 0.0:
+
+                self.phi = phi_new
+
+    def fit(
+        self,
+        X,
+        t,
+        delta,
+        tol=1e-6,
+        max_em_iter=1000,
+    ):
+
         X = np.asarray(X)
-        t = np.asarray(t)
-        delta = np.asarray(delta)
+
+        t = np.asarray(
+            t,
+            dtype=float,
+        )
+
+        delta = np.asarray(
+            delta,
+            dtype=float,
+        )
+
         n = len(t)
+
+        if np.any(t <= 0.0):
+            raise ValueError("All survival times must be strictly positive.")
+
+        if self.phi <= 0.0:
+            raise ValueError("GGNBGB currently requires phi > 0.")
 
         self.X_train_ = X
         self.models_ = []
@@ -278,30 +451,64 @@ class GGNBGB:
         self.converged_ = False
         self.n_iter_ = 0
 
-        self.initial_eta_ = np.zeros(n, dtype=float)
+        self.initial_eta_ = np.zeros(
+            n,
+            dtype=float,
+        )
+
         self.eta_train_ = self.initial_eta_.copy()
 
-        ll_old = self._penalized_loglikelihood(t, delta)
+        ll_old = self._loglikelihood(
+            t,
+            delta,
+        )
+
         ll_new = ll_old
 
         while True:
+
             self.n_iter_ += 1
 
-            Nhat = self._e_step(t, delta)
+            Nhat = self._e_step(
+                t,
+                delta,
+            )
 
-            self._boosting_m_step(X=X, Nhat=Nhat)
-            self._gg_m_step(t=t, delta=delta, Nhat=Nhat)
+            self._boosting_m_step(
+                X=X,
+                Nhat=Nhat,
+            )
+
+            self._gg_m_step(
+                t=t,
+                delta=delta,
+                Nhat=Nhat,
+            )
 
             if self.estimate_phi:
-                self._phi_m_step(t=t, delta=delta)
 
-            ll_new = self._penalized_loglikelihood(t, delta)
+                self._phi_m_step(
+                    t=t,
+                    delta=delta,
+                )
+
+            ll_new = self._loglikelihood(
+                t,
+                delta,
+            )
+
             self.loglik_history_.append(ll_new)
 
-            if abs(ll_new - ll_old) < tol:
+            diff_ll = abs(ll_new - ll_old)
+
+            if diff_ll < tol:
+
                 self.converged_ = True
+
                 break
+
             if self.n_iter_ >= max_em_iter:
+
                 break
 
             ll_old = ll_new
@@ -310,25 +517,63 @@ class GGNBGB:
         self.phi_ = self.phi
         return self
 
-    def predict_eta(self, X_new):
+    def predict_eta(
+        self,
+        X_new,
+    ):
+
         X_new = np.asarray(X_new)
+
         n = len(X_new)
 
-        eta = np.full(n, self.initial_eta_.mean(), dtype=float)
-        for tree, weight in zip(self.models_, self.model_weights_):
+        eta = np.full(
+            n,
+            self.initial_eta_.mean(),
+            dtype=float,
+        )
+
+        for tree, weight in zip(
+            self.models_,
+            self.model_weights_,
+        ):
+
             eta += weight * tree.predict(X_new)
 
         return eta
 
-    def predict_theta(self, X_new):
-        return np.exp(self.predict_eta(X_new))
+    def predict_theta(
+        self,
+        X_new,
+    ):
 
-    def predict_survival(self, X_new, t_grid):
+        eta = self.predict_eta(X_new)
+
+        return self._safe_exp(eta)
+
+    def predict_survival(
+        self,
+        X_new,
+        t_grid,
+    ):
+
         theta = self.predict_theta(X_new)
-        F = self._FGG(t_grid)
-        return (1.0 + self.phi * np.outer(theta, F)) ** (-1.0 / self.phi)
 
-    def predict_cure_probability(self, X_new):
+        F = self._FGG(t_grid)
+
+        return (
+            1.0
+            + self.phi
+            * np.outer(
+                theta,
+                F,
+            )
+        ) ** (-1.0 / self.phi)
+
+    def predict_cure_probability(
+        self,
+        X_new,
+    ):
+
         theta = self.predict_theta(X_new)
         return (1.0 + self.phi * theta) ** (-1.0 / self.phi)
 
