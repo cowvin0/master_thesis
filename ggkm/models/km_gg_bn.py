@@ -5,8 +5,8 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy.special import digamma, gamma, gammainc, gammaln
 from sklearn.tree import DecisionTreeRegressor
-from ggkm.utils.kernels import KernelFunc
-from ggkm.utils.pgamma_derivate import pgamma_shape_derivative_vec
+from utils.kernels import KernelFunc
+from utils.pgamma_derivate import pgamma_shape_derivative_vec
 
 
 class GGNBGB:
