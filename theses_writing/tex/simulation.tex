@@ -227,7 +227,7 @@ $\text{EQM}\left(\hat{\pi}\left(\mathbf{x}\right)\right)$
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\caption{Resultados do IBS médio, C-index médio, AUC médio e respectivos desvios padrão para cada kernel no conjunto de dados Melanoma, juntamente com o tempo de execução para cada distribuição de $N$.}
+\caption{Mean IBS, C-index, and AUC results and their respective standard deviations for each kernel on the Melanoma dataset, along with the execution time for each distribution of $N$.}
 \label{tab:melanoma_kernels}
 
 \begin{tabular}{
@@ -237,7 +237,7 @@ $\text{EQM}\left(\hat{\pi}\left(\mathbf{x}\right)\right)$
 ccccccc
 }
 \toprule
-$N$ & Time (min) & Métrica &
+$N$ & Time (min) & Metric &
 linear &
 exponential &
 cauchy &
@@ -259,7 +259,7 @@ sigmoid \\
 & 0.16214 \\
 
 &
-& DP IBS
+& SD IBS
 & 0.02590
 & 0.01918
 & 0.02393
@@ -279,7 +279,7 @@ sigmoid \\
 & 0.71090 \\
 
 &
-& DP C-index
+& SD C-index
 & 0.09385
 & 0.09151
 & 0.09341
@@ -299,7 +299,7 @@ sigmoid \\
 & 0.68404 \\
 
 &
-& DP AUC
+& SD AUC
 & 0.05056
 & 0.06351
 & 0.05106
@@ -310,7 +310,7 @@ sigmoid \\
 
 \midrule
 
-\multirow{6}{*}{\shortstack[c]{Binomial Negativa\\com $\phi$ estimado}}
+\multirow{6}{*}{\shortstack[c]{Negative Binomial\\with estimated $\phi$}}
 & \multirow{6}{*}{68.46}
 & IBS
 & 0.16917
@@ -322,7 +322,7 @@ sigmoid \\
 & 0.16146 \\
 
 &
-& DP IBS
+& SD IBS
 & 0.02834
 & 0.01916
 & 0.02149
@@ -342,7 +342,7 @@ sigmoid \\
 & 0.70507 \\
 
 &
-& DP C-index
+& SD C-index
 & 0.08676
 & 0.09212
 & 0.09106
@@ -362,7 +362,7 @@ sigmoid \\
 & 0.69977 \\
 
 &
-& DP AUC
+& SD AUC
 & 0.03687
 & 0.06344
 & 0.03678
@@ -385,7 +385,7 @@ sigmoid \\
 & 0.16618 \\
 
 &
-& DP IBS
+& SD IBS
 & 0.03358
 & 0.02212
 & 0.02159
@@ -405,7 +405,7 @@ sigmoid \\
 & 0.69138 \\
 
 &
-& DP C-index
+& SD C-index
 & 0.09148
 & 0.09836
 & 0.08755
@@ -425,7 +425,7 @@ sigmoid \\
 & 0.66067 \\
 
 &
-& DP AUC
+& SD AUC
 & 0.05087
 & 0.03374
 & 0.05358
@@ -448,7 +448,7 @@ sigmoid \\
 & 0.15705 \\
 
 &
-& DP IBS
+& SD IBS
 & 0.01896
 & 0.01983
 & 0.02368
@@ -468,7 +468,7 @@ sigmoid \\
 & 0.72794 \\
 
 &
-& DP C-index
+& SD C-index
 & 0.09758
 & 0.09374
 & 0.09404
@@ -488,7 +488,7 @@ sigmoid \\
 & 0.70422 \\
 
 &
-& DP AUC
+& SD AUC
 & 0.04792
 & 0.06211
 & 0.05637
@@ -505,7 +505,7 @@ sigmoid \\
 \centering
 \footnotesize
 \setlength{\tabcolsep}{5pt}
-\caption{Resultados do IBS médio, C-index médio, AUC médio e respectivos desvios padrão para as abordagens de boosting e bagging no conjunto de dados Melanoma, juntamente com os respectivos tempos de execução.}
+\caption{Mean IBS, C-index, and AUC results and their respective standard deviations for the boosting and bagging approaches on the Melanoma dataset, along with their respective execution times.}
 \label{tab:melanoma_ensemble}
 
 \begin{tabular}{
@@ -516,7 +516,7 @@ sigmoid \\
 cc
 }
 \toprule
-$N$ & Tempo (min) & Abordagem & Métrica & Média & DP \\
+$N$ & Time (min) & Approach & Metric & Mean & SD \\
 \midrule
 
 \multirow{6}{*}{Bernoulli}
@@ -565,24 +565,30 @@ $N$ & Tempo (min) & Abordagem & Métrica & Média & DP \\
 & \multirow{3}{*}{4737.75}
 & \multirow{3}{*}{Boosting}
 & IBS
-& 0.19676
-& 0.03105 \\
+% & 0.19676
+& ----
+% & 0.03105 \\
+& ---- \\
 
 &
 &
 & C-index
-& 0.46930
-& 0.23929 \\
+% & 0.46930
+& ----
+% & 0.23929 \\
+& ---- \\
 
 &
 &
 & AUC
-& 0.78523
-& 0.14891 \\
+% & 0.78523
+& ----
+% & 0.14891 \\
+& ---- \\
 
 \midrule
 
-\multirow{3}{*}{\shortstack[c]{Binomial Negativa\\com $\phi$ estimado}}
+\multirow{3}{*}{\shortstack[c]{Negative Binomial\\with estimated $\phi$}}
 & \multirow{3}{*}{5867.78}
 & \multirow{3}{*}{Boosting}
 & IBS
@@ -621,6 +627,97 @@ $N$ & Tempo (min) & Abordagem & Métrica & Média & DP \\
 & AUC
 & 0.90809
 & 0.05775 \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\caption{Mean IBS, C-index, and AUC results, their respective standard deviations, and execution times for the GG-KM model with the bagging approach.}
+\label{tab:bagging_results}
+
+\begin{tabular}{
+>{\centering\arraybackslash}p{3cm}
+>{\centering\arraybackslash}p{2cm}
+>{\centering\arraybackslash}p{2.5cm}
+cc
+}
+\toprule
+$N$ & Time (min) & Metric & Mean & SD \\
+\midrule
+
+\multirow{3}{*}{Bernoulli}
+& \multirow{3}{*}{121.78}
+& IBS
+& 0.15768
+& 0.02089 \\
+
+&
+& C-index
+& 0.71790
+& 0.03648 \\
+
+&
+& AUC
+& 0.65285
+& 0.01210 \\
+
+\midrule
+
+\multirow{3}{*}{Binomial}
+& \multirow{3}{*}{2426.78}
+& IBS
+& 0.15629
+& 0.02174 \\
+
+&
+& C-index
+& 0.71559
+& 0.03268 \\
+
+&
+& AUC
+& 0.56856
+& 0.00700 \\
+
+\midrule
+
+\multirow{3}{*}{Poisson}
+& \multirow{3}{*}{728.58}
+& IBS
+& 0.15483
+& 0.02071 \\
+
+&
+& C-index
+& 0.71945
+& 0.03738 \\
+
+&
+& AUC
+& 0.66011
+& 0.01239 \\
+
+\midrule
+
+\multirow{3}{*}{\shortstack[c]{Negative Binomial\\with estimated $\phi$}}
+& \multirow{3}{*}{781.60}
+& IBS
+& 0.15479
+& 0.02074 \\
+
+&
+& C-index
+& 0.71954
+& 0.03731 \\
+
+&
+& AUC
+& 0.65944
+& 0.01282 \\
 
 \bottomrule
 \end{tabular}
