@@ -308,47 +308,12 @@ $\boldsymbol{\eta}^{(r+1)}
 Q\left(
 \boldsymbol{\eta}\mid\boldsymbol{\eta}^{(r)}
 \right)$.
-% \begin{equation}
-% \boldsymbol{\eta}^{(r+1)}
-% =
-% \underset{\boldsymbol{\eta}}{\arg\max}
-% \;
-% Q\left(
-% \boldsymbol{\eta}\mid\boldsymbol{\eta}^{(r)}
-% \right).
-% \label{eq:generic_M_step}
-% \end{equation}
 
 Because the proposed GG-KM model estimates the nonparametric function
 $g(\mathbf{x})$ in an RKHS, regularization is incorporated into the
 M-step. Thus, the corresponding Penalized EM algorithm maximizes
 $Q_{\lambda}\left(\boldsymbol{\eta}\mid\boldsymbol{\eta}^{(r)}\right) = Q\left( \boldsymbol{\eta}\mid\boldsymbol{\eta}^{(r)} \right) - \frac{\lambda}{2} \left\|f\right\|_{\mathcal{H}_K}^{2}$.
-% \begin{equation}
-% Q_{\lambda}
-% \left(
-% \boldsymbol{\eta}\mid\boldsymbol{\eta}^{(r)}
-% \right)
-% =
-% Q\left(
-% \boldsymbol{\eta}\mid\boldsymbol{\eta}^{(r)}
-% \right)
-% -
-% \frac{\lambda}{2}
-% \left\|f\right\|_{\mathcal{H}_K}^{2}.
-% \label{eq:penalized_Q_function}
-% \end{equation}
 The resulting update is therefore $\boldsymbol{\eta}^{(r+1)} = \underset{\boldsymbol{\eta}}{\arg\max} \; Q_{\lambda} \left( \boldsymbol{\eta}\mid\boldsymbol{\eta}^{(r)}\right)$.
-% \begin{equation}
-% \boldsymbol{\eta}^{(r+1)}$
-% =
-% \underset{\boldsymbol{\eta}}{\arg\max}
-% \;
-% Q_{\lambda}
-% \left(
-% \boldsymbol{\eta}\mid\boldsymbol{\eta}^{(r)}
-% \right).
-% \label{eq:penalized_M_step}
-% \end{equation}
 
 For the Bernoulli, Binomial, and Poisson specifications, the resulting
 optimization problems can be handled directly within this penalized EM
@@ -630,138 +595,158 @@ and set $k\gets k+1$.
 \end{algorithmic}
 \end{algorithm}
 
-% \begin{algorithm}[H]
-% \caption{EM with functional gradient boosting for the GG-KM model -
-% $N_i \sim \mathrm{Binomial}(K,\theta_i^*)$.}
-% \begin{algorithmic}[1]
+\subsection{Extension via Gradient Boosting}
 
-% \State Initialize
-% $
-% f^{(0)}(\cdot),
-% a^{(0)},
-% d^{(0)},
-% p^{(0)}
-% $
-% and choose $\varepsilon>0$, $\varepsilon_{\mathrm{tree}}>0$, and
-% the maximum number of trees $M$.
+As an alternative to the kernel-based representation of the nonlinear predictor,
+it is also considered a gradient boosting approach. Gradient boosting can be
+interpreted as an optimization procedure in function space, in which an unknown
+function is estimated through a stagewise additive expansion of weak learners
+\cite{friedman2001greedy,mason1999boosting}. In this context, the
+function governing the latent competing-risk distribution is represented as
+\begin{equation}
+g(\mathbf{x})
+=
+g_0(\mathbf{x})
++
+\sum_{m=1}^{M}
+\nu \rho_m h_m(\mathbf{x}),
+\end{equation}
+where $h_m(\mathbf{x})$ denotes a regression tree, $\rho_m$ is obtained numerically
+using the L-BFGS-B algorithm, and $\nu\in(0,1]$ is a shrinkage parameter.
 
-% \State Set $k\gets0$.
+The boosting procedure is incorporated into the EM algorithm by replacing the
+kernel-based maximization step for $g(\mathbf{x})$ with a functional gradient
+optimization. At each EM iteration, after computing the conditional expectations
+$\widehat{N}_i=E(N_i\mid t_i,\delta_i,\mathbf{x}_i)$, the functional gradient of
+the expected complete-data log-likelihood with respect to $g$ is evaluated at the
+current fitted values. A regression tree is then fitted to these gradient values
+to approximate the direction of increase of the expected complete-data
+log-likelihood, and the predictor is updated in the direction defined by the
+fitted tree.
 
-% \Repeat
+\begin{algorithm}[H]
+\caption{EM algorithm with gradient boosting -
+\label{alg:functional_gradient_boosting}
+$N_i \sim \mathrm{Binomial}(K,\theta_i^*)$.}
+\begin{algorithmic}[1]
 
-% \State \textbf{E-step:} compute, for $i=1,\ldots,n$,
+\State Initialize
+$g^{(0)}(\cdot),a^{(0)},d^{(0)},p^{(0)}$,
+set $k\gets0$, and choose $\varepsilon>0$, $\varepsilon_{\mathrm{tree}}>0$,
+learning rate $\nu\in(0,1]$, and maximum number of trees $M$.
 
-% \[
-% \theta_i^{*(k)}
-% =
-% \frac{\exp\{f^{(k)}(x_i)\}}
-%      {1+\exp\{f^{(k)}(x_i)\}},
-% \]
+\While{$|\ell^{(k)}-\ell^{(k-1)}|>\varepsilon$}
 
-% \[
-% \widehat N_i^{(k+1)}
-% =
-% \delta_i
-% +
-% (K-\delta_i)
-% \frac{
-% \theta_i^{*(k)}
-% S(t_i;a^{(k)},d^{(k)},p^{(k)})
-% }{
-% 1-\theta_i^{*(k)}
-% +
-% \theta_i^{*(k)}
-% S(t_i;a^{(k)},d^{(k)},p^{(k)})
-% }.
-% \]
+\State \textbf{E-step:} for $i=1,\ldots,n$, compute
+\[
+\theta_i^{*(k)}
+=
+\frac{\exp\{g^{(k)}(\mathbf{x}_i)\}}
+     {1+\exp\{g^{(k)}(\mathbf{x}_i)\}},
+\]
+and
+\[
+\widehat N_i^{(k+1)}
+=
+\delta_i
++
+(K-\delta_i)
+\frac{
+\theta_i^{*(k)}
+S(t_i;a^{(k)},d^{(k)},p^{(k)})
+}{
+1-\theta_i^{*(k)}
++
+\theta_i^{*(k)}
+S(t_i;a^{(k)},d^{(k)},p^{(k)})
+}.
+\]
 
-% \State \textbf{M-step for $f(x)$:} set $f_0(x)\gets f^{(k)}(x)$ and,
-% for $m=1,\ldots,M$, compute
+\State \textbf{M-step for $g$:} set $g_0\gets g^{(k)}$ and, for
+$m=1,\ldots,M$, compute the functional gradient
+\[
+\mathcal{G}_{i,m}
+=
+\widehat N_i^{(k+1)}
+-
+K
+\frac{\exp\{g_{m-1}(\mathbf{x}_i)\}}
+     {1+\exp\{g_{m-1}(\mathbf{x}_i)\}},
+\qquad i=1,\ldots,n,
+\]
+fit a regression tree $h_m$ to
+$\{(\mathbf{x}_i,\mathcal{G}_{i,m})\}_{i=1}^n$, and obtain
+\[
+\rho_m
+=
+\arg\max_{\rho\geq0}
+\sum_{i=1}^{n}
+\left[
+\widehat N_i^{(k+1)}
+\{g_{m-1}(\mathbf{x}_i)+\rho h_m(\mathbf{x}_i)\}
+-
+K\log
+\left(
+1+\exp\{g_{m-1}(\mathbf{x}_i)+\rho h_m(\mathbf{x}_i)\}
+\right)
+\right].
+\]
 
-% \[
-% g_{i,m}
-% =
-% \widehat N_i^{(k+1)}
-% -
-% K
-% \frac{\exp\{f_{m-1}(x_i)\}}
-%      {1+\exp\{f_{m-1}(x_i)\}},
-% \]
+\State Update
+\[
+g_m(\mathbf{x})
+=
+g_{m-1}(\mathbf{x})
++
+\nu\rho_m h_m(\mathbf{x}),
+\]
+stopping the boosting iterations if
+\[
+\frac{1}{n}
+\sum_{i=1}^{n}
+\left|
+g_m(\mathbf{x}_i)-g_{m-1}(\mathbf{x}_i)
+\right|
+<
+\varepsilon_{\mathrm{tree}}.
+\]
+Set $g^{(k+1)}\gets g_m$.
 
-% fit a regression tree $h_m(x)$ to
-% $\{(x_i,g_{i,m})\}_{i=1}^n$, and obtain
+\State Update
+\[
+(a^{(k+1)},d^{(k+1)},p^{(k+1)})
+=
+\arg\max_{a,d,p}
+\sum_{i=1}^{n}
+\left[
+\delta_i\log f(t_i;a,d,p)
++
+(\widehat N_i^{(k+1)}-\delta_i)
+\log S(t_i;a,d,p)
+\right].
+\]
 
-% \[
-% \rho_m
-% =
-% \arg\max_{\rho\geq0}
-% \sum_{i=1}^n
-% \left[
-% \widehat N_i^{(k+1)}
-% \{f_{m-1}(x_i)+\rho h_m(x_i)\}
-% -
-% K\log
-% \left(
-% 1+\exp\{f_{m-1}(x_i)+\rho h_m(x_i)\}
-% \right)
-% \right].
-% \]
+\State Compute
+\[
+\ell^{(k+1)}
+=
+\ell\!\left(
+g^{(k+1)},a^{(k+1)},d^{(k+1)},p^{(k+1)}
+\right),
+\qquad
+k\gets k+1.
+\]
 
-% \State Update
+\EndWhile
 
-% \[
-% f_m(x)=f_{m-1}(x)+\rho_m h_m(x),
-% \]
+\end{algorithmic}
+\end{algorithm}
 
-% and stop the boosting iterations if
-
-% \[
-% \frac{1}{n}\sum_{i=1}^n
-% |f_m(x_i)-f_{m-1}(x_i)|
-% <\varepsilon_{\mathrm{tree}}.
-% \]
-
-% \State Set $f^{(k+1)}(x)\gets f_m(x)$.
-
-% \State \textbf{M-step for the Generalized Gamma parameters:}
-
-% \[
-% (a^{(k+1)},d^{(k+1)},p^{(k+1)})
-% =
-% \arg\max_{a,d,p}
-% \sum_{i=1}^n
-% \left[
-% \delta_i\log f(t_i;a,d,p)
-% +
-% (\widehat N_i^{(k+1)}-\delta_i)
-% \log S(t_i;a,d,p)
-% \right].
-% \]
-
-% \State Compute
-
-% \[
-% \Delta^{(k+1)}
-% =
-% \left|
-% \ell_P^{(k+1)}-\ell_P^{(k)}
-% \right|,
-% \]
-
-% where
-
-% \[
-% \ell_P^{(k+1)}
-% =
-% \ell_P
-% \left(
-% f^{(k+1)},a^{(k+1)},d^{(k+1)},p^{(k+1)}
-% \right).
-% \]
-
-% \State $k\gets k+1$.
-
-% \Until{$\Delta^{(k+1)}<\varepsilon$}
-
-% \end{algorithmic}
-% \end{algorithm}
+The specific functional gradient depends on the assumed distribution of the latent
+number of competing causes. Therefore, the same general boosting framework can be
+applied to the Poisson, Binomial, and Negative Binomial promotion-time formulations
+by deriving the corresponding gradient from each expected complete-data
+log-likelihood. The remaining parameters of the Generalized Gamma distribution are
+updated through the same EM conditional maximization step used in the kernel-based
+models. Algorithm~\ref{alg:functional_gradient_boosting} represents the specific
+case where the latent variable $N$ follows a Binomial distribution.
